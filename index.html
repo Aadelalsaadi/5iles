@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DocFlow — Intelligent File Processing</title>
+<title>5iles — Intelligent File Processing</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231a6b4a'/%3E%3Crect x='16' y='14' width='52' height='11' rx='5.5' fill='white'/%3E%3Crect x='16' y='14' width='11' height='35' rx='5.5' fill='white'/%3E%3Crect x='16' y='38' width='40' height='11' rx='5.5' fill='white'/%3E%3Crect x='16' y='72' width='52' height='11' rx='5.5' fill='white'/%3E%3Crect x='57' y='49' width='11' height='34' rx='5.5' fill='white'/%3E%3Cpolygon points='52,30 82,48.5 52,67' fill='%234ade80'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -82,8 +83,8 @@ ul{list-style:none}
 #navbar{position:fixed;top:0;left:0;right:0;height:var(--nav-h);z-index:500;background:rgba(248,247,244,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border2);transition:.3s}
 .nav-inner{display:flex;align-items:center;justify-content:space-between;height:var(--nav-h)}
 .logo{display:flex;align-items:center;gap:10px;font-family:var(--ff-head);font-size:20px;font-weight:800;color:var(--ink)}
-.logo-mark{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center}
-.logo-mark svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round}
+.logo-mark{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.logo-mark svg{width:32px;height:32px;display:block}
 .nav-links{display:flex;align-items:center;gap:4px}
 .nav-link{padding:7px 14px;border-radius:8px;font-size:14px;font-weight:500;color:var(--ink2);transition:.15s}
 .nav-link:hover{background:var(--paper2);color:var(--ink)}
@@ -373,11 +374,19 @@ footer{background:var(--ink);color:rgba(255,255,255,.5);padding:60px 0 32px}
 <!-- ─── NAV ───────────────────────────────────────────────────────── -->
 <nav id="navbar" role="navigation" aria-label="Main navigation">
   <div class="container nav-inner">
-    <a href="#" class="logo" id="nav-logo" aria-label="DocFlow home">
+    <a href="#" class="logo" id="nav-logo" aria-label="5iles home">
       <div class="logo-mark">
-        <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h13"/></svg>
+        <svg viewBox="0 0 100 100" width="32" height="32" xmlns="http://www.w3.org/2000/svg">
+          <rect width="100" height="100" rx="22" fill="#1a6b4a"/>
+          <rect x="16" y="14" width="52" height="11" rx="5.5" fill="white"/>
+          <rect x="16" y="14" width="11" height="35" rx="5.5" fill="white"/>
+          <rect x="16" y="38" width="40" height="11" rx="5.5" fill="white"/>
+          <rect x="16" y="72" width="52" height="11" rx="5.5" fill="white"/>
+          <rect x="57" y="49" width="11" height="34" rx="5.5" fill="white"/>
+          <polygon points="52,30 82,48.5 52,67" fill="#4ade80"/>
+        </svg>
       </div>
-      DocFlow
+      5iles
     </a>
     <div class="nav-links" role="list">
       <a href="#tools" class="nav-link" role="listitem">Tools</a>
@@ -856,7 +865,7 @@ footer{background:var(--ink);color:rgba(255,255,255,.5);padding:60px 0 32px}
 <section id="features" class="section">
   <div class="container">
     <div class="section-header reveal">
-      <div class="section-kicker">Why DocFlow</div>
+      <div class="section-kicker">Why 5iles</div>
       <h2 class="section-title">Built for speed, security and simplicity</h2>
       <p class="section-desc">Everything designed with you in mind — from solo freelancers to large enterprise teams.</p>
     </div>
@@ -1060,7 +1069,7 @@ footer{background:var(--ink);color:rgba(255,255,255,.5);padding:60px 0 32px}
     <div class="testimonials-grid">
       <div class="testimonial-card reveal">
         <div class="stars">★★★★★</div>
-        <div class="testimonial-quote">"DocFlow replaced three separate tools I was using. The compression quality is exceptional and the interface is intuitive even for my non-technical teammates."</div>
+        <div class="testimonial-quote">"5iles replaced three separate tools I was using. The compression quality is exceptional and the interface is intuitive even for my non-technical teammates."</div>
         <div class="testimonial-author">
           <div class="avatar avatar-1">SL</div>
           <div><div class="author-name">Sara Lindström</div><div class="author-role">Product Manager, Nextify</div></div>
@@ -1076,7 +1085,7 @@ footer{background:var(--ink);color:rgba(255,255,255,.5);padding:60px 0 32px}
       </div>
       <div class="testimonial-card reveal">
         <div class="stars">★★★★★</div>
-        <div class="testimonial-quote">"As a lawyer, I process dozens of contracts daily. DocFlow's eSign and security features give me peace of mind, and the OCR accuracy on scanned documents is remarkable."</div>
+        <div class="testimonial-quote">"As a lawyer, I process dozens of contracts daily. 5iles's eSign and security features give me peace of mind, and the OCR accuracy on scanned documents is remarkable."</div>
         <div class="testimonial-author">
           <div class="avatar avatar-3">RP</div>
           <div><div class="author-name">Riya Patel</div><div class="author-role">Senior Associate, Chen & Patel LLP</div></div>
@@ -1119,7 +1128,7 @@ footer{background:var(--ink);color:rgba(255,255,255,.5);padding:60px 0 32px}
     </div>
     <div class="faq-list">
       <div class="faq-item">
-        <button class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">Is DocFlow really free to use? <span class="faq-icon">+</span></button>
+        <button class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">Is 5iles really free to use? <span class="faq-icon">+</span></button>
         <div class="faq-answer" role="region"><div class="faq-answer-inner">Yes — the Free plan is genuinely free with no credit card required. You get 20 file processing tasks per day and access to all core tools. We monetise through paid upgrades for users who need unlimited tasks, larger file sizes, AI features, and team capabilities.</div></div>
       </div>
       <div class="faq-item">
@@ -1140,11 +1149,11 @@ footer{background:var(--ink);color:rgba(255,255,255,.5);padding:60px 0 32px}
       </div>
       <div class="faq-item">
         <button class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">Is there an API for developers? <span class="faq-icon">+</span></button>
-        <div class="faq-answer" role="region"><div class="faq-answer-inner">Yes — the Team plan includes full REST API access for integrating DocFlow into your own applications and workflows. API documentation is available in the developer portal. Custom enterprise API plans with higher rate limits are available upon request.</div></div>
+        <div class="faq-answer" role="region"><div class="faq-answer-inner">Yes — the Team plan includes full REST API access for integrating 5iles into your own applications and workflows. API documentation is available in the developer portal. Custom enterprise API plans with higher rate limits are available upon request.</div></div>
       </div>
       <div class="faq-item">
         <button class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">Which file formats are supported? <span class="faq-icon">+</span></button>
-        <div class="faq-answer" role="region"><div class="faq-answer-inner">DocFlow supports PDF, Word (DOC/DOCX), Excel (XLS/XLSX), PowerPoint (PPT/PPTX), JPG, PNG, WebP, AVIF, TIFF, GIF, SVG, HTML, TXT, CSV, and ZIP archives. New formats are regularly added. If you need support for a specific format, let us know through the feedback form.</div></div>
+        <div class="faq-answer" role="region"><div class="faq-answer-inner">5iles supports PDF, Word (DOC/DOCX), Excel (XLS/XLSX), PowerPoint (PPT/PPTX), JPG, PNG, WebP, AVIF, TIFF, GIF, SVG, HTML, TXT, CSV, and ZIP archives. New formats are regularly added. If you need support for a specific format, let us know through the feedback form.</div></div>
       </div>
     </div>
   </div>
@@ -1155,7 +1164,7 @@ footer{background:var(--ink);color:rgba(255,255,255,.5);padding:60px 0 32px}
   <div class="cta-bg"></div>
   <div class="container">
     <h2 class="cta-title">Start processing files for free</h2>
-    <p class="cta-desc">Join 2 million users who trust DocFlow for their document needs.</p>
+    <p class="cta-desc">Join 2 million users who trust 5iles for their document needs.</p>
     <div class="cta-actions">
       <button class="btn btn-white btn-lg" onclick="openSignup()">Create free account</button>
       <a href="#tools" class="btn btn-ghost btn-lg">Try without signing up</a>
@@ -1168,7 +1177,19 @@ footer{background:var(--ink);color:rgba(255,255,255,.5);padding:60px 0 32px}
   <div class="container">
     <div class="footer-grid">
       <div class="footer-brand">
-        <div class="logo"><div class="logo-mark"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h13"/></svg></div>DocFlow</div>
+        <div class="logo">
+          <div class="logo-mark">
+            <svg viewBox="0 0 100 100" width="32" height="32" xmlns="http://www.w3.org/2000/svg">
+              <rect width="100" height="100" rx="22" fill="#1a6b4a"/>
+              <rect x="16" y="14" width="52" height="11" rx="5.5" fill="white"/>
+              <rect x="16" y="14" width="11" height="35" rx="5.5" fill="white"/>
+              <rect x="16" y="38" width="40" height="11" rx="5.5" fill="white"/>
+              <rect x="16" y="72" width="52" height="11" rx="5.5" fill="white"/>
+              <rect x="57" y="49" width="11" height="34" rx="5.5" fill="white"/>
+              <polygon points="52,30 82,48.5 52,67" fill="#4ade80"/>
+            </svg>
+          </div>
+          5iles
         <p>The all-in-one file processing platform for individuals, freelancers, and teams.</p>
       </div>
       <div class="footer-col">
@@ -1197,7 +1218,7 @@ footer{background:var(--ink);color:rgba(255,255,255,.5);padding:60px 0 32px}
       </div>
     </div>
     <div class="footer-bottom">
-      <p>© 2025 DocFlow. All rights reserved.</p>
+      <p>© 2025 5iles. All rights reserved.</p>
       <div class="social-links" aria-label="Social media links">
         <a href="#" class="social-link" aria-label="Twitter/X" onclick="showToast('Follow us on X!','info')">𝕏</a>
         <a href="#" class="social-link" aria-label="LinkedIn" onclick="showToast('Connect on LinkedIn!','info')">in</a>
