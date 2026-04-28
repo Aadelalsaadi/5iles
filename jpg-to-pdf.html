@@ -205,12 +205,12 @@ footer{background:var(--ink);color:rgba(255,255,255,.5);padding:40px 0;border-to
     <!-- UPLOAD CARD -->
     <div class="upload-card">
       <div class="drop-zone" id="drop-zone">
-        <input type="file" id="file-input" accept=".pdf" multiple>
+        <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp,.gif,.avif" multiple>
         <span class="drop-icon">📄</span>
-        <h3>Drag & drop your PDF here</h3>
+        <h3>Drag & drop your images here</h3>
         <p>or click to browse from your computer</p>
-        <button class="btn btn-primary btn-lg" onclick="document.getElementById('file-input').click()">Select PDF files</button>
-        <div class="drop-formats">Supports: PDF · Max 50 MB per file (free) · 1 GB with Pro</div>
+        <button class="btn btn-primary btn-lg" onclick="document.getElementById('file-input').click()">Select image files</button>
+        <div class="drop-formats">Supports: JPG, PNG, WebP, GIF · Max 50 MB (free) · 1 GB with Pro</div>
       </div>
 
       <div class="options-row" id="options-row" style="display:none">
