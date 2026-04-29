@@ -61,25 +61,25 @@
   .btn-primary:hover { transform:translateY(-1px); box-shadow: var(--shadow); }
 
   /* HERO */
-  .hero { min-height: 80vh; display:flex; align-items:center; padding: 100px 5% 60px; position:relative; overflow:hidden; }
+  .hero { min-height: 60vh; display:flex; align-items:center; padding: 80px 5% 30px; position:relative; overflow:hidden; }
   .hero::before { content:''; position:absolute; top:-200px; right:-200px; width:600px; height:600px; background: radial-gradient(circle, rgba(108,99,255,0.15) 0%, transparent 70%); pointer-events:none; }
   .hero::after { content:''; position:absolute; bottom:-100px; left:-100px; width:400px; height:400px; background: radial-gradient(circle, rgba(255,101,132,0.1) 0%, transparent 70%); pointer-events:none; }
   .hero-content { max-width:700px; }
-  .hero-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(108,99,255,0.15); border:1px solid rgba(108,99,255,0.3); color:var(--accent); padding:6px 14px; border-radius:100px; font-size:0.8rem; font-weight:600; margin-bottom:24px; }
-  .hero h1 { font-size: clamp(2.5rem, 5vw, 3.8rem); font-weight:900; line-height:1.1; margin-bottom:20px; }
+  .hero-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(108,99,255,0.15); border:1px solid rgba(108,99,255,0.3); color:var(--accent); padding:6px 14px; border-radius:100px; font-size:0.8rem; font-weight:600; margin-bottom:16px; }
+  .hero h1 { font-size: clamp(2.5rem, 5vw, 3.8rem); font-weight:900; line-height:1.1; margin-bottom:16px; }
   .hero h1 em { font-style:normal; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-  .hero p { font-size:1.1rem; color:var(--text2); line-height:1.7; margin-bottom:32px; max-width:500px; }
+  .hero p { font-size:1.1rem; color:var(--text2); line-height:1.7; margin-bottom:24px; max-width:500px; }
   .hero-btns { display:flex; gap:12px; flex-wrap:wrap; }
   .btn-lg { padding:14px 28px; font-size:1rem; border-radius:12px; }
 
   /* STATS */
-  .stats { display:flex; gap:40px; margin-top:48px; flex-wrap:wrap; }
+  .stats { display:flex; gap:40px; margin-top:28px; flex-wrap:wrap; }
   .stat { }
   .stat-num { font-size:1.8rem; font-weight:800; color:var(--text); }
   .stat-label { font-size:0.8rem; color:var(--text3); margin-top:2px; }
 
   /* TOOLS SECTION */
-  .section { padding: 80px 5%; }
+  .section { padding: 50px 5%; }
   .section-title { text-align:center; margin-bottom:48px; }
   .section-title h2 { font-size:2.2rem; font-weight:800; margin-bottom:12px; }
   .section-title p { color:var(--text2); font-size:1rem; }
