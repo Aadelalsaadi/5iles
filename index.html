@@ -290,6 +290,15 @@ async function initAuth() {
       updateNavForUser(currentUser);
       closeModalDirect();
       showToast('👋 Welcome back, ' + (currentUser.user_metadata?.name || currentUser.email) + '!', 'success');
+      // Handle pending subscription redirect
+      if(typeof pendingSubscriptionPlan !== 'undefined' && pendingSubscriptionPlan) {
+        const plan = pendingSubscriptionPlan;
+        pendingSubscriptionPlan = null;
+        setTimeout(() => {
+          showToast('🔀 Redirecting to payment...', 'success');
+          setTimeout(() => window.open(PAYPAL_URLS[plan], '_blank'), 1000);
+        }, 600);
+      }
     } else if (event === 'SIGNED_OUT') {
       currentUser = null;
       updateNavForSignedOut();
@@ -2110,59 +2119,36 @@ function showToast(msg, type='success') {
 
 // ===================== INIT =====================
 renderTools();
+
 const PAYPAL_URLS = {
   pro: 'https://www.paypal.com/ncp/payment/94Y2Y49X9PKHL',
   team: 'https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=P-41N09220EC076120XNHY6LVI'
 };
 
+let pendingSubscriptionPlan = null;
+
 function startSubscription(plan) {
   if(currentUser) {
-    // Already logged in — go straight to PayPal with email pre-filled
-    const url = PAYPAL_URLS[plan];
-    window.open(url, '_blank');
+    window.open(PAYPAL_URLS[plan], '_blank');
   } else {
-    // Not logged in — show signup modal, then redirect after auth
     pendingSubscriptionPlan = plan;
     openModal('signup-for-plan');
   }
 }
-
-let pendingSubscriptionPlan = null;
-
-// Override auth state change to handle post-signup subscription redirect
-const _origOnAuthChange = _supabase.auth.onAuthStateChange.bind(_supabase.auth);
-_supabase.auth.onAuthStateChange((event, session) => {
-  if(event === 'SIGNED_IN') {
-    currentUser = session.user;
-    updateNavForUser(currentUser);
-    closeModalDirect();
-    showToast('👋 Welcome, ' + (currentUser.user_metadata?.name || currentUser.email) + '!', 'success');
-    if(pendingSubscriptionPlan) {
-      const plan = pendingSubscriptionPlan;
-      pendingSubscriptionPlan = null;
-      setTimeout(() => {
-        showToast('🔀 Redirecting to payment...', 'success');
-        setTimeout(() => window.open(PAYPAL_URLS[plan], '_blank'), 1000);
-      }, 500);
-    }
-  } else if(event === 'SIGNED_OUT') {
-    currentUser = null;
-    updateNavForSignedOut();
-    showToast('👋 Signed out successfully.', 'success');
-  }
-});
 </script>
 
 <script>
-  paypal.Buttons({
-    style: { shape: 'pill', color: 'blue', layout: 'vertical', label: 'subscribe' },
-    createSubscription: function(data, actions) {
-      return actions.subscription.create({ plan_id: 'P-41N09220EC076120XNHY6LVI' });
-    },
-    onApprove: function(data, actions) {
-      document.getElementById('paypal-button-container-P-41N09220EC076120XNHY6LVI').innerHTML = '<div style="background:rgba(67,233,123,0.1);border:1px solid rgba(67,233,123,0.3);border-radius:12px;padding:16px;text-align:center;color:#43e97b;font-weight:700;">✅ Subscription activated! Welcome to 5iles Team!</div>';
-    }
-  }).render('#paypal-button-container-P-41N09220EC076120XNHY6LVI');
+  if(document.getElementById('paypal-button-container-P-41N09220EC076120XNHY6LVI')) {
+    paypal.Buttons({
+      style: { shape: 'pill', color: 'blue', layout: 'vertical', label: 'subscribe' },
+      createSubscription: function(data, actions) {
+        return actions.subscription.create({ plan_id: 'P-41N09220EC076120XNHY6LVI' });
+      },
+      onApprove: function(data, actions) {
+        document.getElementById('paypal-button-container-P-41N09220EC076120XNHY6LVI').innerHTML = '<div style="background:rgba(67,233,123,0.1);border:1px solid rgba(67,233,123,0.3);border-radius:12px;padding:16px;text-align:center;color:#43e97b;font-weight:700;">✅ Subscription activated! Welcome to 5iles Team!</div>';
+      }
+    }).render('#paypal-button-container-P-41N09220EC076120XNHY6LVI');
+  }
 </script>
 
 <script>
