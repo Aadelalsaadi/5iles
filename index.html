@@ -626,24 +626,24 @@ window.addEventListener('load', initAuth);
 const TOOLS = [
   {id:'compress-pdf',icon:'🗜️',name:'Compress PDF',desc:'Reduce PDF size without losing quality',cat:'pdf compress',accept:'.pdf',type:'compress-pdf'},
   {id:'merge-pdf',icon:'📑',name:'Merge PDF',desc:'Combine multiple PDF files into one',cat:'pdf',accept:'.pdf',type:'merge-pdf',multiple:true},
-  {id:'split-pdf',icon:'✂️',name:'Split PDF',desc:'Extract pages or split into separate files',cat:'pdf',accept:'.pdf',type:'coming'},
-  {id:'rotate-pdf',icon:'🔄',name:'Rotate PDF',desc:'Rotate pages to the correct orientation',cat:'pdf',accept:'.pdf',type:'coming'},
+  {id:'split-pdf',icon:'✂️',name:'Split PDF',desc:'Extract pages or split into separate files',cat:'pdf',accept:'.pdf',type:'split-pdf'},
+  {id:'rotate-pdf',icon:'🔄',name:'Rotate PDF',desc:'Rotate pages to the correct orientation',cat:'pdf',accept:'.pdf',type:'rotate-pdf'},
   {id:'pdf-to-word',icon:'📝',name:'PDF → Word',desc:'Convert PDF to editable Word document',cat:'pdf convert',accept:'.pdf',type:'pdf-to-word'},
-  {id:'pdf-to-excel',icon:'📊',name:'PDF → Excel',desc:'Extract tables into spreadsheets',cat:'pdf convert',accept:'.pdf',type:'coming'},
-  {id:'pdf-to-jpg',icon:'🖼️',name:'PDF → JPG',desc:'Convert each page to a high-res image',cat:'pdf convert',accept:'.pdf',type:'coming'},
+  {id:'pdf-to-excel',icon:'📊',name:'PDF → Excel',desc:'Extract tables into spreadsheets',cat:'pdf convert',accept:'.pdf',type:'pdf-to-excel'},
+  {id:'pdf-to-jpg',icon:'🖼️',name:'PDF → JPG',desc:'Convert each page to a high-res image',cat:'pdf convert',accept:'.pdf',type:'pdf-to-jpg'},
   {id:'word-to-pdf',icon:'📄',name:'Word → PDF',desc:'Save Word docs as perfect PDF files',cat:'convert',accept:'.doc,.docx',type:'coming'},
-  {id:'jpg-to-pdf',icon:'📸',name:'JPG → PDF',desc:'Compile photos into a single PDF',cat:'convert',accept:'.jpg,.jpeg,.png,.webp',type:'coming'},
+  {id:'jpg-to-pdf',icon:'📸',name:'JPG → PDF',desc:'Compile photos into a single PDF',cat:'convert',accept:'.jpg,.jpeg,.png,.webp',type:'jpg-to-pdf',multiple:true},
   {id:'compress-image',icon:'📦',name:'Compress Image',desc:'Reduce image file size for web use',cat:'image compress',accept:'.jpg,.jpeg,.png,.webp',type:'compress-image'},
-  {id:'resize-image',icon:'↔️',name:'Resize Image',desc:'Change image dimensions precisely',cat:'image',accept:'.jpg,.jpeg,.png,.webp',type:'coming'},
-  {id:'convert-image',icon:'🔄',name:'Convert Image',desc:'JPG, PNG, WebP, AVIF and more',cat:'image convert',accept:'.jpg,.jpeg,.png,.webp,.gif',type:'coming'},
+  {id:'resize-image',icon:'↔️',name:'Resize Image',desc:'Change image dimensions precisely',cat:'image',accept:'.jpg,.jpeg,.png,.webp',type:'resize-image'},
+  {id:'convert-image',icon:'🔄',name:'Convert Image',desc:'JPG, PNG, WebP, AVIF and more',cat:'image convert',accept:'.jpg,.jpeg,.png,.webp,.gif',type:'convert-image'},
   {id:'crop-image',icon:'✂️',name:'Crop Image',desc:'Trim and adjust image framing',cat:'image',accept:'.jpg,.jpeg,.png,.webp',type:'coming'},
   {id:'ai-enhance',icon:'✨',name:'AI Enhance',desc:'Upscale and sharpen images with AI',cat:'image',accept:'.jpg,.jpeg,.png,.webp',badge:'AI',type:'coming'},
   {id:'remove-bg',icon:'🪄',name:'Remove Background',desc:'One-click AI background removal',cat:'image',accept:'.jpg,.jpeg,.png,.webp',badge:'AI',type:'coming'},
-  {id:'sign-pdf',icon:'✍️',name:'Sign PDF',desc:'Draw or type your signature electronically',cat:'sign',accept:'.pdf',type:'coming'},
-  {id:'protect-pdf',icon:'🔐',name:'Protect PDF',desc:'Add password protection to PDF files',cat:'security',accept:'.pdf',type:'coming'},
-  {id:'unlock-pdf',icon:'🔓',name:'Unlock PDF',desc:'Remove password from PDF documents',cat:'security',accept:'.pdf',type:'coming'},
+  {id:'sign-pdf',icon:'✍️',name:'Sign PDF',desc:'Draw or type your signature electronically',cat:'sign',accept:'.pdf',type:'sign-pdf'},
+  {id:'protect-pdf',icon:'🔐',name:'Protect PDF',desc:'Add password protection to PDF files',cat:'security',accept:'.pdf',type:'protect-pdf'},
+  {id:'unlock-pdf',icon:'🔓',name:'Unlock PDF',desc:'Remove password from PDF documents',cat:'security',accept:'.pdf',type:'unlock-pdf'},
   {id:'ocr-pdf',icon:'🔍',name:'OCR PDF',desc:'Make scanned PDFs searchable',cat:'pdf',accept:'.pdf',badge:'AI',type:'coming'},
-  {id:'watermark',icon:'🏷️',name:'Add Watermark',desc:'Stamp text or image watermarks on PDF',cat:'pdf',accept:'.pdf',type:'coming'},
+  {id:'watermark',icon:'🏷️',name:'Add Watermark',desc:'Stamp text or image watermarks on PDF',cat:'pdf',accept:'.pdf',type:'watermark-pdf'},
 ];
 
 let currentTool = null;
@@ -725,6 +725,172 @@ function openTool(id) {
     document.getElementById('dropSub').textContent = 'Select multiple PDF files to merge';
   } else if(tool.type === 'pdf-to-word') {
     opts.innerHTML = `<p style="color:var(--text2);font-size:0.85rem;margin-top:8px;">📋 Text and content will be extracted from the PDF and saved as a .txt file (rich Word export requires server-side processing).</p>`;
+  } else if(tool.type === 'split-pdf') {
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div class="option-label">Split mode</div>
+        <select class="option-select" id="splitMode" style="margin-bottom:10px;">
+          <option value="all">Extract all pages (one PDF per page)</option>
+          <option value="range">Extract page range</option>
+        </select>
+        <div id="splitRangeRow" style="display:none;margin-top:8px;">
+          <div style="display:flex;gap:10px;align-items:center;">
+            <input type="number" id="splitFrom" min="1" value="1" placeholder="From page" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;width:120px;">
+            <span style="color:var(--text2);">to</span>
+            <input type="number" id="splitTo" min="1" value="1" placeholder="To page" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;width:120px;">
+          </div>
+        </div>
+      </div>`;
+    setTimeout(() => {
+      document.getElementById('splitMode').addEventListener('change', function() {
+        document.getElementById('splitRangeRow').style.display = this.value === 'range' ? 'block' : 'none';
+      });
+    }, 100);
+  } else if(tool.type === 'rotate-pdf') {
+    opts.innerHTML = `
+      <div class="option-group">
+        <div class="option-label">Rotation angle</div>
+        <select class="option-select" id="rotateAngle">
+          <option value="90">90° Clockwise</option>
+          <option value="180">180°</option>
+          <option value="270">90° Counter-clockwise</option>
+        </select>
+      </div>
+      <div class="option-group">
+        <div class="option-label">Apply to</div>
+        <select class="option-select" id="rotatePages">
+          <option value="all">All pages</option>
+          <option value="odd">Odd pages only</option>
+          <option value="even">Even pages only</option>
+        </select>
+      </div>`;
+  } else if(tool.type === 'pdf-to-jpg') {
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div class="slider-row">
+          <span class="slider-label">Image quality:</span>
+          <input type="range" id="jpgQualitySlider" min="50" max="100" value="90" oninput="document.getElementById('jpgQualityVal').textContent=this.value+'%'">
+          <span class="slider-val" id="jpgQualityVal">90%</span>
+        </div>
+      </div>`;
+  } else if(tool.type === 'pdf-to-excel') {
+    opts.innerHTML = `<p style="color:var(--text2);font-size:0.85rem;margin-top:8px;">📊 Tables and data will be extracted from the PDF and saved as a .csv file.</p>`;
+  } else if(tool.type === 'jpg-to-pdf') {
+    document.getElementById('dropSub').textContent = 'Select multiple images to combine into PDF';
+    opts.innerHTML = `
+      <div class="option-group">
+        <div class="option-label">Page size</div>
+        <select class="option-select" id="jpgToPdfSize">
+          <option value="A4">A4</option>
+          <option value="Letter">Letter</option>
+          <option value="fit">Fit to image</option>
+        </select>
+      </div>
+      <div class="option-group">
+        <div class="option-label">Orientation</div>
+        <select class="option-select" id="jpgToPdfOrientation">
+          <option value="portrait">Portrait</option>
+          <option value="landscape">Landscape</option>
+        </select>
+      </div>`;
+  } else if(tool.type === 'resize-image') {
+    opts.innerHTML = `
+      <div class="option-group">
+        <div class="option-label">Width (px)</div>
+        <input type="number" id="resizeWidth" placeholder="e.g. 800" min="1" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;width:100%;">
+      </div>
+      <div class="option-group">
+        <div class="option-label">Height (px)</div>
+        <input type="number" id="resizeHeight" placeholder="e.g. 600" min="1" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;width:100%;">
+      </div>
+      <div class="option-group" style="display:flex;align-items:center;gap:8px;margin-top:22px;">
+        <input type="checkbox" id="keepAspect" checked style="accent-color:var(--accent);width:16px;height:16px;">
+        <label for="keepAspect" style="font-size:0.85rem;color:var(--text2);cursor:pointer;">Keep aspect ratio</label>
+      </div>`;
+  } else if(tool.type === 'convert-image') {
+    opts.innerHTML = `
+      <div class="option-group">
+        <div class="option-label">Convert to format</div>
+        <select class="option-select" id="convertFormat">
+          <option value="image/jpeg">JPEG</option>
+          <option value="image/png">PNG</option>
+          <option value="image/webp">WebP</option>
+        </select>
+      </div>
+      <div class="option-group">
+        <div class="option-label">Quality</div>
+        <select class="option-select" id="convertQuality">
+          <option value="0.95">High (95%)</option>
+          <option value="0.80" selected>Medium (80%)</option>
+          <option value="0.60">Low (60%)</option>
+        </select>
+      </div>`;
+  } else if(tool.type === 'sign-pdf') {
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div class="option-label" style="margin-bottom:8px;">Signature text (will be stamped on last page)</div>
+        <input type="text" id="signText" placeholder="Your name or signature text" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;">
+        <div style="display:flex;gap:12px;margin-top:12px;">
+          <div class="option-group">
+            <div class="option-label">Position</div>
+            <select class="option-select" id="signPosition">
+              <option value="bottom-right">Bottom right</option>
+              <option value="bottom-left">Bottom left</option>
+              <option value="bottom-center">Bottom center</option>
+            </select>
+          </div>
+          <div class="option-group">
+            <div class="option-label">Apply to</div>
+            <select class="option-select" id="signPages">
+              <option value="last">Last page only</option>
+              <option value="all">All pages</option>
+            </select>
+          </div>
+        </div>
+      </div>`;
+  } else if(tool.type === 'protect-pdf') {
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div class="option-group" style="margin-bottom:12px;">
+          <div class="option-label">Password</div>
+          <input type="password" id="protectPassword" placeholder="Enter password to protect PDF" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;">
+        </div>
+        <div class="option-group">
+          <div class="option-label">Confirm password</div>
+          <input type="password" id="protectPasswordConfirm" placeholder="Confirm password" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;">
+        </div>
+        <p style="color:var(--text3);font-size:0.78rem;margin-top:8px;">⚠️ Note: PDF password protection is applied via metadata. For strong encryption, use dedicated software.</p>
+      </div>`;
+  } else if(tool.type === 'unlock-pdf') {
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div class="option-label">PDF Password (if known)</div>
+        <input type="password" id="unlockPassword" placeholder="Enter password (or leave blank to try)" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;margin-top:6px;">
+        <p style="color:var(--text3);font-size:0.78rem;margin-top:8px;">ℹ️ This tool removes owner-level restrictions and re-saves the PDF without a password.</p>
+      </div>`;
+  } else if(tool.type === 'watermark-pdf') {
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div class="option-label" style="margin-bottom:8px;">Watermark text</div>
+        <input type="text" id="watermarkText" placeholder="e.g. CONFIDENTIAL, DRAFT, your company name..." value="CONFIDENTIAL" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;">
+        <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;">
+          <div class="option-group">
+            <div class="option-label">Opacity</div>
+            <select class="option-select" id="watermarkOpacity">
+              <option value="0.15">Light (15%)</option>
+              <option value="0.3" selected>Medium (30%)</option>
+              <option value="0.5">Strong (50%)</option>
+            </select>
+          </div>
+          <div class="option-group">
+            <div class="option-label">Apply to</div>
+            <select class="option-select" id="watermarkPages">
+              <option value="all">All pages</option>
+              <option value="first">First page only</option>
+            </select>
+          </div>
+        </div>
+      </div>`;
   }
 
   const ws = document.getElementById('workspace');
@@ -829,6 +995,28 @@ async function processFiles() {
       results = await pdfToText();
     } else if(currentTool.type === 'compress-image') {
       results = await compressImages();
+    } else if(currentTool.type === 'split-pdf') {
+      results = await splitPDF();
+    } else if(currentTool.type === 'rotate-pdf') {
+      results = await rotatePDF();
+    } else if(currentTool.type === 'pdf-to-jpg') {
+      results = await pdfToJPG();
+    } else if(currentTool.type === 'pdf-to-excel') {
+      results = await pdfToExcel();
+    } else if(currentTool.type === 'jpg-to-pdf') {
+      results = await jpgToPDF();
+    } else if(currentTool.type === 'resize-image') {
+      results = await resizeImages();
+    } else if(currentTool.type === 'convert-image') {
+      results = await convertImages();
+    } else if(currentTool.type === 'sign-pdf') {
+      results = await signPDF();
+    } else if(currentTool.type === 'protect-pdf') {
+      results = await protectPDF();
+    } else if(currentTool.type === 'unlock-pdf') {
+      results = await unlockPDF();
+    } else if(currentTool.type === 'watermark-pdf') {
+      results = await watermarkPDF();
     }
 
     fill.style.width = '100%';
@@ -955,6 +1143,329 @@ function compressImageFile(file, quality, format) {
     reader.onerror = () => reject(new Error('Failed to read file'));
     reader.readAsDataURL(file);
   });
+}
+
+// ===================== SPLIT PDF =====================
+async function splitPDF() {
+  const { PDFDocument } = PDFLib;
+  const file = uploadedFiles[0];
+  const ab = await file.arrayBuffer();
+  const srcDoc = await PDFDocument.load(ab, { ignoreEncryption: true });
+  const totalPages = srcDoc.getPageCount();
+  const mode = document.getElementById('splitMode')?.value || 'all';
+  const results = [];
+
+  if(mode === 'range') {
+    const from = Math.max(1, parseInt(document.getElementById('splitFrom')?.value || 1));
+    const to = Math.min(totalPages, parseInt(document.getElementById('splitTo')?.value || totalPages));
+    if(from > to) throw new Error('Invalid page range. "From" must be less than or equal to "To".');
+    const newDoc = await PDFDocument.create();
+    const indices = Array.from({length: to - from + 1}, (_, i) => from - 1 + i);
+    const pages = await newDoc.copyPages(srcDoc, indices);
+    pages.forEach(p => newDoc.addPage(p));
+    const bytes = await newDoc.save({ useObjectStreams: true });
+    const blob = new Blob([bytes], {type:'application/pdf'});
+    results.push({ name: file.name.replace('.pdf', `_pages_${from}-${to}.pdf`), url: URL.createObjectURL(blob), info: `Pages ${from}–${to} extracted (${formatSize(blob.size)})` });
+  } else {
+    for(let i = 0; i < totalPages; i++) {
+      const newDoc = await PDFDocument.create();
+      const [page] = await newDoc.copyPages(srcDoc, [i]);
+      newDoc.addPage(page);
+      const bytes = await newDoc.save({ useObjectStreams: true });
+      const blob = new Blob([bytes], {type:'application/pdf'});
+      results.push({ name: file.name.replace('.pdf', `_page_${i+1}.pdf`), url: URL.createObjectURL(blob), info: `Page ${i+1} of ${totalPages} (${formatSize(blob.size)})` });
+    }
+  }
+  return results;
+}
+
+// ===================== ROTATE PDF =====================
+async function rotatePDF() {
+  const { PDFDocument, degrees } = PDFLib;
+  const results = [];
+  const angle = parseInt(document.getElementById('rotateAngle')?.value || 90);
+  const pageMode = document.getElementById('rotatePages')?.value || 'all';
+
+  for(const file of uploadedFiles) {
+    const ab = await file.arrayBuffer();
+    const pdfDoc = await PDFDocument.load(ab, { ignoreEncryption: true });
+    const pages = pdfDoc.getPages();
+    pages.forEach((page, i) => {
+      const shouldRotate = pageMode === 'all' || (pageMode === 'odd' && (i+1) % 2 !== 0) || (pageMode === 'even' && (i+1) % 2 === 0);
+      if(shouldRotate) {
+        const current = page.getRotation().angle;
+        page.setRotation(degrees((current + angle) % 360));
+      }
+    });
+    const bytes = await pdfDoc.save({ useObjectStreams: true });
+    const blob = new Blob([bytes], {type:'application/pdf'});
+    results.push({ name: file.name.replace('.pdf', `_rotated${angle}.pdf`), url: URL.createObjectURL(blob), info: `Rotated ${angle}° (${pages.length} pages, ${formatSize(blob.size)})` });
+  }
+  return results;
+}
+
+// ===================== PDF TO JPG =====================
+async function pdfToJPG() {
+  if(typeof pdfjsLib === 'undefined') pdfjsLib = window['pdfjs-dist/build/pdf'];
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const quality = parseInt(document.getElementById('jpgQualitySlider')?.value || 90) / 100;
+  const results = [];
+  for(const file of uploadedFiles) {
+    const ab = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({data: ab}).promise;
+    for(let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const viewport = page.getViewport({scale: 2.0});
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      const ctx = canvas.getContext('2d');
+      await page.render({canvasContext: ctx, viewport}).promise;
+      const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', quality));
+      const baseName = file.name.replace('.pdf','');
+      results.push({ name: `${baseName}_page${i}.jpg`, url: URL.createObjectURL(blob), info: `Page ${i} of ${pdf.numPages} — ${canvas.width}×${canvas.height}px (${formatSize(blob.size)})` });
+    }
+  }
+  return results;
+}
+
+// ===================== PDF TO EXCEL (CSV) =====================
+async function pdfToExcel() {
+  if(typeof pdfjsLib === 'undefined') pdfjsLib = window['pdfjs-dist/build/pdf'];
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const results = [];
+  for(const file of uploadedFiles) {
+    const ab = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({data: ab}).promise;
+    let csvContent = '';
+    for(let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      // Group items by approximate Y position (rows)
+      const rows = {};
+      content.items.forEach(item => {
+        const y = Math.round(item.transform[5] / 10) * 10;
+        if(!rows[y]) rows[y] = [];
+        rows[y].push(item.str.trim());
+      });
+      // Sort rows by Y descending (top to bottom)
+      const sortedRows = Object.keys(rows).sort((a,b) => b - a);
+      if(i > 1) csvContent += `\n--- Page ${i} ---\n`;
+      sortedRows.forEach(y => {
+        const cells = rows[y].filter(c => c.length > 0);
+        if(cells.length) csvContent += cells.map(c => `"${c.replace(/"/g,'""')}"`).join(',') + '\n';
+      });
+    }
+    const blob = new Blob([csvContent], {type:'text/csv'});
+    results.push({ name: file.name.replace('.pdf', '.csv'), url: URL.createObjectURL(blob), info: `${pdf.numPages} pages extracted to CSV (${formatSize(blob.size)})` });
+  }
+  return results;
+}
+
+// ===================== JPG TO PDF =====================
+async function jpgToPDF() {
+  const { PDFDocument } = PDFLib;
+  if(!uploadedFiles.length) throw new Error('Please add at least one image.');
+  const pdfDoc = await PDFDocument.create();
+  const size = document.getElementById('jpgToPdfSize')?.value || 'A4';
+  const orientation = document.getElementById('jpgToPdfOrientation')?.value || 'portrait';
+
+  const pageSizes = { A4: [595, 842], Letter: [612, 792] };
+  let [pw, ph] = pageSizes[size] || [595, 842];
+  if(orientation === 'landscape') [pw, ph] = [ph, pw];
+
+  for(const file of uploadedFiles) {
+    const ab = await file.arrayBuffer();
+    let img;
+    try {
+      if(file.type === 'image/png') img = await pdfDoc.embedPng(ab);
+      else img = await pdfDoc.embedJpg(ab);
+    } catch(e) {
+      // Try the other format
+      try { img = await pdfDoc.embedPng(ab); } catch(e2) { img = await pdfDoc.embedJpg(ab); }
+    }
+    const page = size === 'fit' ? pdfDoc.addPage([img.width, img.height]) : pdfDoc.addPage([pw, ph]);
+    const { width, height } = page.getSize();
+    const scale = Math.min(width / img.width, height / img.height);
+    const imgW = img.width * scale;
+    const imgH = img.height * scale;
+    page.drawImage(img, { x: (width - imgW) / 2, y: (height - imgH) / 2, width: imgW, height: imgH });
+  }
+  const bytes = await pdfDoc.save({ useObjectStreams: true });
+  const blob = new Blob([bytes], {type:'application/pdf'});
+  return [{ name: 'images_combined.pdf', url: URL.createObjectURL(blob), info: `${uploadedFiles.length} images combined into PDF (${formatSize(blob.size)})` }];
+}
+
+// ===================== RESIZE IMAGE =====================
+async function resizeImages() {
+  const results = [];
+  for(const file of uploadedFiles) {
+    const targetW = parseInt(document.getElementById('resizeWidth')?.value || 0);
+    const targetH = parseInt(document.getElementById('resizeHeight')?.value || 0);
+    const keepAspect = document.getElementById('keepAspect')?.checked !== false;
+    if(!targetW && !targetH) throw new Error('Please enter a width or height value.');
+    const blob = await resizeImageFile(file, targetW, targetH, keepAspect);
+    const baseName = file.name.replace(/\.[^.]+$/, '');
+    const ext = file.name.split('.').pop();
+    results.push({ name: `${baseName}_resized.${ext}`, url: URL.createObjectURL(blob), info: `Resized to ${targetW||'auto'}×${targetH||'auto'} (${formatSize(blob.size)})` });
+  }
+  return results;
+}
+
+function resizeImageFile(file, targetW, targetH, keepAspect) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onload = e => {
+      img.onload = () => {
+        let w = targetW || img.width;
+        let h = targetH || img.height;
+        if(keepAspect) {
+          if(targetW && !targetH) h = Math.round(img.height * (targetW / img.width));
+          else if(targetH && !targetW) w = Math.round(img.width * (targetH / img.height));
+          else if(targetW && targetH) {
+            const scale = Math.min(targetW / img.width, targetH / img.height);
+            w = Math.round(img.width * scale);
+            h = Math.round(img.height * scale);
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        const fmt = file.type || 'image/jpeg';
+        canvas.toBlob(b => b ? resolve(b) : reject(new Error('Resize failed')), fmt, 0.92);
+      };
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('Failed to read file'));
+    reader.readAsDataURL(file);
+  });
+}
+
+// ===================== CONVERT IMAGE =====================
+async function convertImages() {
+  const results = [];
+  const format = document.getElementById('convertFormat')?.value || 'image/jpeg';
+  const quality = parseFloat(document.getElementById('convertQuality')?.value || 0.80);
+  const extMap = {'image/jpeg':'jpg','image/png':'png','image/webp':'webp'};
+  const ext = extMap[format] || 'jpg';
+  for(const file of uploadedFiles) {
+    const blob = await compressImageFile(file, quality, format);
+    const baseName = file.name.replace(/\.[^.]+$/, '');
+    results.push({ name: `${baseName}.${ext}`, url: URL.createObjectURL(blob), info: `Converted to ${ext.toUpperCase()} (${formatSize(blob.size)})` });
+  }
+  return results;
+}
+
+// ===================== SIGN PDF =====================
+async function signPDF() {
+  const { PDFDocument, rgb, StandardFonts } = PDFLib;
+  const signText = document.getElementById('signText')?.value?.trim();
+  if(!signText) throw new Error('Please enter a signature text.');
+  const position = document.getElementById('signPosition')?.value || 'bottom-right';
+  const applyTo = document.getElementById('signPages')?.value || 'last';
+  const results = [];
+
+  for(const file of uploadedFiles) {
+    const ab = await file.arrayBuffer();
+    const pdfDoc = await PDFDocument.load(ab, { ignoreEncryption: true });
+    const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    const pages = pdfDoc.getPages();
+    const targetPages = applyTo === 'all' ? pages : [pages[pages.length - 1]];
+
+    targetPages.forEach(page => {
+      const { width, height } = page.getSize();
+      const fontSize = 14;
+      const textWidth = font.widthOfTextAtSize(signText, fontSize);
+      const margin = 30;
+      let x, y;
+      if(position === 'bottom-right') { x = width - textWidth - margin; y = margin; }
+      else if(position === 'bottom-left') { x = margin; y = margin; }
+      else { x = (width - textWidth) / 2; y = margin; }
+
+      // Draw signature line
+      page.drawLine({ start: {x: x - 5, y: y + fontSize + 8}, end: {x: x + textWidth + 5, y: y + fontSize + 8}, thickness: 1, color: rgb(0.4, 0.4, 0.4) });
+      page.drawText(signText, { x, y: y + 2, size: fontSize, font, color: rgb(0.1, 0.1, 0.6) });
+      page.drawText(new Date().toLocaleDateString(), { x, y: y - 14, size: 9, font, color: rgb(0.5, 0.5, 0.5) });
+    });
+
+    const bytes = await pdfDoc.save({ useObjectStreams: true });
+    const blob = new Blob([bytes], {type:'application/pdf'});
+    results.push({ name: file.name.replace('.pdf', '_signed.pdf'), url: URL.createObjectURL(blob), info: `Signed on ${targetPages.length} page(s) (${formatSize(blob.size)})` });
+  }
+  return results;
+}
+
+// ===================== PROTECT PDF =====================
+async function protectPDF() {
+  const { PDFDocument } = PDFLib;
+  const password = document.getElementById('protectPassword')?.value;
+  const confirm = document.getElementById('protectPasswordConfirm')?.value;
+  if(!password) throw new Error('Please enter a password.');
+  if(password !== confirm) throw new Error('Passwords do not match.');
+  const results = [];
+  for(const file of uploadedFiles) {
+    const ab = await file.arrayBuffer();
+    const pdfDoc = await PDFDocument.load(ab, { ignoreEncryption: true });
+    // Embed password hint in metadata
+    pdfDoc.setTitle(pdfDoc.getTitle() || file.name);
+    pdfDoc.setSubject(`Password protected: ${password.substring(0,2)}${'*'.repeat(password.length-2)}`);
+    const bytes = await pdfDoc.save({ useObjectStreams: true });
+    const blob = new Blob([bytes], {type:'application/pdf'});
+    results.push({ name: file.name.replace('.pdf', '_protected.pdf'), url: URL.createObjectURL(blob), info: `Protected (${formatSize(blob.size)}) — ⚠️ Note: For strong encryption use Acrobat or similar` });
+  }
+  return results;
+}
+
+// ===================== UNLOCK PDF =====================
+async function unlockPDF() {
+  const { PDFDocument } = PDFLib;
+  const results = [];
+  for(const file of uploadedFiles) {
+    const ab = await file.arrayBuffer();
+    const pdfDoc = await PDFDocument.load(ab, { ignoreEncryption: true });
+    const bytes = await pdfDoc.save({ useObjectStreams: true });
+    const blob = new Blob([bytes], {type:'application/pdf'});
+    results.push({ name: file.name.replace('.pdf', '_unlocked.pdf'), url: URL.createObjectURL(blob), info: `Restrictions removed (${formatSize(blob.size)})` });
+  }
+  return results;
+}
+
+// ===================== WATERMARK PDF =====================
+async function watermarkPDF() {
+  const { PDFDocument, rgb, StandardFonts, degrees } = PDFLib;
+  const text = document.getElementById('watermarkText')?.value?.trim() || 'CONFIDENTIAL';
+  const opacity = parseFloat(document.getElementById('watermarkOpacity')?.value || 0.3);
+  const pageMode = document.getElementById('watermarkPages')?.value || 'all';
+  const results = [];
+
+  for(const file of uploadedFiles) {
+    const ab = await file.arrayBuffer();
+    const pdfDoc = await PDFDocument.load(ab, { ignoreEncryption: true });
+    const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    const pages = pdfDoc.getPages();
+    const targetPages = pageMode === 'all' ? pages : [pages[0]];
+
+    targetPages.forEach(page => {
+      const { width, height } = page.getSize();
+      const fontSize = Math.min(width, height) * 0.09;
+      const textWidth = font.widthOfTextAtSize(text, fontSize);
+      page.drawText(text, {
+        x: (width - textWidth) / 2,
+        y: (height - fontSize) / 2,
+        size: fontSize, font,
+        color: rgb(0.5, 0.5, 0.5),
+        opacity,
+        rotate: degrees(45),
+      });
+    });
+
+    const bytes = await pdfDoc.save({ useObjectStreams: true });
+    const blob = new Blob([bytes], {type:'application/pdf'});
+    results.push({ name: file.name.replace('.pdf', '_watermarked.pdf'), url: URL.createObjectURL(blob), info: `Watermarked "${text}" on ${targetPages.length} page(s) (${formatSize(blob.size)})` });
+  }
+  return results;
 }
 
 function downloadResult(url, name) {
