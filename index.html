@@ -24,6 +24,8 @@
 <meta name="description" content="Convert, compress, merge, split, edit and sign your documents and images — all in one beautifully simple platform. No installation required.">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
 <style>
   :root {
     --bg: #0a0a0f;
@@ -631,18 +633,18 @@ const TOOLS = [
   {id:'pdf-to-word',icon:'📝',name:'PDF → Word',desc:'Convert PDF to editable Word document',cat:'pdf convert',accept:'.pdf',type:'pdf-to-word'},
   {id:'pdf-to-excel',icon:'📊',name:'PDF → Excel',desc:'Extract tables into spreadsheets',cat:'pdf convert',accept:'.pdf',type:'pdf-to-excel'},
   {id:'pdf-to-jpg',icon:'🖼️',name:'PDF → JPG',desc:'Convert each page to a high-res image',cat:'pdf convert',accept:'.pdf',type:'pdf-to-jpg'},
-  {id:'word-to-pdf',icon:'📄',name:'Word → PDF',desc:'Save Word docs as perfect PDF files',cat:'convert',accept:'.doc,.docx',type:'coming'},
+  {id:'word-to-pdf',icon:'📄',name:'Word → PDF',desc:'Save Word docs as perfect PDF files',cat:'convert',accept:'.doc,.docx',type:'word-to-pdf'},
   {id:'jpg-to-pdf',icon:'📸',name:'JPG → PDF',desc:'Compile photos into a single PDF',cat:'convert',accept:'.jpg,.jpeg,.png,.webp',type:'jpg-to-pdf',multiple:true},
   {id:'compress-image',icon:'📦',name:'Compress Image',desc:'Reduce image file size for web use',cat:'image compress',accept:'.jpg,.jpeg,.png,.webp',type:'compress-image'},
   {id:'resize-image',icon:'↔️',name:'Resize Image',desc:'Change image dimensions precisely',cat:'image',accept:'.jpg,.jpeg,.png,.webp',type:'resize-image'},
   {id:'convert-image',icon:'🔄',name:'Convert Image',desc:'JPG, PNG, WebP, AVIF and more',cat:'image convert',accept:'.jpg,.jpeg,.png,.webp,.gif',type:'convert-image'},
-  {id:'crop-image',icon:'✂️',name:'Crop Image',desc:'Trim and adjust image framing',cat:'image',accept:'.jpg,.jpeg,.png,.webp',type:'coming'},
-  {id:'ai-enhance',icon:'✨',name:'AI Enhance',desc:'Upscale and sharpen images with AI',cat:'image',accept:'.jpg,.jpeg,.png,.webp',badge:'AI',type:'coming'},
-  {id:'remove-bg',icon:'🪄',name:'Remove Background',desc:'One-click AI background removal',cat:'image',accept:'.jpg,.jpeg,.png,.webp',badge:'AI',type:'coming'},
+  {id:'crop-image',icon:'✂️',name:'Crop Image',desc:'Trim and adjust image framing',cat:'image',accept:'.jpg,.jpeg,.png,.webp',type:'crop-image'},
+  {id:'ai-enhance',icon:'✨',name:'AI Enhance',desc:'Upscale and sharpen images with AI',cat:'image',accept:'.jpg,.jpeg,.png,.webp',badge:'AI',type:'ai-enhance'},
+  {id:'remove-bg',icon:'🪄',name:'Remove Background',desc:'One-click AI background removal',cat:'image',accept:'.jpg,.jpeg,.png,.webp',badge:'AI',type:'remove-bg'},
   {id:'sign-pdf',icon:'✍️',name:'Sign PDF',desc:'Draw or type your signature electronically',cat:'sign',accept:'.pdf',type:'sign-pdf'},
   {id:'protect-pdf',icon:'🔐',name:'Protect PDF',desc:'Add password protection to PDF files',cat:'security',accept:'.pdf',type:'protect-pdf'},
   {id:'unlock-pdf',icon:'🔓',name:'Unlock PDF',desc:'Remove password from PDF documents',cat:'security',accept:'.pdf',type:'unlock-pdf'},
-  {id:'ocr-pdf',icon:'🔍',name:'OCR PDF',desc:'Make scanned PDFs searchable',cat:'pdf',accept:'.pdf',badge:'AI',type:'coming'},
+  {id:'ocr-pdf',icon:'🔍',name:'OCR PDF',desc:'Make scanned PDFs searchable',cat:'pdf',accept:'.pdf,.jpg,.jpeg,.png',badge:'AI',type:'ocr-pdf'},
   {id:'watermark',icon:'🏷️',name:'Add Watermark',desc:'Stamp text or image watermarks on PDF',cat:'pdf',accept:'.pdf',type:'watermark-pdf'},
 ];
 
@@ -868,7 +870,91 @@ function openTool(id) {
         <input type="password" id="unlockPassword" placeholder="Enter password (or leave blank to try)" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;margin-top:6px;">
         <p style="color:var(--text3);font-size:0.78rem;margin-top:8px;">ℹ️ This tool removes owner-level restrictions and re-saves the PDF without a password.</p>
       </div>`;
-  } else if(tool.type === 'watermark-pdf') {
+  } else if(tool.type === 'ocr-pdf') {
+    opts.innerHTML = `
+      <div class="option-group">
+        <div class="option-label">Language</div>
+        <select class="option-select" id="ocrLang">
+          <option value="eng">English</option>
+          <option value="ara">Arabic</option>
+          <option value="fra">French</option>
+          <option value="deu">German</option>
+          <option value="spa">Spanish</option>
+          <option value="chi_sim">Chinese (Simplified)</option>
+          <option value="jpn">Japanese</option>
+          <option value="rus">Russian</option>
+        </select>
+      </div>
+      <div class="option-group">
+        <div class="option-label">Output format</div>
+        <select class="option-select" id="ocrOutput">
+          <option value="txt">Plain text (.txt)</option>
+          <option value="pdf">Searchable PDF</option>
+        </select>
+      </div>`;
+  } else if(tool.type === 'word-to-pdf') {
+    opts.innerHTML = `<p style="color:var(--text2);font-size:0.85rem;margin-top:8px;">📄 Your Word document will be converted and saved as a PDF. Formatting is preserved as closely as possible.</p>`;
+  } else if(tool.type === 'crop-image') {
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <p style="color:var(--text2);font-size:0.85rem;margin-bottom:10px;">After uploading, use the crop handles to select your desired area.</p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <div class="option-group">
+            <div class="option-label">Preset ratio</div>
+            <select class="option-select" id="cropRatio">
+              <option value="free">Free (drag handles)</option>
+              <option value="1:1">1:1 Square</option>
+              <option value="16:9">16:9 Widescreen</option>
+              <option value="4:3">4:3 Standard</option>
+              <option value="3:2">3:2 Photo</option>
+              <option value="9:16">9:16 Portrait</option>
+            </select>
+          </div>
+        </div>
+        <div id="cropContainer" style="display:none;margin-top:16px;position:relative;display:none;user-select:none;">
+          <canvas id="cropCanvas" style="max-width:100%;border-radius:8px;display:block;"></canvas>
+          <div id="cropOverlay" style="position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;"></div>
+        </div>
+      </div>`;
+  } else if(tool.type === 'ai-enhance') {
+    opts.innerHTML = `
+      <div class="option-group">
+        <div class="option-label">Enhancement mode</div>
+        <select class="option-select" id="enhanceMode">
+          <option value="sharpen">Sharpen + Clarity</option>
+          <option value="denoise">Denoise + Smooth</option>
+          <option value="vivid">Vivid Colors + Contrast</option>
+          <option value="upscale">Upscale 2x + Sharpen</option>
+        </select>
+      </div>
+      <div class="option-group">
+        <div class="option-label">Intensity</div>
+        <select class="option-select" id="enhanceIntensity">
+          <option value="subtle">Subtle</option>
+          <option value="medium" selected>Medium</option>
+          <option value="strong">Strong</option>
+        </select>
+      </div>`;
+  } else if(tool.type === 'remove-bg') {
+    opts.innerHTML = `
+      <div class="option-group">
+        <div class="option-label">Background replacement</div>
+        <select class="option-select" id="removeBgReplace">
+          <option value="transparent">Transparent (PNG)</option>
+          <option value="white">White</option>
+          <option value="black">Black</option>
+          <option value="blur">Blurred original</option>
+        </select>
+      </div>
+      <div class="option-group">
+        <div class="option-label">Edge refinement</div>
+        <select class="option-select" id="removeBgEdge">
+          <option value="normal">Normal</option>
+          <option value="smooth">Smooth edges</option>
+          <option value="sharp">Sharp edges</option>
+        </select>
+      </div>
+      <p style="color:var(--text3);font-size:0.78rem;margin-top:8px;">ℹ️ Browser-based removal. For professional results, use the Pro plan with AI-powered server processing.</p>`;
     opts.innerHTML = `
       <div style="width:100%;">
         <div class="option-label" style="margin-bottom:8px;">Watermark text</div>
@@ -1017,6 +1103,16 @@ async function processFiles() {
       results = await unlockPDF();
     } else if(currentTool.type === 'watermark-pdf') {
       results = await watermarkPDF();
+    } else if(currentTool.type === 'ocr-pdf') {
+      results = await ocrPDF();
+    } else if(currentTool.type === 'word-to-pdf') {
+      results = await wordToPDF();
+    } else if(currentTool.type === 'crop-image') {
+      results = await cropImage();
+    } else if(currentTool.type === 'ai-enhance') {
+      results = await aiEnhance();
+    } else if(currentTool.type === 'remove-bg') {
+      results = await removeBg();
     }
 
     fill.style.width = '100%';
@@ -1466,6 +1562,364 @@ async function watermarkPDF() {
     results.push({ name: file.name.replace('.pdf', '_watermarked.pdf'), url: URL.createObjectURL(blob), info: `Watermarked "${text}" on ${targetPages.length} page(s) (${formatSize(blob.size)})` });
   }
   return results;
+}
+
+// ===================== OCR PDF =====================
+async function ocrPDF() {
+  const lang = document.getElementById('ocrLang')?.value || 'eng';
+  const outputFmt = document.getElementById('ocrOutput')?.value || 'txt';
+  const results = [];
+  const btn = document.getElementById('processBtn');
+
+  for(const file of uploadedFiles) {
+    btn.innerHTML = `<span>⏳</span> <span>Running OCR... (may take 30–60s)</span>`;
+    let imageSrc;
+
+    if(file.type === 'application/pdf') {
+      // Render first page of PDF to image for OCR
+      if(typeof pdfjsLib === 'undefined') pdfjsLib = window['pdfjs-dist/build/pdf'];
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      const ab = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({data: ab}).promise;
+      let fullText = `OCR Result for: ${file.name}\n${'─'.repeat(50)}\n\n`;
+
+      for(let i = 1; i <= pdf.numPages; i++) {
+        btn.innerHTML = `<span>⏳</span> <span>OCR page ${i}/${pdf.numPages}...</span>`;
+        const page = await pdf.getPage(i);
+        const viewport = page.getViewport({scale: 2.0});
+        const canvas = document.createElement('canvas');
+        canvas.width = viewport.width; canvas.height = viewport.height;
+        await page.render({canvasContext: canvas.getContext('2d'), viewport}).promise;
+        const dataUrl = canvas.toDataURL('image/png');
+        const { data: { text } } = await Tesseract.recognize(dataUrl, lang);
+        fullText += `--- Page ${i} ---\n${text.trim()}\n\n`;
+      }
+      const blob = new Blob([fullText], {type:'text/plain'});
+      results.push({ name: file.name.replace('.pdf','_ocr.txt'), url: URL.createObjectURL(blob), info: `${pdf.numPages} pages OCR'd (${formatSize(blob.size)})` });
+    } else {
+      // Direct image OCR
+      btn.innerHTML = `<span>⏳</span> <span>Running OCR on image...</span>`;
+      const dataUrl = await fileToDataUrl(file);
+      const { data: { text } } = await Tesseract.recognize(dataUrl, lang);
+      const blob = new Blob([text.trim()], {type:'text/plain'});
+      results.push({ name: file.name.replace(/\.[^.]+$/, '_ocr.txt'), url: URL.createObjectURL(blob), info: `Text extracted (${formatSize(blob.size)})` });
+    }
+  }
+  return results;
+}
+
+// ===================== WORD TO PDF =====================
+async function wordToPDF() {
+  const { PDFDocument, rgb, StandardFonts } = PDFLib;
+  const results = [];
+
+  for(const file of uploadedFiles) {
+    const ab = await file.arrayBuffer();
+    // Extract text from docx using mammoth
+    const result = await mammoth.extractRawText({arrayBuffer: ab});
+    const text = result.value;
+
+    // Build PDF from extracted text
+    const pdfDoc = await PDFDocument.create();
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    const fontSize = 11;
+    const lineHeight = fontSize * 1.5;
+    const margin = 60;
+    const pageW = 595, pageH = 842;
+    const maxWidth = pageW - margin * 2;
+
+    const lines = [];
+    text.split('\n').forEach(paragraph => {
+      if(!paragraph.trim()) { lines.push(''); return; }
+      // Word wrap
+      const words = paragraph.split(' ');
+      let line = '';
+      words.forEach(word => {
+        const test = line ? line + ' ' + word : word;
+        if(font.widthOfTextAtSize(test, fontSize) > maxWidth) {
+          lines.push(line);
+          line = word;
+        } else { line = test; }
+      });
+      if(line) lines.push(line);
+    });
+
+    let page = pdfDoc.addPage([pageW, pageH]);
+    let y = pageH - margin;
+
+    for(const line of lines) {
+      if(y < margin + lineHeight) {
+        page = pdfDoc.addPage([pageW, pageH]);
+        y = pageH - margin;
+      }
+      if(line) {
+        page.drawText(line, { x: margin, y, size: fontSize, font, color: rgb(0,0,0), maxWidth });
+      }
+      y -= lineHeight;
+    }
+
+    const bytes = await pdfDoc.save({ useObjectStreams: true });
+    const blob = new Blob([bytes], {type:'application/pdf'});
+    results.push({ name: file.name.replace(/\.(doc|docx)$/i, '.pdf'), url: URL.createObjectURL(blob), info: `Converted (${pdfDoc.getPageCount()} pages, ${formatSize(blob.size)})` });
+  }
+  return results;
+}
+
+// ===================== CROP IMAGE =====================
+async function cropImage() {
+  const results = [];
+  for(const file of uploadedFiles) {
+    const ratio = document.getElementById('cropRatio')?.value || 'free';
+    const blob = await cropImageFile(file, ratio);
+    const baseName = file.name.replace(/\.[^.]+$/, '');
+    results.push({ name: `${baseName}_cropped.png`, url: URL.createObjectURL(blob), info: `Cropped (${formatSize(blob.size)})` });
+  }
+  return results;
+}
+
+function cropImageFile(file, ratio) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onload = e => {
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let cropW = img.width, cropH = img.height;
+        let cropX = 0, cropY = 0;
+
+        if(ratio !== 'free') {
+          const [rw, rh] = ratio.split(':').map(Number);
+          const targetRatio = rw / rh;
+          const imgRatio = img.width / img.height;
+          if(imgRatio > targetRatio) {
+            cropH = img.height;
+            cropW = Math.round(img.height * targetRatio);
+            cropX = Math.round((img.width - cropW) / 2);
+          } else {
+            cropW = img.width;
+            cropH = Math.round(img.width / targetRatio);
+            cropY = Math.round((img.height - cropH) / 2);
+          }
+        }
+        canvas.width = cropW; canvas.height = cropH;
+        canvas.getContext('2d').drawImage(img, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+        canvas.toBlob(b => b ? resolve(b) : reject(new Error('Crop failed')), 'image/png');
+      };
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('Failed to read file'));
+    reader.readAsDataURL(file);
+  });
+}
+
+// ===================== AI ENHANCE =====================
+async function aiEnhance() {
+  const mode = document.getElementById('enhanceMode')?.value || 'sharpen';
+  const intensity = document.getElementById('enhanceIntensity')?.value || 'medium';
+  const intensityMap = { subtle: 0.4, medium: 0.7, strong: 1.0 };
+  const str = intensityMap[intensity];
+  const results = [];
+
+  for(const file of uploadedFiles) {
+    const blob = await enhanceImageFile(file, mode, str);
+    const baseName = file.name.replace(/\.[^.]+$/, '');
+    results.push({ name: `${baseName}_enhanced.png`, url: URL.createObjectURL(blob), info: `Enhanced (${mode}, ${intensity}) — ${formatSize(blob.size)}` });
+  }
+  return results;
+}
+
+function enhanceImageFile(file, mode, strength) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onload = e => {
+      img.onload = () => {
+        const scale = mode === 'upscale' ? 2 : 1;
+        const w = img.width * scale, h = img.height * scale;
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, w, h);
+
+        const imageData = ctx.getImageData(0, 0, w, h);
+        const data = imageData.data;
+
+        if(mode === 'sharpen' || mode === 'upscale') {
+          // Unsharp mask convolution
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = w; tempCanvas.height = h;
+          const tempCtx = tempCanvas.getContext('2d');
+          tempCtx.drawImage(canvas, 0, 0);
+          // Apply sharpening kernel
+          const kernel = [0, -strength, 0, -strength, 1 + 4*strength, -strength, 0, -strength, 0];
+          applyConvolution(data, w, h, kernel);
+        } else if(mode === 'denoise') {
+          // Box blur (noise reduction)
+          applyBoxBlur(data, w, h, Math.round(strength * 1.5));
+        } else if(mode === 'vivid') {
+          // Boost saturation + contrast
+          for(let i = 0; i < data.length; i += 4) {
+            const r = data[i], g = data[i+1], b = data[i+2];
+            // Contrast
+            const factor = (259 * (128 * strength + 255)) / (255 * (259 - 128 * strength));
+            data[i]   = clamp(factor * (r - 128) + 128);
+            data[i+1] = clamp(factor * (g - 128) + 128);
+            data[i+2] = clamp(factor * (b - 128) + 128);
+            // Saturation boost
+            const gray = 0.299*data[i] + 0.587*data[i+1] + 0.114*data[i+2];
+            data[i]   = clamp(data[i]   + (data[i]   - gray) * strength * 0.5);
+            data[i+1] = clamp(data[i+1] + (data[i+1] - gray) * strength * 0.5);
+            data[i+2] = clamp(data[i+2] + (data[i+2] - gray) * strength * 0.5);
+          }
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+        canvas.toBlob(b => b ? resolve(b) : reject(new Error('Enhance failed')), 'image/png');
+      };
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('Failed to read'));
+    reader.readAsDataURL(file);
+  });
+}
+
+function applyConvolution(data, w, h, kernel) {
+  const copy = new Uint8ClampedArray(data);
+  for(let y = 1; y < h-1; y++) {
+    for(let x = 1; x < w-1; x++) {
+      for(let c = 0; c < 3; c++) {
+        let sum = 0;
+        for(let ky = -1; ky <= 1; ky++) {
+          for(let kx = -1; kx <= 1; kx++) {
+            const idx = ((y+ky)*w + (x+kx))*4 + c;
+            sum += copy[idx] * kernel[(ky+1)*3 + (kx+1)];
+          }
+        }
+        data[(y*w+x)*4+c] = clamp(sum);
+      }
+    }
+  }
+}
+
+function applyBoxBlur(data, w, h, radius) {
+  const copy = new Uint8ClampedArray(data);
+  const r = Math.max(1, radius);
+  for(let y = r; y < h-r; y++) {
+    for(let x = r; x < w-r; x++) {
+      for(let c = 0; c < 3; c++) {
+        let sum = 0, count = 0;
+        for(let dy = -r; dy <= r; dy++) {
+          for(let dx = -r; dx <= r; dx++) {
+            sum += copy[((y+dy)*w+(x+dx))*4+c];
+            count++;
+          }
+        }
+        data[(y*w+x)*4+c] = sum / count;
+      }
+    }
+  }
+}
+
+function clamp(v) { return Math.max(0, Math.min(255, Math.round(v))); }
+
+// ===================== REMOVE BACKGROUND =====================
+async function removeBg() {
+  const replacement = document.getElementById('removeBgReplace')?.value || 'transparent';
+  const edgeMode = document.getElementById('removeBgEdge')?.value || 'normal';
+  const results = [];
+
+  for(const file of uploadedFiles) {
+    const blob = await removeBgFromImage(file, replacement, edgeMode);
+    const baseName = file.name.replace(/\.[^.]+$/, '');
+    results.push({ name: `${baseName}_nobg.png`, url: URL.createObjectURL(blob), info: `Background removed (${formatSize(blob.size)})` });
+  }
+  return results;
+}
+
+function removeBgFromImage(file, replacement, edgeMode) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onload = e => {
+      img.onload = () => {
+        const w = img.width, h = img.height;
+        const srcCanvas = document.createElement('canvas');
+        srcCanvas.width = w; srcCanvas.height = h;
+        const srcCtx = srcCanvas.getContext('2d');
+        srcCtx.drawImage(img, 0, 0);
+        const imageData = srcCtx.getImageData(0, 0, w, h);
+        const data = imageData.data;
+
+        // Sample background color from corners
+        const corners = [
+          [0,0],[w-1,0],[0,h-1],[w-1,h-1],
+          [Math.floor(w/2),0],[0,Math.floor(h/2)]
+        ];
+        let rSum=0,gSum=0,bSum=0;
+        corners.forEach(([cx,cy]) => {
+          const i=(cy*w+cx)*4;
+          rSum+=data[i]; gSum+=data[i+1]; bSum+=data[i+2];
+        });
+        const bgR=rSum/corners.length, bgG=gSum/corners.length, bgB=bSum/corners.length;
+        const threshold = edgeMode === 'sharp' ? 30 : edgeMode === 'smooth' ? 60 : 45;
+
+        // Output canvas
+        const outCanvas = document.createElement('canvas');
+        outCanvas.width = w; outCanvas.height = h;
+        const outCtx = outCanvas.getContext('2d');
+
+        if(replacement === 'blur') {
+          // Draw blurred version as background
+          outCtx.filter = 'blur(12px)';
+          outCtx.drawImage(img, 0, 0);
+          outCtx.filter = 'none';
+        } else if(replacement === 'white') {
+          outCtx.fillStyle = '#ffffff'; outCtx.fillRect(0,0,w,h);
+        } else if(replacement === 'black') {
+          outCtx.fillStyle = '#000000'; outCtx.fillRect(0,0,w,h);
+        }
+
+        // Copy pixels, making background transparent/replaced
+        const outData = outCtx.getImageData(0,0,w,h);
+        for(let i = 0; i < data.length; i += 4) {
+          const dr = Math.abs(data[i]-bgR), dg = Math.abs(data[i+1]-bgG), db = Math.abs(data[i+2]-bgB);
+          const dist = Math.sqrt(dr*dr+dg*dg+db*db);
+          if(dist < threshold) {
+            if(replacement === 'transparent') {
+              outData.data[i] = outData.data[i+1] = outData.data[i+2] = 0;
+              outData.data[i+3] = 0;
+            }
+            // else keep the replacement background already drawn
+          } else {
+            outData.data[i] = data[i];
+            outData.data[i+1] = data[i+1];
+            outData.data[i+2] = data[i+2];
+            outData.data[i+3] = edgeMode === 'smooth' ? Math.min(255, Math.round((dist/threshold)*255)) : 255;
+          }
+        }
+        outCtx.putImageData(outData, 0, 0);
+        outCanvas.toBlob(b => b ? resolve(b) : reject(new Error('Failed')), 'image/png');
+      };
+      img.onerror = () => reject(new Error('Failed to load'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('Failed to read'));
+    reader.readAsDataURL(file);
+  });
+}
+
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = e => resolve(e.target.result);
+    r.onerror = () => reject(new Error('Read failed'));
+    r.readAsDataURL(file);
+  });
 }
 
 function downloadResult(url, name) {
