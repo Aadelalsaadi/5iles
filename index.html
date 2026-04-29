@@ -262,6 +262,128 @@
   }
 </style>
 <script src="https://www.paypal.com/sdk/js?client-id=AaBmVFOe5m8DBhSlr7EX2VZQ7czwo9rS525DFpxJ7LNmr4IFsr8UnX9LcYGprNDDZxOwuScG8D6XEmbJ&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+// ===================== SUPABASE AUTH =====================
+const SUPABASE_URL = 'https://rwmagyyiayscaqvljrft.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_7tFuLwSpdZ9FKqiyr5G72A_pLkFptOr';
+const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Auth state
+let currentUser = null;
+
+// Check session on load
+async function initAuth() {
+  const { data: { session } } = await _supabase.auth.getSession();
+  if (session) {
+    currentUser = session.user;
+    updateNavForUser(currentUser);
+  }
+
+  // Listen for auth changes
+  _supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN') {
+      currentUser = session.user;
+      updateNavForUser(currentUser);
+      closeModalDirect();
+      showToast('👋 Welcome back, ' + (currentUser.user_metadata?.name || currentUser.email) + '!', 'success');
+    } else if (event === 'SIGNED_OUT') {
+      currentUser = null;
+      updateNavForSignedOut();
+      showToast('👋 Signed out successfully.', 'success');
+    }
+  });
+}
+
+function updateNavForUser(user) {
+  const name = user.user_metadata?.name || user.email.split('@')[0];
+  const navBtns = document.querySelector('.nav-btns');
+  if(navBtns) {
+    navBtns.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="background:linear-gradient(135deg,var(--accent),var(--accent2));width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:0.9rem;">
+          ${name.charAt(0).toUpperCase()}
+        </div>
+        <span style="font-size:0.875rem;color:var(--text2);">${name}</span>
+        <button class="btn btn-ghost" onclick="signOut()" style="padding:6px 14px;font-size:0.8rem;">Sign out</button>
+      </div>
+    `;
+  }
+}
+
+function updateNavForSignedOut() {
+  const navBtns = document.querySelector('.nav-btns');
+  if(navBtns) {
+    navBtns.innerHTML = `
+      <button class="btn btn-ghost" onclick="openModal('signin')">Sign in</button>
+      <button class="btn btn-primary" onclick="openModal('signup')">Get started</button>
+    `;
+  }
+}
+
+// Sign Up
+async function signUp(name, email, password) {
+  const btn = document.getElementById('authBtn');
+  btn.disabled = true;
+  btn.textContent = 'Creating account...';
+
+  const { data, error } = await _supabase.auth.signUp({
+    email,
+    password,
+    options: { data: { name } }
+  });
+
+  if (error) {
+    showToast('❌ ' + error.message, 'error');
+    btn.disabled = false;
+    btn.textContent = 'Create free account';
+    return;
+  }
+
+  if (data.user && !data.session) {
+    closeModalDirect();
+    showToast('📧 Check your email to confirm your account!', 'success');
+  }
+}
+
+// Sign In
+async function signIn(email, password) {
+  const btn = document.getElementById('authBtn');
+  btn.disabled = true;
+  btn.textContent = 'Signing in...';
+
+  const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    showToast('❌ ' + error.message, 'error');
+    btn.disabled = false;
+    btn.textContent = 'Sign in';
+    return;
+  }
+}
+
+// Sign Out
+async function signOut() {
+  await _supabase.auth.signOut();
+}
+
+// Reset Password
+async function resetPassword(email) {
+  const { error } = await _supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: 'https://5iles.com'
+  });
+  if (error) {
+    showToast('❌ ' + error.message, 'error');
+  } else {
+    showToast('📧 Password reset email sent!', 'success');
+    closeModalDirect();
+  }
+}
+
+// Init on page load
+window.addEventListener('load', initAuth);
+</script>
 </head>
 <body>
 
@@ -958,16 +1080,21 @@ function toggleFaq(i) {
 // ===================== MODAL =====================
 const MODALS = {
   signin: `<h3>Welcome back</h3><div class="modal-sub">Sign in to access your workspace.</div>
-    <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" placeholder="you@example.com"></div>
-    <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" placeholder="••••••••"></div>
-    <button class="btn btn-primary" style="width:100%;padding:12px;margin-top:8px;" onclick="closeModalDirect();showToast('👋 Welcome back!','success')">Sign in</button>
+    <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="signinEmail" placeholder="you@example.com"></div>
+    <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" id="signinPassword" placeholder="••••••••"></div>
+    <button id="authBtn" class="btn btn-primary" style="width:100%;padding:12px;margin-top:8px;" onclick="signIn(document.getElementById('signinEmail').value, document.getElementById('signinPassword').value)">Sign in</button>
+    <div class="modal-footer" style="margin-top:10px;"><a onclick="openModal('forgot')" style="color:var(--text3);font-size:0.8rem;cursor:pointer;">Forgot password?</a></div>
     <div class="modal-footer">No account? <a onclick="openModal('signup')">Sign up free</a></div>`,
   signup: `<h3>Create your account</h3><div class="modal-sub">Free forever. No credit card required.</div>
-    <div class="form-group"><label class="form-label">Full name</label><input class="form-input" type="text" placeholder="Your name"></div>
-    <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" placeholder="you@example.com"></div>
-    <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" placeholder="Choose a password"></div>
-    <button class="btn btn-primary" style="width:100%;padding:12px;margin-top:8px;" onclick="closeModalDirect();showToast('🎉 Account created! Welcome to 5iles.','success')">Create free account</button>
+    <div class="form-group"><label class="form-label">Full name</label><input class="form-input" type="text" id="signupName" placeholder="Your name"></div>
+    <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="signupEmail" placeholder="you@example.com"></div>
+    <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" id="signupPassword" placeholder="Min 6 characters"></div>
+    <button id="authBtn" class="btn btn-primary" style="width:100%;padding:12px;margin-top:8px;" onclick="signUp(document.getElementById('signupName').value, document.getElementById('signupEmail').value, document.getElementById('signupPassword').value)">Create free account</button>
     <div class="modal-footer">Already have an account? <a onclick="openModal('signin')">Sign in</a></div>`,
+  forgot: `<h3>Reset password</h3><div class="modal-sub">Enter your email and we'll send you a reset link.</div>
+    <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="forgotEmail" placeholder="you@example.com"></div>
+    <button id="authBtn" class="btn btn-primary" style="width:100%;padding:12px;margin-top:8px;" onclick="resetPassword(document.getElementById('forgotEmail').value)">Send reset link</button>
+    <div class="modal-footer"><a onclick="openModal('signin')">← Back to sign in</a></div>`,
   upgrade: `<h3>Upgrade to Pro</h3><div class="modal-sub">Just $5/mo. Cancel anytime. Powered by PayPal.</div>
     <div style="background:rgba(108,99,255,0.08);border:1px solid rgba(108,99,255,0.2);border-radius:12px;padding:20px;margin-bottom:20px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
