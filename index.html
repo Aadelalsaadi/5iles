@@ -989,7 +989,11 @@ function openTool(id) {
 
   const ws = document.getElementById('workspace');
   ws.classList.add('active');
-  ws.scrollIntoView({behavior:'smooth', block:'start'});
+  setTimeout(() => {
+    const navHeight = document.querySelector('nav').offsetHeight || 64;
+    const wsTop = ws.getBoundingClientRect().top + window.scrollY - navHeight - 16;
+    window.scrollTo({ top: wsTop, behavior: 'smooth' });
+  }, 50);
 }
 
 function closeWorkspace() {
