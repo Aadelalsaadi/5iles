@@ -1,3 +1,6 @@
+[build]
+  functions = "netlify/functions"
+
 [[redirects]]
   from = "http://5iles.com/*"
   to = "https://5iles.com/:splat"
