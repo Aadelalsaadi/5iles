@@ -567,7 +567,7 @@ window.addEventListener('load', initAuth);
         <li>Cloud storage integration</li>
         <li>Priority email support</li>
       </ul>
-      <a href="https://www.paypal.com/ncp/payment/94Y2Y49X9PKHL" target="_blank" class="btn btn-primary" style="width:100%;padding:12px;text-align:center;text-decoration:none;display:block;">Start Pro — $5/mo →</a>
+      <button onclick="startSubscription('pro')" class="btn btn-primary" style="width:100%;padding:12px;">Start Pro — $5/mo →</button>
     </div>
     <div class="price-card">
       <div class="price-name">Team</div>
@@ -582,7 +582,7 @@ window.addEventListener('load', initAuth);
         <li>API access</li>
         <li>Dedicated support</li>
       </ul>
-      <a href="https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=P-41N09220EC076120XNHY6LVI" target="_blank" class="btn btn-ghost" style="width:100%;padding:12px;text-align:center;text-decoration:none;display:block;margin-top:8px;">Start Team — $12/user/mo →</a>
+      <button onclick="startSubscription('team')" class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;">Start Team — $12/user/mo →</button>
     </div>
   </div>
 </section>
@@ -2061,7 +2061,17 @@ const MODALS = {
     <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="forgotEmail" placeholder="you@example.com"></div>
     <button id="authBtn" class="btn btn-primary" style="width:100%;padding:12px;margin-top:8px;" onclick="resetPassword(document.getElementById('forgotEmail').value)">Send reset link</button>
     <div class="modal-footer"><a onclick="openModal('signin')">← Back to sign in</a></div>`,
-  upgrade: `<h3>Upgrade to Pro</h3><div class="modal-sub">Just $5/mo. Cancel anytime. Powered by PayPal.</div>
+  'signup-for-plan': `
+    <h3>Create your account first</h3>
+    <div class="modal-sub">You need an account so we can link your subscription to you. It only takes 30 seconds — no credit card needed yet.</div>
+    <div style="background:rgba(108,99,255,0.08);border:1px solid rgba(108,99,255,0.2);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:0.85rem;color:var(--text2);">
+      ✅ After signing up, you'll be taken straight to the payment page.
+    </div>
+    <div class="form-group"><label class="form-label">Full name</label><input class="form-input" type="text" id="signupName" placeholder="Your name"></div>
+    <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="signupEmail" placeholder="you@example.com"></div>
+    <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" id="signupPassword" placeholder="Min 6 characters"></div>
+    <button id="authBtn" class="btn btn-primary" style="width:100%;padding:12px;margin-top:8px;" onclick="signUp(document.getElementById('signupName').value, document.getElementById('signupEmail').value, document.getElementById('signupPassword').value)">Create account & continue to payment →</button>
+    <div class="modal-footer">Already have an account? <a onclick="openModal('signin')">Sign in</a></div>`,<div class="modal-sub">Just $5/mo. Cancel anytime. Powered by PayPal.</div>
     <div style="background:rgba(108,99,255,0.08);border:1px solid rgba(108,99,255,0.2);border-radius:12px;padding:20px;margin-bottom:20px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
         <span style="font-weight:700;">Pro Plan</span>
@@ -2100,6 +2110,47 @@ function showToast(msg, type='success') {
 
 // ===================== INIT =====================
 renderTools();
+const PAYPAL_URLS = {
+  pro: 'https://www.paypal.com/ncp/payment/94Y2Y49X9PKHL',
+  team: 'https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=P-41N09220EC076120XNHY6LVI'
+};
+
+function startSubscription(plan) {
+  if(currentUser) {
+    // Already logged in — go straight to PayPal with email pre-filled
+    const url = PAYPAL_URLS[plan];
+    window.open(url, '_blank');
+  } else {
+    // Not logged in — show signup modal, then redirect after auth
+    pendingSubscriptionPlan = plan;
+    openModal('signup-for-plan');
+  }
+}
+
+let pendingSubscriptionPlan = null;
+
+// Override auth state change to handle post-signup subscription redirect
+const _origOnAuthChange = _supabase.auth.onAuthStateChange.bind(_supabase.auth);
+_supabase.auth.onAuthStateChange((event, session) => {
+  if(event === 'SIGNED_IN') {
+    currentUser = session.user;
+    updateNavForUser(currentUser);
+    closeModalDirect();
+    showToast('👋 Welcome, ' + (currentUser.user_metadata?.name || currentUser.email) + '!', 'success');
+    if(pendingSubscriptionPlan) {
+      const plan = pendingSubscriptionPlan;
+      pendingSubscriptionPlan = null;
+      setTimeout(() => {
+        showToast('🔀 Redirecting to payment...', 'success');
+        setTimeout(() => window.open(PAYPAL_URLS[plan], '_blank'), 1000);
+      }, 500);
+    }
+  } else if(event === 'SIGNED_OUT') {
+    currentUser = null;
+    updateNavForSignedOut();
+    showToast('👋 Signed out successfully.', 'success');
+  }
+});
 </script>
 
 <script>
