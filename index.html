@@ -253,6 +253,7 @@
     .stats { gap:24px; }
   }
 </style>
+<script src="https://www.paypal.com/sdk/js?client-id=AaBmVFOe5m8DBhSlr7EX2VZQ7czwo9rS525DFpxJ7LNmr4IFsr8UnX9LcYGprNDDZxOwuScG8D6XEmbJ&vault=true&intent=subscription" data-sdk-integration-source="button-factory"></script>
 </head>
 <body>
 
@@ -449,7 +450,7 @@
         <li>API access</li>
         <li>Dedicated support</li>
       </ul>
-      <button class="btn btn-ghost" style="width:100%;padding:12px;" onclick="openModal('upgrade')">Start Team trial →</button>
+      <div id="paypal-button-container-P-41N09220EC076120XNHY6LVI" style="margin-top:8px;"></div>
     </div>
   </div>
 </section>
@@ -998,6 +999,18 @@ function showToast(msg, type='success') {
 
 // ===================== INIT =====================
 renderTools();
+</script>
+
+<script>
+  paypal.Buttons({
+    style: { shape: 'pill', color: 'blue', layout: 'vertical', label: 'subscribe' },
+    createSubscription: function(data, actions) {
+      return actions.subscription.create({ plan_id: 'P-41N09220EC076120XNHY6LVI' });
+    },
+    onApprove: function(data, actions) {
+      document.getElementById('paypal-button-container-P-41N09220EC076120XNHY6LVI').innerHTML = '<div style="background:rgba(67,233,123,0.1);border:1px solid rgba(67,233,123,0.3);border-radius:12px;padding:16px;text-align:center;color:#43e97b;font-weight:700;">✅ Subscription activated! Welcome to 5iles Team!</div>';
+    }
+  }).render('#paypal-button-container-P-41N09220EC076120XNHY6LVI');
 </script>
 </body>
 </html>
