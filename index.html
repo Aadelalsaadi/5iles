@@ -480,10 +480,10 @@
     </div>
     <div class="footer-col"><h4>Tools</h4><ul><li><a href="#tools">PDF tools</a></li><li><a href="#tools">Converters</a></li><li><a href="#tools">Image tools</a></li><li><a href="#tools">OCR & Scan</a></li><li><a href="#tools">Security</a></li></ul></div>
     <div class="footer-col"><h4>Product</h4><ul><li><a href="#features">Features</a></li><li><a href="#pricing">Pricing</a></li><li><a href="#voice">Voice to Text</a></li><li><a href="#faq">FAQ</a></li></ul></div>
-    <div class="footer-col"><h4>Company</h4><ul><li><a href="#">About</a></li><li><a href="#">Blog</a></li><li><a href="/privacy-policy.html">Privacy</a></li><li><a href="/terms.html">Terms</a></li><li><a href="#">Contact</a></li></ul></div>
+    <div class="footer-col"><h4>Company</h4><ul><li><a href="#features">About</a></li><li><a href="#faq">Blog</a></li><li><a href="/privacy-policy.html">Privacy Policy</a></li><li><a href="/terms.html">Terms of Service</a></li><li><a href="mailto:hello@5iles.com">Contact</a></li></ul></div>
   </div>
   <div class="footer-bottom">
-    <p>© 2025 5iles. All rights reserved.</p>
+    <p>© 2026 5iles. All rights reserved.</p>
     <p style="color:var(--text3);font-size:0.8rem;">🔒 AES-256 encrypted · Files auto-deleted after 2 hours</p>
   </div>
 </footer>
@@ -1140,6 +1140,21 @@ function hideCookieBanner() {
 }
 
 showCookieBanner();
+</script>
+
+<script>
+// Fix all anchor links to scroll smoothly
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function(e) {
+    const href = this.getAttribute('href');
+    if(href === '#') return;
+    const target = document.querySelector(href);
+    if(target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
 </script>
 </body>
 </html>
