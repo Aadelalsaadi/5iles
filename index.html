@@ -480,7 +480,7 @@
     </div>
     <div class="footer-col"><h4>Tools</h4><ul><li><a href="#tools">PDF tools</a></li><li><a href="#tools">Converters</a></li><li><a href="#tools">Image tools</a></li><li><a href="#tools">OCR & Scan</a></li><li><a href="#tools">Security</a></li></ul></div>
     <div class="footer-col"><h4>Product</h4><ul><li><a href="#features">Features</a></li><li><a href="#pricing">Pricing</a></li><li><a href="#voice">Voice to Text</a></li><li><a href="#faq">FAQ</a></li></ul></div>
-    <div class="footer-col"><h4>Company</h4><ul><li><a href="#">About</a></li><li><a href="#">Blog</a></li><li><a href="#">Privacy</a></li><li><a href="#">Terms</a></li><li><a href="#">Contact</a></li></ul></div>
+    <div class="footer-col"><h4>Company</h4><ul><li><a href="#">About</a></li><li><a href="#">Blog</a></li><li><a href="/privacy-policy.html">Privacy</a></li><li><a href="/terms.html">Terms</a></li><li><a href="#">Contact</a></li></ul></div>
   </div>
   <div class="footer-bottom">
     <p>© 2025 5iles. All rights reserved.</p>
@@ -1078,6 +1078,68 @@ window.addEventListener('appinstalled', () => {
   installBanner.style.display = 'none';
   showToast('🎉 5iles app installed!', 'success');
 });
+</script>
+
+<!-- Cookie Consent Banner -->
+<div id="cookie-banner" style="
+  position:fixed; bottom:0; left:0; right:0; z-index:9999;
+  background:var(--surface); border-top:1px solid var(--border);
+  padding:20px 5%; display:flex; align-items:center; justify-content:space-between;
+  flex-wrap:wrap; gap:16px; box-shadow:0 -8px 32px rgba(0,0,0,0.4);
+  transform:translateY(100%); transition:transform 0.4s ease;
+">
+  <div style="flex:1; min-width:280px;">
+    <div style="font-weight:700; font-size:0.95rem; margin-bottom:4px;">🍪 We use cookies</div>
+    <div style="color:var(--text2); font-size:0.8rem; line-height:1.5;">
+      We use cookies for analytics and to improve your experience. 
+      Your files are always processed locally and never stored on our servers.
+      <a href="/privacy-policy.html" style="color:var(--accent); text-decoration:none;">Learn more</a>
+    </div>
+  </div>
+  <div style="display:flex; gap:10px; flex-shrink:0;">
+    <button onclick="rejectCookies()" style="
+      padding:10px 20px; border-radius:10px; border:1px solid var(--border);
+      background:transparent; color:var(--text2); cursor:pointer; font-size:0.85rem;
+      transition:all 0.2s;
+    " onmouseover="this.style.borderColor='var(--accent2)';this.style.color='var(--accent2)'" 
+       onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text2)'">
+      Reject non-essential
+    </button>
+    <button onclick="acceptCookies()" style="
+      padding:10px 20px; border-radius:10px; border:none;
+      background:linear-gradient(135deg,var(--accent),#8b7fff); color:#fff;
+      cursor:pointer; font-size:0.85rem; font-weight:600; transition:all 0.2s;
+    ">
+      Accept all ✓
+    </button>
+  </div>
+</div>
+
+<script>
+// Cookie consent
+function showCookieBanner() {
+  if(!localStorage.getItem('cookieConsent')) {
+    setTimeout(() => {
+      document.getElementById('cookie-banner').style.transform = 'translateY(0)';
+    }, 1500);
+  }
+}
+
+function acceptCookies() {
+  localStorage.setItem('cookieConsent', 'accepted');
+  hideCookieBanner();
+}
+
+function rejectCookies() {
+  localStorage.setItem('cookieConsent', 'rejected');
+  hideCookieBanner();
+}
+
+function hideCookieBanner() {
+  document.getElementById('cookie-banner').style.transform = 'translateY(100%)';
+}
+
+showCookieBanner();
 </script>
 </body>
 </html>
