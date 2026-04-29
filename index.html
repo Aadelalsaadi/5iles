@@ -434,7 +434,7 @@
         <li>Cloud storage integration</li>
         <li>Priority email support</li>
       </ul>
-      <button class="btn btn-primary" style="width:100%;padding:12px;" onclick="openModal('upgrade')">Start Pro trial →</button>
+      <a href="https://www.paypal.com/ncp/payment/94Y2Y49X9PKHL" target="_blank" class="btn btn-primary" style="width:100%;padding:12px;text-align:center;text-decoration:none;display:block;">Start Pro — $5/mo →</a>
     </div>
     <div class="price-card">
       <div class="price-name">Team</div>
@@ -959,14 +959,24 @@ const MODALS = {
     <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" placeholder="Choose a password"></div>
     <button class="btn btn-primary" style="width:100%;padding:12px;margin-top:8px;" onclick="closeModalDirect();showToast('🎉 Account created! Welcome to 5iles.','success')">Create free account</button>
     <div class="modal-footer">Already have an account? <a onclick="openModal('signin')">Sign in</a></div>`,
-  upgrade: `<h3>Upgrade to Pro</h3><div class="modal-sub">7-day free trial, then $5/mo. Cancel anytime.</div>
-    <div class="form-group"><label class="form-label">Card number</label><input class="form-input" type="text" placeholder="1234 5678 9012 3456"></div>
-    <div style="display:flex;gap:12px;">
-      <div class="form-group" style="flex:1"><label class="form-label">Expiry</label><input class="form-input" type="text" placeholder="MM/YY"></div>
-      <div class="form-group" style="flex:1"><label class="form-label">CVV</label><input class="form-input" type="text" placeholder="123"></div>
+  upgrade: `<h3>Upgrade to Pro</h3><div class="modal-sub">Just $5/mo. Cancel anytime. Powered by PayPal.</div>
+    <div style="background:rgba(108,99,255,0.08);border:1px solid rgba(108,99,255,0.2);border-radius:12px;padding:20px;margin-bottom:20px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <span style="font-weight:700;">Pro Plan</span>
+        <span style="font-size:1.5rem;font-weight:900;">$5<span style="font-size:0.9rem;font-weight:400;color:var(--text2)">/mo</span></span>
+      </div>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;">
+        <li style="font-size:0.875rem;color:var(--text2);">✓ Unlimited tasks</li>
+        <li style="font-size:0.875rem;color:var(--text2);">✓ Files up to 1GB</li>
+        <li style="font-size:0.875rem;color:var(--text2);">✓ All AI-powered tools</li>
+        <li style="font-size:0.875rem;color:var(--text2);">✓ Batch processing</li>
+        <li style="font-size:0.875rem;color:var(--text2);">✓ Priority support</li>
+      </ul>
     </div>
-    <button class="btn btn-primary" style="width:100%;padding:12px;margin-top:8px;" onclick="closeModalDirect();showToast('✅ Pro trial started! Enjoy unlimited access.','success')">Start 7-day free trial →</button>
-    <p style="font-size:0.75rem;color:var(--text3);text-align:center;margin-top:8px;">🔒 Secured by Stripe · Cancel anytime</p>`
+    <a href="https://www.paypal.com/ncp/payment/94Y2Y49X9PKHL" target="_blank" style="display:block;width:100%;padding:14px;background:#0070ba;color:#fff;text-align:center;border-radius:12px;font-weight:700;font-size:1rem;text-decoration:none;transition:all 0.2s;" onmouseover="this.style.background='#005ea6'" onmouseout="this.style.background='#0070ba'">
+      💳 Pay with PayPal → $5/mo
+    </a>
+    <p style="font-size:0.75rem;color:var(--text3);text-align:center;margin-top:10px;">🔒 Secured by PayPal · Accepts cards, Apple Pay & PayPal · Cancel anytime</p>`
 };
 
 function openModal(type) {
