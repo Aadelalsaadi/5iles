@@ -1,0 +1,69 @@
+{
+  "name": "5iles — Every File Tool You'll Ever Need",
+  "short_name": "5iles",
+  "description": "Convert, compress, merge, split, edit and sign your documents and images — all in one beautifully simple platform.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#6c63ff",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='40' fill='%236c63ff'/><text x='96' y='140' font-size='120' text-anchor='middle' fill='white' font-family='Arial Black,sans-serif' font-weight='900'>5</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%236c63ff'/><text x='256' y='370' font-size='320' text-anchor='middle' fill='white' font-family='Arial Black,sans-serif' font-weight='900'>5</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "https://5iles.com",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "5iles Desktop"
+    },
+    {
+      "src": "https://5iles.com",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "5iles Mobile"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Compress PDF",
+      "short_name": "Compress PDF",
+      "url": "/compress-pdf.html",
+      "icons": [{ "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><rect width='96' height='96' rx='20' fill='%236c63ff'/><text x='48' y='68' font-size='60' text-anchor='middle' fill='white'>🗜️</text></svg>", "sizes": "96x96" }]
+    },
+    {
+      "name": "Merge PDF",
+      "short_name": "Merge PDF",
+      "url": "/merge-pdf.html",
+      "icons": [{ "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><rect width='96' height='96' rx='20' fill='%236c63ff'/><text x='48' y='68' font-size='60' text-anchor='middle' fill='white'>📑</text></svg>", "sizes": "96x96" }]
+    },
+    {
+      "name": "Voice to Text",
+      "short_name": "Voice",
+      "url": "/#voice",
+      "icons": [{ "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><rect width='96' height='96' rx='20' fill='%236c63ff'/><text x='48' y='68' font-size='60' text-anchor='middle' fill='white'>🎤</text></svg>", "sizes": "96x96" }]
+    },
+    {
+      "name": "Compress Image",
+      "short_name": "Compress Image",
+      "url": "/compress-image.html",
+      "icons": [{ "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><rect width='96' height='96' rx='20' fill='%236c63ff'/><text x='48' y='68' font-size='60' text-anchor='middle' fill='white'>📦</text></svg>", "sizes": "96x96" }]
+    }
+  ]
+}

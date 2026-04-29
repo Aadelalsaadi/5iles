@@ -2,6 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<!-- PWA -->
+<link rel="manifest" href="/manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="5iles">
+<meta name="theme-color" content="#6c63ff">
+<meta name="msapplication-TileColor" content="#6c63ff">
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-YQJE3S5BY5"></script>
 <script>
@@ -1011,6 +1019,65 @@ renderTools();
       document.getElementById('paypal-button-container-P-41N09220EC076120XNHY6LVI').innerHTML = '<div style="background:rgba(67,233,123,0.1);border:1px solid rgba(67,233,123,0.3);border-radius:12px;padding:16px;text-align:center;color:#43e97b;font-weight:700;">✅ Subscription activated! Welcome to 5iles Team!</div>';
     }
   }).render('#paypal-button-container-P-41N09220EC076120XNHY6LVI');
+</script>
+
+<script>
+// Register Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('5iles SW registered:', reg.scope))
+      .catch(err => console.log('SW registration failed:', err));
+  });
+}
+
+// PWA Install Prompt
+let deferredPrompt;
+const installBanner = document.createElement('div');
+installBanner.id = 'pwa-banner';
+installBanner.style.cssText = `
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--surface); border: 1px solid var(--accent);
+  border-radius: 16px; padding: 16px 20px; display: none; align-items: center;
+  gap: 14px; z-index: 999; box-shadow: 0 8px 32px rgba(108,99,255,0.3);
+  max-width: 380px; width: 90%;
+`;
+installBanner.innerHTML = `
+  <div style="font-size:2rem;">📱</div>
+  <div style="flex:1;">
+    <div style="font-weight:700;font-size:0.9rem;">Install 5iles App</div>
+    <div style="font-size:0.75rem;color:var(--text2);">Add to your home screen for quick access</div>
+  </div>
+  <button id="pwa-install-btn" style="background:linear-gradient(135deg,#6c63ff,#8b7fff);color:#fff;border:none;padding:8px 16px;border-radius:10px;font-weight:700;cursor:pointer;font-size:0.85rem;">Install</button>
+  <button id="pwa-dismiss-btn" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:1.2rem;padding:4px;">✕</button>
+`;
+document.body.appendChild(installBanner);
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  installBanner.style.display = 'flex';
+});
+
+document.getElementById('pwa-install-btn').addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  if (outcome === 'accepted') {
+    showToast('🎉 5iles installed successfully!', 'success');
+  }
+  deferredPrompt = null;
+  installBanner.style.display = 'none';
+});
+
+document.getElementById('pwa-dismiss-btn').addEventListener('click', () => {
+  installBanner.style.display = 'none';
+});
+
+window.addEventListener('appinstalled', () => {
+  installBanner.style.display = 'none';
+  showToast('🎉 5iles app installed!', 'success');
+});
 </script>
 </body>
 </html>
