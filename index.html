@@ -675,6 +675,7 @@ function openTool(id) {
   uploadedFiles = [];
 
   if(tool.type === 'coming') {
+    closeWorkspace();
     showToast('🚧 Coming soon! This tool is under development.', 'error');
     return;
   }
