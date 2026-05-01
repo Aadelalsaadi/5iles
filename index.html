@@ -408,7 +408,7 @@ async function signOut() {
 // Reset Password
 async function resetPassword(email) {
   const { error } = await _supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: 'https://5iles.com'
+    redirectTo: 'https://5iles.com/reset-password.html'
   });
   if (error) {
     showToast('❌ ' + error.message, 'error');
