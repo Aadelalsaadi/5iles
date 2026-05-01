@@ -376,6 +376,7 @@ async function signIn(email, password) {
 // Sign Out
 async function signOut() {
   await _supabase.auth.signOut();
+  window.location.reload();
 }
 
 // Reset Password
