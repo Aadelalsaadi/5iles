@@ -1,7 +1,5 @@
 [build]
-  base = "5iles"
-  publish = "5iles"
-  functions = "5iles/netlify/functions"
+  functions = "netlify/functions"
 
 [build.environment]
   SECRETS_SCAN_ENABLED = "false"
