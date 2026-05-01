@@ -355,7 +355,12 @@ async function signUp(name, email, password) {
   return;
   }
 
-  if (data.user && !data.session) {
+  if (data.user && data.user.identities && data.user.identities.length === 0) {
+  // Email already exists
+  showToast('✗ This email is already registered. Please sign in instead.', 'error');
+  btn.disabled = false;
+  btn.textContent = 'Create free account';
+} else if (data.user && !data.session) {
   closeModalDirect();
   showToast('📧 Check your email to confirm your account!', 'success');
 } else if (data.session) {
