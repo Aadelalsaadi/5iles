@@ -4,16 +4,3 @@
 
 [build.environment]
   SECRETS_SCAN_ENABLED = "false"
-
-[[redirects]]
-  from = "https://www.5iles.com/*"
-  to = "https://5iles.com/:splat"
-  status = 301
-  force = true
-
-[[headers]]
-  for = "/*"
-  [headers.values]
-    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
-    X-Frame-Options = "DENY"
-    X-Content-Type-Options = "nosniff"
