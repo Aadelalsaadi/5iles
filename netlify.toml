@@ -4,4 +4,4 @@ toml[build]
 
 [build.environment]
   SECRETS_SCAN_ENABLED = "false"
-  NODE_VERSION = "18"
+  NODE_VERSION = "21.7.1"
