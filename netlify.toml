@@ -1,8 +1,7 @@
 [build]
-  functions = "netlify/functions"
+  base = "5iles"
+  publish = "5iles"
+  functions = "5iles/netlify/functions"
 
 [build.environment]
   SECRETS_SCAN_ENABLED = "false"
-
-[[plugins]]
-  package = "@netlify/plugin-functions-install-core"
