@@ -345,10 +345,14 @@ async function signUp(name, email, password) {
   });
 
   if (error) {
-    showToast('❌ ' + error.message, 'error');
-    btn.disabled = false;
-    btn.textContent = 'Create free account';
-    return;
+  if (error.message.toLowerCase().includes('already') || error.status === 422 || error.status === 400) {
+    showToast('✗ This email is already registered. Please sign in instead.', 'error');
+  } else {
+    showToast('✗ ' + error.message, 'error');
+  }
+  btn.disabled = false;
+  btn.textContent = 'Create free account';
+  return;
   }
 
   if (data.user && !data.session) {
