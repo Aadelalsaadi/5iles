@@ -1,4 +1,5 @@
 [build]
+  base = "."
   publish = "."
   command = "cd netlify/functions && npm install"
   functions = "netlify/functions"
