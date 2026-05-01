@@ -366,10 +366,16 @@ async function signIn(email, password) {
   const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    showToast('❌ ' + error.message, 'error');
-    btn.disabled = false;
-    btn.textContent = 'Sign in';
-    return;
+  const existingErr = document.getElementById('signin-error');
+  if (existingErr) existingErr.remove();
+  const errDiv = document.createElement('div');
+  errDiv.id = 'signin-error';
+  errDiv.style.cssText = 'color:#ff4d4d;font-size:13px;margin-top:8px;text-align:center;';
+  errDiv.textContent = '✗ Invalid email or password';
+  document.getElementById('authPassword').parentNode.appendChild(errDiv);
+  btn.disabled = false;
+  btn.textContent = 'Sign in';
+  return;
   }
 }
 
