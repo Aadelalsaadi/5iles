@@ -357,7 +357,13 @@ async function signUp(name, email, password) {
 
   if (data.user && data.user.identities && data.user.identities.length === 0) {
   // Email already exists
-  showToast('✗ This email is already registered. Please sign in instead.', 'error');
+  const existingErr = document.getElementById('signup-error');
+  if (existingErr) existingErr.remove();
+  const errDiv = document.createElement('div');
+  errDiv.id = 'signup-error';
+  errDiv.style.cssText = 'color:#ff4d4d;font-size:13px;margin-top:8px;text-align:center;padding:6px;background:rgba(255,77,77,0.1);border-radius:6px;';
+  errDiv.textContent = '✗ This email is already registered. Please sign in instead.';
+  document.getElementById('signupPassword').after(errDiv);
   btn.disabled = false;
   btn.textContent = 'Create free account';
 } else if (data.user && !data.session) {
