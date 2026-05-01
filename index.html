@@ -372,7 +372,7 @@ async function signIn(email, password) {
   errDiv.id = 'signin-error';
   errDiv.style.cssText = 'color:#ff4d4d;font-size:13px;margin-top:8px;text-align:center;';
   errDiv.textContent = '✗ Invalid email or password';
-  document.getElementById('authPassword').after(errDiv);
+  document.getElementById('signinPassword').after(errDiv);
   btn.disabled = false;
   btn.textContent = 'Sign in';
   return;
