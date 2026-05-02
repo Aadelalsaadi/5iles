@@ -1418,20 +1418,20 @@ async function pdfToExcel() {
 }
   // ==================== PDF TO WORD ====================
 async function pdfToText() {
-  const API_KEY = 'alsaadi.legend@gmail.com_7FtrjwweCnnIMe5Kxo8hkWeFREJzYGaHjQK4C7a3OkR2XaK7daD3DVgozSoKAtyj';
   const results = [];
   for(const file of uploadedFiles) {
-    const formData = new FormData();
-    formData.append('file', file);
-    const uploadRes = await fetch('https://api.pdf.co/v1/file/upload', {
-      method: 'POST', headers: { 'x-api-key': API_KEY }, body: formData
+    const fileBase64 = await fileToBase64(file);
+    const uploadRes = await fetch('/.netlify/functions/pdfco-upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ filename: file.name, fileBase64 })
     });
     const uploadData = await uploadRes.json();
     if(uploadData.error) throw new Error(uploadData.message || 'Upload failed');
-    const convertRes = await fetch('https://api.pdf.co/v1/pdf/convert/to/doc', {
+    const convertRes = await fetch('/.netlify/functions/pdfco-proxy', {
       method: 'POST',
-      headers: { 'x-api-key': API_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url: uploadData.url, name: file.name.replace('.pdf','.docx') })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ endpoint: 'pdf/convert/to/doc', body: { url: uploadData.url, name: file.name.replace('.pdf','.docx') } })
     });
     const convertData = await convertRes.json();
     if(convertData.error) throw new Error(convertData.message || 'Conversion failed');
