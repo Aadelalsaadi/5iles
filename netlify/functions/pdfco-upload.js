@@ -17,33 +17,56 @@ exports.handler = async (event) => {
     const API_KEY = 'alsaadi.legend@gmail.com_7FtrjwweCnnIMe5Kxo8hkWeFREJzYGaHjQK4C7a3OkR2XaK7daD3DVgozSoKAtyj';
     const { filename, fileBase64 } = JSON.parse(event.body);
 
-    const requestBody = JSON.stringify({ name: filename, content: fileBase64 });
-
-    const data = await new Promise((resolve, reject) => {
+    // Step 1: Get a presigned upload URL from PDF.co
+    const presignData = await new Promise((resolve, reject) => {
       const req = https.request({
         hostname: 'api.pdf.co',
-        path: '/v1/file/upload/base64',
-        method: 'POST',
-        headers: {
-          'x-api-key': API_KEY,
-          'Content-Type': 'application/json',
-          'Content-Length': Buffer.byteLength(requestBody)
-        }
+        path: `/v1/file/upload/get-presigned-url?name=${encodeURIComponent(filename)}&encrypt=false`,
+        method: 'GET',
+        headers: { 'x-api-key': API_KEY }
       }, (res) => {
         let body = '';
         res.on('data', chunk => body += chunk);
         res.on('end', () => resolve(JSON.parse(body)));
       });
       req.on('error', reject);
-      req.write(requestBody);
       req.end();
     });
 
+    if (presignData.error) {
+      return {
+        statusCode: 200,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify(presignData)
+      };
+    }
+
+    // Step 2: Upload the file to the presigned URL
+    const fileBuffer = Buffer.from(fileBase64, 'base64');
+    const uploadUrl = new URL(presignData.presignedUrl);
+
+    await new Promise((resolve, reject) => {
+      const req = https.request({
+        hostname: uploadUrl.hostname,
+        path: uploadUrl.pathname + uploadUrl.search,
+        method: 'PUT',
+        headers: { 'Content-Length': fileBuffer.length }
+      }, (res) => {
+        res.on('data', () => {});
+        res.on('end', resolve);
+      });
+      req.on('error', reject);
+      req.write(fileBuffer);
+      req.end();
+    });
+
+    // Step 3: Return the permanent file URL
     return {
       statusCode: 200,
       headers: { 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify(data)
+      body: JSON.stringify({ url: presignData.url, error: false })
     };
+
   } catch (err) {
     return {
       statusCode: 500,
