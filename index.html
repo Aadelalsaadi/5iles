@@ -1358,60 +1358,75 @@ async function rotatePDF() {
   return results;
 }
 
-// ===================== PDF TO JPG =====================
 async function pdfToJPG() {
-  if(typeof pdfjsLib === 'undefined') pdfjsLib = window['pdfjs-dist/build/pdf'];
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-  const quality = parseInt(document.getElementById('jpgQualitySlider')?.value || 90) / 100;
+  const API_KEY = 'alsaadi.legend@gmail.com_7FtrjwweCnnIMe5Kxo8hkWeFREJzYGaHjQK4C7a3OkR2XaK7daD3DVgozSoKAtyj';
   const results = [];
   for(const file of uploadedFiles) {
-    const ab = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({data: ab}).promise;
-    for(let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const viewport = page.getViewport({scale: 2.0});
-      const canvas = document.createElement('canvas');
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
-      const ctx = canvas.getContext('2d');
-      await page.render({canvasContext: ctx, viewport}).promise;
-      const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', quality));
-      const baseName = file.name.replace('.pdf','');
-      results.push({ name: `${baseName}_page${i}.jpg`, url: URL.createObjectURL(blob), info: `Page ${i} of ${pdf.numPages} — ${canvas.width}×${canvas.height}px (${formatSize(blob.size)})` });
-    }
+    const formData = new FormData();
+    formData.append('file', file);
+    const uploadRes = await fetch('https://api.pdf.co/v1/file/upload', {
+      method: 'POST', headers: { 'x-api-key': API_KEY }, body: formData
+    });
+    const uploadData = await uploadRes.json();
+    if(uploadData.error) throw new Error(uploadData.message || 'Upload failed');
+    const convertRes = await fetch('https://api.pdf.co/v1/pdf/convert/to/jpg', {
+      method: 'POST',
+      headers: { 'x-api-key': API_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: uploadData.url, pages: '0-', name: file.name.replace('.pdf','') })
+    });
+    const convertData = await convertRes.json();
+    if(convertData.error) throw new Error(convertData.message || 'Conversion failed');
+    const urls = convertData.urls || [convertData.url];
+    urls.forEach((url, i) => {
+      results.push({ name: file.name.replace('.pdf', `_page${i+1}.jpg`), url, info: `Page ${i+1} converted to JPG` });
+    });
   }
   return results;
 }
 
 // ===================== PDF TO EXCEL (CSV) =====================
 async function pdfToExcel() {
-  if(typeof pdfjsLib === 'undefined') pdfjsLib = window['pdfjs-dist/build/pdf'];
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const API_KEY = 'alsaadi.legend@gmail.com_7FtrjwweCnnIMe5Kxo8hkWeFREJzYGaHjQK4C7a3OkR2XaK7daD3DVgozSoKAtyj';
   const results = [];
   for(const file of uploadedFiles) {
-    const ab = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({data: ab}).promise;
-    let csvContent = '';
-    for(let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const content = await page.getTextContent();
-      // Group items by approximate Y position (rows)
-      const rows = {};
-      content.items.forEach(item => {
-        const y = Math.round(item.transform[5] / 10) * 10;
-        if(!rows[y]) rows[y] = [];
-        rows[y].push(item.str.trim());
-      });
-      // Sort rows by Y descending (top to bottom)
-      const sortedRows = Object.keys(rows).sort((a,b) => b - a);
-      if(i > 1) csvContent += `\n--- Page ${i} ---\n`;
-      sortedRows.forEach(y => {
-        const cells = rows[y].filter(c => c.length > 0);
-        if(cells.length) csvContent += cells.map(c => `"${c.replace(/"/g,'""')}"`).join(',') + '\n';
-      });
-    }
-    const blob = new Blob([csvContent], {type:'text/csv'});
-    results.push({ name: file.name.replace('.pdf', '.csv'), url: URL.createObjectURL(blob), info: `${pdf.numPages} pages extracted to CSV (${formatSize(blob.size)})` });
+    const formData = new FormData();
+    formData.append('file', file);
+    const uploadRes = await fetch('https://api.pdf.co/v1/file/upload', {
+      method: 'POST', headers: { 'x-api-key': API_KEY }, body: formData
+    });
+    const uploadData = await uploadRes.json();
+    if(uploadData.error) throw new Error(uploadData.message || 'Upload failed');
+    const convertRes = await fetch('https://api.pdf.co/v1/pdf/convert/to/xls', {
+      method: 'POST',
+      headers: { 'x-api-key': API_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: uploadData.url, name: file.name.replace('.pdf','.xls') })
+    });
+    const convertData = await convertRes.json();
+    if(convertData.error) throw new Error(convertData.message || 'Conversion failed');
+    results.push({ name: file.name.replace('.pdf','.xls'), url: convertData.url, info: `Converted to Excel (${formatSize(file.size)})` });
+  }
+  return results;
+}
+  // ==================== PDF TO WORD ====================
+async function pdfToText() {
+  const API_KEY = 'alsaadi.legend@gmail.com_7FtrjwweCnnIMe5Kxo8hkWeFREJzYGaHjQK4C7a3OkR2XaK7daD3DVgozSoKAtyj';
+  const results = [];
+  for(const file of uploadedFiles) {
+    const formData = new FormData();
+    formData.append('file', file);
+    const uploadRes = await fetch('https://api.pdf.co/v1/file/upload', {
+      method: 'POST', headers: { 'x-api-key': API_KEY }, body: formData
+    });
+    const uploadData = await uploadRes.json();
+    if(uploadData.error) throw new Error(uploadData.message || 'Upload failed');
+    const convertRes = await fetch('https://api.pdf.co/v1/pdf/convert/to/doc', {
+      method: 'POST',
+      headers: { 'x-api-key': API_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: uploadData.url, name: file.name.replace('.pdf','.docx') })
+    });
+    const convertData = await convertRes.json();
+    if(convertData.error) throw new Error(convertData.message || 'Conversion failed');
+    results.push({ name: file.name.replace('.pdf','.docx'), url: convertData.url, info: `Converted to Word (${formatSize(file.size)})` });
   }
   return results;
 }
