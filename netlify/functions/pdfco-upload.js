@@ -1,5 +1,4 @@
-const fetch = require('node-fetch');
-const FormData = require('form-data');
+const https = require('https');
 
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
@@ -17,18 +16,29 @@ exports.handler = async (event) => {
   try {
     const API_KEY = 'alsaadi.legend@gmail.com_7FtrjwweCnnIMe5Kxo8hkWeFREJzYGaHjQK4C7a3OkR2XaK7daD3DVgozSoKAtyj';
     const { filename, fileBase64 } = JSON.parse(event.body);
-    const fileBuffer = Buffer.from(fileBase64, 'base64');
 
-    const form = new FormData();
-    form.append('file', fileBuffer, { filename });
+    const requestBody = JSON.stringify({ name: filename, content: fileBase64 });
 
-    const response = await fetch('https://api.pdf.co/v1/file/upload', {
-      method: 'POST',
-      headers: { 'x-api-key': API_KEY, ...form.getHeaders() },
-      body: form
+    const data = await new Promise((resolve, reject) => {
+      const req = https.request({
+        hostname: 'api.pdf.co',
+        path: '/v1/file/upload/base64',
+        method: 'POST',
+        headers: {
+          'x-api-key': API_KEY,
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(requestBody)
+        }
+      }, (res) => {
+        let body = '';
+        res.on('data', chunk => body += chunk);
+        res.on('end', () => resolve(JSON.parse(body)));
+      });
+      req.on('error', reject);
+      req.write(requestBody);
+      req.end();
     });
 
-    const data = await response.json();
     return {
       statusCode: 200,
       headers: { 'Access-Control-Allow-Origin': '*' },
