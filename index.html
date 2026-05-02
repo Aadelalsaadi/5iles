@@ -1180,19 +1180,36 @@ async function processFiles() {
 
 // ===================== COMPRESS PDF =====================
 async function compressPDF() {
-  const { PDFDocument } = PDFLib;
+  const API_KEY = 'alsaadi.legend@gmail.com_7FtrjwweCnnIMe5Kxo8hkWeFREJzYGaHjQK4C7a3OkR2XaK7daD3DVgozSoKAtyj';
   const results = [];
   for(const file of uploadedFiles) {
-    const quality = parseInt(document.getElementById('qualitySlider')?.value || 60);
-    const arrayBuffer = await file.arrayBuffer();
-    const pdfDoc = await PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
-    // Re-save the PDF — this removes unused objects and compresses
-    const compressed = await pdfDoc.save({ useObjectStreams: true, addDefaultPage: false });
-    const blob = new Blob([compressed], {type:'application/pdf'});
-    const url = URL.createObjectURL(blob);
-    const savings = ((1 - blob.size/file.size)*100).toFixed(1);
-    const savingsText = savings > 0 ? `↓ ${savings}% smaller (${formatSize(file.size)} → ${formatSize(blob.size)})` : `Optimised (${formatSize(blob.size)})`;
-    results.push({ name: file.name.replace('.pdf','_compressed.pdf'), url, info: savingsText });
+    // Step 1: Upload file to PDF.co
+    const formData = new FormData();
+    formData.append('file', file);
+    const uploadRes = await fetch('https://api.pdf.co/v1/file/upload', {
+      method: 'POST',
+      headers: { 'x-api-key': API_KEY },
+      body: formData
+    });
+    const uploadData = await uploadRes.json();
+    if(uploadData.error) throw new Error(uploadData.message || 'Upload failed');
+
+    // Step 2: Compress via PDF.co
+    const compressRes = await fetch('https://api.pdf.co/v1/pdf/optimize', {
+      method: 'POST',
+      headers: { 'x-api-key': API_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: uploadData.url, grayscale: false, name: file.name.replace('.pdf','_compressed.pdf') })
+    });
+    const compressData = await compressRes.json();
+    if(compressData.error) throw new Error(compressData.message || 'Compression failed');
+
+    // Step 3: Get size info
+    const headRes = await fetch(compressData.url, { method: 'HEAD' });
+    const compressedSize = parseInt(headRes.headers.get('content-length') || 0);
+    const savings = compressedSize > 0 ? ((1 - compressedSize/file.size)*100).toFixed(1) : '?';
+    const savingsText = savings > 0 ? `${savings}% smaller (${formatSize(file.size)} → ${formatSize(compressedSize)})` : `Optimised (${formatSize(file.size)})`;
+
+    results.push({ name: file.name.replace('.pdf','_compressed.pdf'), url: compressData.url, info: savingsText });
   }
   return results;
 }
