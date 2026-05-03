@@ -1435,7 +1435,7 @@ async function pdfToText() {
     });
     const convertData = await convertRes.json();
     if(convertData.error) throw new Error(convertData.message || 'Conversion failed');
-    results.push({ name: file.name.replace('.pdf','.txt'), url: convertData.url, info: `Converted to Word (${formatSize(file.size)})` });
+    results.push({ name: file.name.replace('.pdf','.txt'), url: convertData.url, info: `Converted to Text (${formatSize(file.size)})` });
   }
   return results;
 }
