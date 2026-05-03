@@ -1235,11 +1235,7 @@ async function mergePDFs() {
 }
 
 // ===================== PDF TO TEXT =====================
-async function pdfToText() {
-  const results = [];
-  for(const file of uploadedFiles) {
-    const fileBase64 = await fileToBase64(file);
-    const uploadRes = await fetch('/.netlify/functions/pdfco-upload', {
+
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ filename: file.name, fileBase64 })
