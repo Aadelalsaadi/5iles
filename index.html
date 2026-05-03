@@ -1235,36 +1235,21 @@ async function mergePDFs() {
 }
 
 // ===================== PDF TO TEXT =====================
-
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ filename: file.name, fileBase64 })
-    });
-    const uploadData = await uploadRes.json();
-    if(uploadData.error) throw new Error(uploadData.message || 'Upload failed');
-    const startRes = await fetch('/.netlify/functions/pdfco-proxy', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ endpoint: 'pdf/convert/to/text', body: { url: uploadData.url, name: file.name.replace('.pdf','.txt'), async: true } })
-    });
-    const startData = await startRes.json();
-    if(startData.error) throw new Error(startData.message || 'Conversion failed');
-    const jobId = startData.jobId || startData.job || startData.id;
-    if(!jobId) throw new Error('No job ID: ' + JSON.stringify(startData));
-    let convertData;
-    for(let i = 0; i < 24; i++) {
-      await new Promise(r => setTimeout(r, 5000));
-      const pollRes = await fetch('/.netlify/functions/pdfco-proxy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ checkJob: jobId })
-      });
-      convertData = await pollRes.json();
-      if(convertData.status === 'success') break;
-      if(convertData.status === 'error') throw new Error(convertData.message || 'Conversion failed');
+async function pdfToText() {
+  const results = [];
+  for(const file of uploadedFiles) {
+    const ab = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({data: ab}).promise;
+    let fullText = '';
+    for(let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      const pageText = content.items.map(item => item.str).join(' ');
+      fullText += `--- Page ${i} ---\n${pageText}\n\n`;
     }
-    if(convertData.status !== 'success') throw new Error('Final status: ' + convertData.status + ' | ' + JSON.stringify(convertData));
-    results.push({ name: file.name.replace('.pdf','.txt'), url: convertData.url, info: `Converted to Text (${formatSize(file.size)})` });
+    const blob = new Blob([fullText], {type: 'text/plain'});
+    const url = URL.createObjectURL(blob);
+    results.push({ name: file.name.replace('.pdf', '.txt'), url, info: `${pdf.numPages} pages extracted (${formatSize(blob.size)})` });
   }
   return results;
 }
