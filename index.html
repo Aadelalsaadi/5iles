@@ -2212,10 +2212,23 @@ function startSubscription(plan) {
     openModal('signup-for-plan');
   }
 }
+function toggleMenu() {
+  const h = document.getElementById('hamburger');
+  const n = document.getElementById('navLinks');
+  const b = document.getElementById('navBtns');
+  h.classList.toggle('open');
+  n.classList.toggle('open');
+  b.classList.toggle('open');
+}
+function closeMenu() {
+  document.getElementById('hamburger').classList.remove('open');
+  document.getElementById('navLinks').classList.remove('open');
+  document.getElementById('navBtns').classList.remove('open');
+}
 </script>
 
 <script>
-  if(document.getElementById('paypal-button-container-P-41N09220EC076120XNHY6LVI')) {
+  if(document.getElementById('paypal-button-container-P-41N09220EC076120XMY6LVI')) {
     paypal.Buttons({
       style: { shape: 'pill', color: 'blue', layout: 'vertical', label: 'subscribe' },
       createSubscription: function(data, actions) {
