@@ -1428,13 +1428,27 @@ async function pdfToText() {
     });
     const uploadData = await uploadRes.json();
     if(uploadData.error) throw new Error(uploadData.message || 'Upload failed');
-    const convertRes = await fetch('/.netlify/functions/pdfco-proxy', {
+    const startRes = await fetch('/.netlify/functions/pdfco-proxy', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ endpoint: 'pdf/convert/to/text', body: { url: uploadData.url, name: file.name.replace('.pdf','.txt'), async: false } })
+      body: JSON.stringify({ endpoint: 'pdf/convert/to/text', body: { url: uploadData.url, name: file.name.replace('.pdf','.txt'), async: true } })
     });
-    const convertData = await convertRes.json();
-    if(convertData.error) throw new Error(convertData.message || 'Conversion failed');
+    const startData = await startRes.json();
+    if(startData.error) throw new Error(startData.message || 'Conversion failed');
+    const jobId = startData.jobId;
+    let convertData;
+    for(let i = 0; i < 24; i++) {
+      await new Promise(r => setTimeout(r, 5000));
+      const pollRes = await fetch('/.netlify/functions/pdfco-proxy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ checkJob: jobId })
+      });
+      convertData = await pollRes.json();
+      if(convertData.status === 'success') break;
+      if(convertData.status === 'error') throw new Error(convertData.message || 'Conversion failed');
+    }
+    if(convertData.status !== 'success') throw new Error('Conversion timed out');
     results.push({ name: file.name.replace('.pdf','.txt'), url: convertData.url, info: `Converted to Text (${formatSize(file.size)})` });
   }
   return results;
