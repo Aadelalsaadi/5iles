@@ -1431,11 +1431,11 @@ async function pdfToText() {
     const convertRes = await fetch('/.netlify/functions/pdfco-proxy', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ endpoint: 'pdf/convert/to/text', body: { url: uploadData.url, name: file.name.replace('.pdf','.docx') } })
+      body: JSON.stringify({ endpoint: 'pdf/convert/to/text', body: { url: uploadData.url, name: file.name.replace('.pdf','.txt') } })
     });
     const convertData = await convertRes.json();
     if(convertData.error) throw new Error(convertData.message || 'Conversion failed');
-    results.push({ name: file.name.replace('.pdf','.docx'), url: convertData.url, info: `Converted to Word (${formatSize(file.size)})` });
+    results.push({ name: file.name.replace('.pdf','.txt'), url: convertData.url, info: `Converted to Word (${formatSize(file.size)})` });
   }
   return results;
 }
