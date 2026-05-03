@@ -1236,28 +1236,42 @@ async function mergePDFs() {
 
 // ===================== PDF TO TEXT =====================
 async function pdfToText() {
-  if(typeof pdfjsLib === 'undefined') {
-    pdfjsLib = window['pdfjs-dist/build/pdf'];
-  }
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   const results = [];
   for(const file of uploadedFiles) {
-    const ab = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({data: ab}).promise;
-    let fullText = `Converted from: ${file.name}\nPages: ${pdf.numPages}\n${'─'.repeat(50)}\n\n`;
-    for(let i=1; i<=pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const content = await page.getTextContent();
-      const pageText = content.items.map(item => item.str).join(' ');
-      fullText += `--- Page ${i} ---\n${pageText}\n\n`;
+    const fileBase64 = await fileToBase64(file);
+    const uploadRes = await fetch('/.netlify/functions/pdfco-upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ filename: file.name, fileBase64 })
+    });
+    const uploadData = await uploadRes.json();
+    if(uploadData.error) throw new Error(uploadData.message || 'Upload failed');
+    const startRes = await fetch('/.netlify/functions/pdfco-proxy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ endpoint: 'pdf/convert/to/text', body: { url: uploadData.url, name: file.name.replace('.pdf','.txt'), async: true } })
+    });
+    const startData = await startRes.json();
+    if(startData.error) throw new Error(startData.message || 'Conversion failed');
+    const jobId = startData.jobId || startData.job || startData.id;
+    if(!jobId) throw new Error('No job ID: ' + JSON.stringify(startData));
+    let convertData;
+    for(let i = 0; i < 24; i++) {
+      await new Promise(r => setTimeout(r, 5000));
+      const pollRes = await fetch('/.netlify/functions/pdfco-proxy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ checkJob: jobId })
+      });
+      convertData = await pollRes.json();
+      if(convertData.status === 'success') break;
+      if(convertData.status === 'error') throw new Error(convertData.message || 'Conversion failed');
     }
-    const blob = new Blob([fullText], {type:'text/plain'});
-    const url = URL.createObjectURL(blob);
-    results.push({ name: file.name.replace('.pdf','.txt'), url, info: `${pdf.numPages} pages extracted (${formatSize(blob.size)})` });
+    if(convertData.status !== 'success') throw new Error('Final status: ' + convertData.status + ' | ' + JSON.stringify(convertData));
+    results.push({ name: file.name.replace('.pdf','.txt'), url: convertData.url, info: `Converted to Text (${formatSize(file.size)})` });
   }
   return results;
 }
-
 // ===================== COMPRESS IMAGE =====================
 async function compressImages() {
   const results = [];
