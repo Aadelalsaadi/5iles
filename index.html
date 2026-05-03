@@ -1411,8 +1411,9 @@ async function pdfToExcel() {
   }
   return results;
 }
-  // ==================== PDF TO WORD ====================
-
+  // ===================== JPG TO PDF =====================
+async function jpgToPDF() {
+  const { PDFDocument } = PDFLib;
   if(!uploadedFiles.length) throw new Error('Please add at least one image.');
   const pdfDoc = await PDFDocument.create();
   const size = document.getElementById('jpgToPdfSize')?.value || 'A4';
