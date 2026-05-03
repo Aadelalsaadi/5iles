@@ -1266,7 +1266,11 @@ async function pdfToText() {
     }
     const blob = new Blob([fullText], {type: 'text/plain'});
     const url = URL.createObjectURL(blob);
-    results.push({ name: file.name.replace('.pdf', '.txt'), url, info: `${pdf.numPages} pages extracted (${formatSize(blob.size)})` });
+    const isEmpty = fullText.trim().replace(/---\s*Page\s*\d+\s*---/g, '').trim().length === 0;
+    const info = isEmpty 
+      ? `⚠️ No text found — this may be a scanned PDF. Try the OCR tool instead.`
+      : `${pdf.numPages} pages extracted (${formatSize(blob.size)})`;
+    results.push({ name: file.name.replace('.pdf', '.txt'), url, info });
   }
   return results;
 }
