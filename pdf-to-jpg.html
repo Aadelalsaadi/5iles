@@ -114,7 +114,19 @@ async function processFiles() {
 function clearAll() { files = []; document.getElementById('queue').innerHTML=''; document.getElementById('output-area').classList.remove('show'); document.getElementById('options-row').style.display='none'; document.getElementById('action-row').style.display='none'; }
 function downloadAll() { document.querySelectorAll('.output-file a').forEach(a => a.click()); }
 function compressMore() { clearAll(); window.scrollTo({top:0,behavior:'smooth'}); }
-
+async function forceDownload(url, filename) {
+  try {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  } catch(e) {
+    window.open(url, '_blank');
+  }
+}
 function toggleFaq(btn) {
   const item = btn.closest('.faq-item');
   const isOpen = item.classList.contains('open');
