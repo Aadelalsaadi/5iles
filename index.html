@@ -1435,7 +1435,8 @@ async function pdfToText() {
     });
     const startData = await startRes.json();
     if(startData.error) throw new Error(startData.message || 'Conversion failed');
-    const jobId = startData.jobId;
+    const jobId = startData.jobId || startData.job || startData.id;
+    if(!jobId) throw new Error('No job ID: ' + JSON.stringify(startData));
     let convertData;
     for(let i = 0; i < 24; i++) {
       await new Promise(r => setTimeout(r, 5000));
