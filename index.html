@@ -1124,6 +1124,19 @@ async function processFiles() {
   const fill = document.getElementById('progressFill');
   const resultBox = document.getElementById('resultBox');
   const resultFiles = document.getElementById('resultFiles');
+// Usage limit check
+const today = new Date().toDateString();
+const usageKey = 'usage_' + today;
+const usageCount = parseInt(localStorage.getItem(usageKey) || 0);
+if (!currentUser && usageCount >= 20) {
+  showToast('⚠️ Daily limit reached (20/day). Sign in for unlimited access!', 'error');
+  btn.disabled = false;
+  btn.innerHTML = '<span>✨</span> <span>Process files</span>';
+  return;
+}
+if (!currentUser) {
+  localStorage.setItem(usageKey, usageCount + 1);
+}
 
   btn.disabled = true;
   btn.innerHTML = '<span>⏳</span> <span>Processing...</span>';
