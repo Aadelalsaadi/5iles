@@ -413,7 +413,8 @@ async function signIn(email, password) {
 // Sign Out
 async function signOut() {
   await _supabase.auth.signOut();
-  window.location.href = '/';
+  window.location.href = '/#tools';
+  window.scrollTo({top: 0, behavior: 'smooth'});
 }
 
 // Reset Password
