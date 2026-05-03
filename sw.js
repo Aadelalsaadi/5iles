@@ -1,5 +1,5 @@
 // 5iles Service Worker — PWA Offline Support
-const CACHE_NAME = '5iles-v2';
+const CACHE_NAME = '5iles-v3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
