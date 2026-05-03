@@ -2253,6 +2253,7 @@ function closeMenu() {
   document.getElementById('navBtns').classList.remove('open');
 }
 function openDashboard() {
+  if(!document.getElementById('dashboardModal')){const m=document.createElement('div');m.id='dashboardModal';m.style.cssText='display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;';m.innerHTML='<div style="background:var(--surface);border-radius:16px;padding:32px;max-width:420px;width:90%;position:relative;"><button onclick="closeDashboard()" style="position:absolute;top:12px;right:16px;background:none;border:none;color:var(--text2);font-size:1.5rem;cursor:pointer;">×</button><h2>My Account</h2><div id="dashboardContent"></div></div>';document.body.appendChild(m);}
   const modal = document.getElementById('dashboardModal');
   if(modal){modal.style.display='flex';}
 
