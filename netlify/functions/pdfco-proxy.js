@@ -83,10 +83,19 @@ exports.handler = async (event) => {
       if (result.status === 'error') break;
     }
 
+    // Job check returns urls array, normalize to match direct response format
+    const normalized = {
+      error: result.status !== 'success',
+      message: result.status !== 'success' ? (result.status || 'Job failed') : undefined,
+      url: result.url || (result.urls && result.urls[0]),
+      urls: result.urls,
+      status: result.status
+    };
+
     return {
       statusCode: 200,
       headers: { 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify(result)
+      body: JSON.stringify(normalized)
     };
 
   } catch (err) {
