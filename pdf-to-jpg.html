@@ -92,7 +92,7 @@ async function processFiles() {
       jpgUrls.forEach((url, i) => {
         const div = document.createElement('div');
         div.className = 'output-file';
-        div.innerHTML = `<span style="font-size:20px">🖼️</span><div style="flex:1"><div style="font-size:14px;font-weight:500">${f.name.replace('.pdf','')} - page ${i+1}.jpg</div></div><a class="btn btn-primary btn-sm" href="${url}" download="page-${i+1}.jpg" target="_blank">⬇ Download</a>`;
+        div.innerHTML = `<span style="font-size:20px">🖼️</span><div style="flex:1"><div style="font-size:14px;font-weight:500">${f.name.replace('.pdf','')} - page ${i+1}.jpg</div></div><button class="btn btn-primary btn-sm" onclick="forceDownload('${url}', 'page-${i+1}.jpg')">⬇ Download</button>`;
         filesDiv.appendChild(div);
       });
       anySuccess = true;
