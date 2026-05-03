@@ -1216,12 +1216,17 @@ async function compressPDF() {
     if(compressData.error) throw new Error(compressData.message || 'Compression failed');
 
     // Step 3: Get size info
-    const headRes = await fetch(compressData.url, { method: 'HEAD' });
-    const compressedSize = parseInt(headRes.headers.get('content-length') || 0);
-    const savings = compressedSize > 0 ? ((1 - compressedSize/file.size)*100).toFixed(1) : null;
-const savingsText = savings && savings > 0 
-  ? `${savings}% smaller (${formatSize(file.size)} → ${formatSize(compressedSize)})` 
-  : `✅ Compressed via PDF.co (click Download to save)`;
+    let savingsText = `✅ Compressed via PDF.co (click Download to save)`;
+    try {
+      const headRes = await fetch(compressData.url, { method: 'HEAD' });
+      const compressedSize = parseInt(headRes.headers.get('content-length') || 0);
+      if(compressedSize > 0) {
+        const savings = ((1 - compressedSize/file.size)*100).toFixed(1);
+        savingsText = savings > 0
+          ? `↓ ${savings}% smaller (${formatSize(file.size)} → ${formatSize(compressedSize)})`
+          : `Optimised (${formatSize(compressedSize)})`;
+      }
+    } catch(e) {}
 
     results.push({ name: file.name.replace('.pdf','_compressed.pdf'), url: compressData.url, info: savingsText });
   }
