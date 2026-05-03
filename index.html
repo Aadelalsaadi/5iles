@@ -1449,7 +1449,7 @@ async function pdfToText() {
       if(convertData.status === 'success') break;
       if(convertData.status === 'error') throw new Error(convertData.message || 'Conversion failed');
     }
-    if(convertData.status !== 'success') throw new Error('Conversion timed out');
+        if(convertData.status !== 'success') throw new Error('Final status: ' + convertData.status + ' jobId: ' + jobId + ' response: ' + JSON.stringify(convertData));
     results.push({ name: file.name.replace('.pdf','.txt'), url: convertData.url, info: `Converted to Text (${formatSize(file.size)})` });
   }
   return results;
