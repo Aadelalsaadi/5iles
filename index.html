@@ -1194,7 +1194,20 @@ if (!currentUser) {
     fill.style.width = '100%';
     await delay(400);
 
-    resultFiles.innerHTML = results.map(r => `
+    // Log to Supabase file_history
+if(currentUser) {
+  results.forEach(r => {
+    _supabase.from('file_history').insert({
+      user_id: currentUser.id,
+      tool_used: currentTool.type,
+      input_filename: uploadedFiles[0]?.name || '',
+      output_filename: r.name,
+      file_size_kb: uploadedFiles[0] ? Math.round(uploadedFiles[0].size/1024) : 0,
+      status: 'success'
+    }).then(() => {});
+  });
+}
+resultFiles.innerHTML = results.map(r => `
       <div class="result-file">
         <div class="file-item-icon">${getFileIcon(r.name)}</div>
         <div class="result-file-info">
