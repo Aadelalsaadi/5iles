@@ -2425,7 +2425,7 @@ window.addEventListener('load', function() {
   };
   document.body.appendChild(s);
 });
-  function openDashboard() {
+  window.openDashboard = function() {
   const modal = document.getElementById('dashboardModal');
   modal.style.display = 'flex';
   const today = new Date().toDateString();
