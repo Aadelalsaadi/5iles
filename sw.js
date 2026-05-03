@@ -45,7 +45,9 @@ self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
   if (event.request.url.includes('paypal.com')) return;
   if (event.request.url.includes('google-analytics.com')) return;
-  if (event.request.url.includes('googletagmanager.com')) return;
+   if (event.request.url.includes('googletagmanager.com')) return;
+    if (event.request.url.includes('/.netlify/functions/')) return;
+    if (event.request.url.endsWith('index.html') || event.request.url.endsWith('/')) { event.respondWith(fetch(event.request)); return; }
 
   event.respondWith(
     caches.match(event.request)
