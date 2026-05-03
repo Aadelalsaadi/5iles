@@ -1412,47 +1412,7 @@ async function pdfToExcel() {
   return results;
 }
   // ==================== PDF TO WORD ====================
-async function pdfToText() {
-  const results = [];
-  for(const file of uploadedFiles) {
-    const fileBase64 = await fileToBase64(file);
-    const uploadRes = await fetch('/.netlify/functions/pdfco-upload', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ filename: file.name, fileBase64 })
-    });
-    const uploadData = await uploadRes.json();
-    if(uploadData.error) throw new Error(uploadData.message || 'Upload failed');
-    const startRes = await fetch('/.netlify/functions/pdfco-proxy', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ endpoint: 'pdf/convert/to/text', body: { url: uploadData.url, name: file.name.replace('.pdf','.txt'), async: true } })
-    });
-    const startData = await startRes.json();
-    if(startData.error) throw new Error(startData.message || 'Conversion failed');
-    const jobId = startData.jobId || startData.job || startData.id;
-    if(!jobId) throw new Error('No job ID: ' + JSON.stringify(startData));
-    let convertData;
-    for(let i = 0; i < 24; i++) {
-      await new Promise(r => setTimeout(r, 5000));
-      const pollRes = await fetch('/.netlify/functions/pdfco-proxy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ checkJob: jobId })
-      });
-      convertData = await pollRes.json();
-      if(convertData.status === 'success') break;
-      if(convertData.status === 'error') throw new Error(convertData.message || 'Conversion failed');
-    }
-        if(convertData.status !== 'success') throw new Error('Final status: ' + convertData.status + ' jobId: ' + jobId + ' response: ' + JSON.stringify(convertData));
-    results.push({ name: file.name.replace('.pdf','.txt'), url: convertData.url, info: `Converted to Text (${formatSize(file.size)})` });
-  }
-  return results;
-}
 
-// ===================== JPG TO PDF =====================
-async function jpgToPDF() {
-  const { PDFDocument } = PDFLib;
   if(!uploadedFiles.length) throw new Error('Please add at least one image.');
   const pdfDoc = await PDFDocument.create();
   const size = document.getElementById('jpgToPdfSize')?.value || 'A4';
