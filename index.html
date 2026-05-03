@@ -1431,7 +1431,7 @@ async function pdfToText() {
     const convertRes = await fetch('/.netlify/functions/pdfco-proxy', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ endpoint: 'pdf/convert/to/text', body: { url: uploadData.url, name: file.name.replace('.pdf','.txt'), pages: '1-10', async: false } })
+      body: JSON.stringify({ endpoint: 'pdf/convert/to/text', body: { url: uploadData.url, name: file.name.replace('.pdf','.txt'), async: false } })
     });
     const convertData = await convertRes.json();
     if(convertData.error) throw new Error(convertData.message || 'Conversion failed');
