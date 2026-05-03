@@ -76,8 +76,8 @@ exports.handler = async (event) => {
     // Poll for result (max 50 seconds)
     const jobId = jobData.jobId;
     let result;
-    for (let i = 0; i < 10; i++) {
-      await sleep(5000);
+    for (let i = 0; i < 4; i++) {
+      await sleep(4000);
       result = await pdfcoGet(`/v1/job/check?jobid=${jobId}`);
       if (result.status === 'success') break;
       if (result.status === 'error') break;
