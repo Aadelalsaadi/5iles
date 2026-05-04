@@ -55,14 +55,19 @@ exports.handler = async (event) => {
         body: JSON.stringify({ error: result.message })
       };
     }
-const imageUrls = await Promise.all(result.urls.map(async (jsonUrl) => {
-      const data = await pdfcoRequest('', jsonUrl, true);
-      return data.url || jsonUrl;
-    }));
+const imageUrls = await Promise.all(result.urls.map(jsonUrl => new Promise((resolve, reject) => {
+      const u = new URL(jsonUrl);
+      https.get({ hostname: u.hostname, path: u.pathname + u.search }, (res) => {
+        let d = '';
+        res.on('data', chunk => d += chunk);
+        res.on('end', () => { try { resolve(JSON.parse(d).url || jsonUrl); } catch(e) { resolve(jsonUrl); } });
+        res.on('error', reject);
+      });
+    })));
     return {
       statusCode: 200,
       headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' },
-      body: JSON.stringify(result.urls)
+      body: JSON.stringify(imageUrls)
     };
 
   } catch (err) {
