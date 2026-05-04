@@ -55,14 +55,14 @@ exports.handler = async (event) => {
         body: JSON.stringify({ error: result.message })
       };
     }
-console.log('PDF.co result:', JSON.stringify(result));
+const imageUrls = await Promise.all(result.urls.map(async (jsonUrl) => {
+      const data = await pdfcoRequest('', jsonUrl, true);
+      return data.url || jsonUrl;
+    }));
     return {
       statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(result.urls.map(u => u.url || u))
+      headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' },
+      body: JSON.stringify(result.urls)
     };
 
   } catch (err) {
