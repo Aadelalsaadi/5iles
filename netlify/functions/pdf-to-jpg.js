@@ -41,11 +41,12 @@ exports.handler = async (event) => {
     const { url, pages, quality } = JSON.parse(event.body);
 
     const result = await pdfcoRequest('/v1/pdf/convert/to/jpg', {
-      url,
-      pages: pages || '1-',
-      quality: quality || 90,
-      async: false
-    });
+  url,
+  pages: pages || '1-',
+  quality: quality || 90,
+  name: 'output.jpg',  // ADD THIS LINE
+  async: false
+});
 
     if (result.error) {
       return {
