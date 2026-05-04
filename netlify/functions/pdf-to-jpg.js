@@ -1,29 +1,3 @@
-const https = require('https');
-
-function pdfcoRequest(path, body) {
-  const API_KEY = 'alsaadi.legend@gmail.com_7FtrjwwmCnnIMe5XxoBhWeFRE3ZYGaHJQK4C7a3OkRZXaK7daD3VgozSoKAty';
-  const requestBody = JSON.stringify(body);
-  return new Promise((resolve, reject) => {
-    const req = https.request({
-      hostname: 'api.pdf.co',
-      path,
-      method: 'POST',
-      headers: {
-        'x-api-key': API_KEY,
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(requestBody)
-      }
-    }, (res) => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => resolve(JSON.parse(data)));
-    });
-    req.on('error', reject);
-    req.write(requestBody);
-    req.end();
-  });
-}
-
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
     return {
@@ -39,14 +13,23 @@ exports.handler = async (event) => {
 
   try {
     const { url, pages, quality } = JSON.parse(event.body);
+    const API_KEY = 'alsaadi.legend@gmail.com_7FtrjwamCnnIMe5XxoRHWeFRE3ZYGaHjQK4C7a3Ok8ZXaK7daD3VgozSoKAty';
 
-    const result = await pdfcoRequest('/v1/pdf/convert/to/jpg', {
-  url,
-  pages: pages || '1-',
-  quality: quality || 90,
-  name: 'output.jpg',  // ADD THIS LINE
-  async: false
-});
+    const response = await fetch('https://api.pdf.co/v1/pdf/convert/to/jpg', {
+      method: 'POST',
+      headers: {
+        'x-api-key': API_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        url,
+        pages: pages || '1-',
+        quality: quality || 90,
+        async: false
+      })
+    });
+
+    const result = await response.json();
 
     if (result.error) {
       return {
@@ -55,19 +38,11 @@ exports.handler = async (event) => {
         body: JSON.stringify({ error: result.message })
       };
     }
-const imageUrls = await Promise.all(result.urls.map(jsonUrl => new Promise((resolve, reject) => {
-      const u = new URL(jsonUrl);
-      https.get({ hostname: u.hostname, path: u.pathname + u.search }, (res) => {
-        let d = '';
-        res.on('data', chunk => d += chunk);
-        res.on('end', () => { try { resolve(JSON.parse(d).url || jsonUrl); } catch(e) { resolve(jsonUrl); } });
-        res.on('error', reject);
-      });
-    })));
+
     return {
       statusCode: 200,
       headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' },
-      body: JSON.stringify(imageUrls.map(u => u.replace('.json?', '.jpg?')))
+      body: JSON.stringify(result.urls)
     };
 
   } catch (err) {
