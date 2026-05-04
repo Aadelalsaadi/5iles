@@ -95,7 +95,7 @@ async function processFiles() {
   const btn = document.createElement('button');
   btn.className = 'btn btn-primary btn-sm';
   btn.textContent = '⬇ Download';
-  btn.addEventListener('click', () => forceDownload(url, f.name.replace('.pdf','') + '-page' + (i+1) + '.jpg'));
+  btn.addEventListener('click', () => window.open(url, '_blank'));
   const info = document.createElement('div');
   info.style.flex = '1';
   info.innerHTML = `<div style="font-size:14px;font-weight:500">${f.name.replace('.pdf','')} - page ${i+1}.jpg</div>`;
