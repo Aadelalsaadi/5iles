@@ -55,7 +55,7 @@ exports.handler = async (event) => {
         body: JSON.stringify({ error: result.message })
       };
     }
-
+console.log('PDF.co result:', JSON.stringify(result));
     return {
       statusCode: 200,
       headers: {
