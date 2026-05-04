@@ -61,7 +61,7 @@ exports.handler = async (event) => {
         'Access-Control-Allow-Origin': '*',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(result.urls)
+      body: JSON.stringify(result.urls.map(u => u.url || u))
     };
 
   } catch (err) {
