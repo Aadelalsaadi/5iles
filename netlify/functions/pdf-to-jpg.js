@@ -67,7 +67,7 @@ const imageUrls = await Promise.all(result.urls.map(jsonUrl => new Promise((reso
     return {
       statusCode: 200,
       headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' },
-      body: JSON.stringify(imageUrls)
+      body: JSON.stringify(imageUrls.map(u => u.replace('.json?', '.jpg?')))
     };
 
   } catch (err) {
