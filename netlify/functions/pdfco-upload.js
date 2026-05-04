@@ -50,7 +50,7 @@ exports.handler = async (event) => {
         hostname: uploadUrl.hostname,
         path: uploadUrl.pathname + uploadUrl.search,
         method: 'PUT',
-        headers: { 'Content-Length': fileBuffer.length }
+        headers: { 'Content-Length': fileBuffer.length, 'Content-Type': 'application/pdf' }
       }, (res) => {
         res.on('data', () => {});
         res.on('end', resolve);
