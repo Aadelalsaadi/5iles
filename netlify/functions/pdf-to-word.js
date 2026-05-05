@@ -22,9 +22,10 @@ exports.handler = async (event) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        url,
-        async: false
-      })
+  url,
+  async: false,
+  name: 'output.docx'
+})
     });
 
     const result = await response.json();
