@@ -14,7 +14,7 @@ exports.handler = async (event) => {
     const body = typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
     const { url } = body;
     const API_KEY = 'alsaadi.legend@gmail.com_7FtrjwweCnnIMe5Kxo8hkWeFREJzYGaHjQK4C7a3OkR2XaK7daD3DVgozSoKAtyj';
-    const response = await fetch('https://api.pdf.co/v1/pdf/convert/to/doc', {
+    const response = await fetch('https://api.pdf.co/v1/pdf/convert/to/docx', {
       method: 'POST',
       headers: {
         'x-api-key': API_KEY,
