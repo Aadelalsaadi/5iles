@@ -16,7 +16,7 @@ exports.handler = async (event) => {
     const response = await fetch('https://v2.convertapi.com/convert/pdf/to/docx?Secret=94OMEH5gibAm7FfZHe6cXPB4xcOgLIyZ', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ Parameters: [{ Name: 'File', FileUrl: url }] })
+      body: JSON.stringify({ Parameters: [{ Name: 'File', FileValue: url }] })
     });
     const result = await response.json();
     if (!result.Files) throw new Error(result.Message || 'Conversion failed');
