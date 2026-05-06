@@ -13,21 +13,17 @@ exports.handler = async (event) => {
   try {
     const body = typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
     const { url } = body;
-    const API_KEY = 'alsaadi.legend@gmail.com_7FtrjwweCnnIMe5Kxo8hkWeFREJzYGaHjQK4C7a3OkR2XaK7daD3DVgozSoKAtyj';
-    const response = await fetch('https://api.pdf.co/v1/pdf/convert/to/docx', {
+    const response = await fetch(`https://v2.convertapi.com/convert/pdf/to/docx?Secret=YOUR_SECRET`, {
       method: 'POST',
-      headers: {
-        'x-api-key': API_KEY,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ url, outputFormat: 'docx', async: false })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ Parameters: [{ Name: 'File', FileUrl: url }] })
     });
     const result = await response.json();
-    if (result.error) throw new Error(result.message);
+    if (!result.Files) throw new Error(result.Message || 'Conversion failed');
     return {
       statusCode: 200,
       headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url: result.url })
+      body: JSON.stringify({ url: result.Files[0].Url })
     };
   } catch (err) {
     return {
