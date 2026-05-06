@@ -17,11 +17,10 @@ exports.handler = async (event) => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        Parameters: [
-          { Name: 'File', FileValue: url },
-          { Name: 'StoreFile', Value: true }
-        ]
-      })
+  Parameters: [
+    { Name: 'Url', Value: url }
+  ]
+})
     });
     const result = await response.json();
     if (!result.Files || !result.Files[0]) throw new Error(result.Message || 'Conversion failed');
