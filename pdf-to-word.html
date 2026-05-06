@@ -426,10 +426,12 @@ if (pfEl) pfEl.style.width = '60%';
 if (psEl) psEl.textContent = 'Converting...';
       const SECRET = '94OMEH5gibAm7FfZHe6cXPB4xcOgLIyZ';
 const fileBuffer = Uint8Array.from(atob(fileBase64), c => c.charCodeAt(0));
+const blob = new Blob([fileBuffer], { type: 'application/pdf' });
+const formData = new FormData();
+formData.append('file', blob, filename || 'file.pdf');
 const uploadRes = await fetch(`https://v2.convertapi.com/upload?Secret=${SECRET}`, {
   method: 'POST',
-  headers: { 'Content-Type': 'application/octet-stream' },
-  body: fileBuffer
+  body: formData
 });
 const uploadData = await uploadRes.json();
 if (!uploadData.FileId) throw new Error('Upload failed: ' + JSON.stringify(uploadData));
