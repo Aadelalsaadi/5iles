@@ -464,18 +464,12 @@ async function processFiles() {
   }
 }
 
-async function forceDownload(url, filename) {
-  const res = await fetch('/.netlify/functions/download-proxy', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ url })
-  });
-  const blob = await res.blob();
+function forceDownload(url, filename) {
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
+  a.href = url;
   a.download = filename;
+  a.target = '_blank';
   a.click();
-  URL.revokeObjectURL(a.href);
 }
 
 function clearAll() { files = []; document.getElementById('queue').innerHTML=''; document.getElementById('output-area').classList.remove('show'); document.getElementById('action-row').style.display='none'; }
