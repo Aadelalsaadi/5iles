@@ -430,6 +430,7 @@ if (psEl) psEl.textContent = 'Converting...';
         body: JSON.stringify({ fileBase64, filename: f.name })
       });
       const convertData = await convertRes.json();
+      console.log('convertData:', JSON.stringify(convertData));
       if (convertData.error) throw new Error(convertData.error);
       if (pfEl) pfEl.style.width = '100%';
       if (psEl) { psEl.textContent = 'Done'; psEl.style.color = 'var(--accent)'; }
