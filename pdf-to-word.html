@@ -421,17 +421,7 @@ async function processFiles() {
     if (pfEl) pfEl.style.width = '30%';
 
     try {
-      const fileBase64 = await toBase64(f);
-      const uploadRes = await fetch('/.netlify/functions/pdfco-upload', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename: f.name, fileBase64 })
-      });
-      const uploadData = await uploadRes.json();
-      if (uploadData.error) throw new Error(uploadData.error);
-      if (pfEl) pfEl.style.width = '60%';
-      if (psEl) psEl.textContent = 'Converting...';
-
+      
       const convertRes = await fetch('/.netlify/functions/pdf-to-word', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
