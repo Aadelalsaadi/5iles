@@ -1,14 +1,6 @@
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS'
-      },
-      body: ''
-    };
+    return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Content-Type', 'Access-Control-Allow-Methods': 'POST, OPTIONS' }, body: '' };
   }
   try {
     const body = typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
@@ -17,18 +9,13 @@ exports.handler = async (event) => {
       'https://v2.convertapi.com/convert/pdf/to/docx?Secret=94OMEH5gibAm7FfZHe6cXPB4xcOgLIyZ&StoreFile=true&Url=' + encodeURIComponent(url),
       { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
     );
-    const result = await response.json();
-    if (!result.Files || !result.Files[0]) throw new Error(result.Message || 'Conversion failed');
+    const text = await response.text();
     return {
       statusCode: 200,
       headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url: result.Files[0].Url })
+      body: JSON.stringify({ debug: text })
     };
   } catch (err) {
-    return {
-      statusCode: 500,
-      headers: { 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({ error: err.message })
-    };
+    return { statusCode: 500, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: err.message }) };
   }
 };
