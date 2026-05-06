@@ -1,3 +1,5 @@
+const ConvertAPI = require('convertapi');
+
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
     return {
@@ -13,20 +15,13 @@ exports.handler = async (event) => {
   try {
     const body = typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
     const { url } = body;
-    const FormData = require('form-data');
-    const form = new FormData();
-    form.append('Url', url);
-    form.append('StoreFile', 'true');
-    const response = await fetch(
-      'https://v2.convertapi.com/convert/pdf/to/docx?Secret=94OMEH5gibAm7FfZHe6cXPB4xcOgLIyZ',
-      { method: 'POST', body: form, headers: form.getHeaders() }
-    );
-    const result = await response.json();
-    if (!result.Files || !result.Files[0]) throw new Error(result.Message || 'Conversion failed');
+    const convertapi = new ConvertAPI('94OMEH5gibAm7FfZHe6cXPB4xcOgLIyZ', { conversionTimeout: 60 });
+    const result = await convertapi.convert('docx', { File: url }, 'pdf');
+    const fileUrl = result.files[0].url;
     return {
       statusCode: 200,
       headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url: result.Files[0].Url })
+      body: JSON.stringify({ url: fileUrl })
     };
   } catch (err) {
     return {
