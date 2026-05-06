@@ -51,7 +51,7 @@ const { filename, fileBase64 } = body;
         hostname: uploadUrl.hostname,
         path: uploadUrl.pathname + uploadUrl.search,
         method: 'PUT',
-        headers: { 'Content-Length': fileBuffer.length, 'Content-Type': 'application/octet-stream'
+        headers: { 'Content-Length': fileBuffer.length, 'Content-Type': 'application/octet-stream' }
       }, (res) => {
         res.on('data', () => {});
         res.on('end', resolve);
