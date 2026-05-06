@@ -13,7 +13,7 @@ exports.handler = async (event) => {
 
   try {
     const { url, pages, quality } = JSON.parse(event.body);
-    const API_KEY = 'alsaadi.legend@gmail.com_7FtrjwweCnnIMe5Kxo8hkWeFREJzYGaHjQK4C7a3OkR2XaK7daD3DVgozSoKAtyj;
+    const API_KEY = 'alsaadi.legend@gmail.com_7FtrjwweCnnIMe5Kxo8hkWeFREJzYGaHjQK4C7a3OkR2XaK7daD3DVgozSoKAtyj';
 
     const response = await fetch('https://api.pdf.co/v1/pdf/convert/to/jpg', {
       method: 'POST',
