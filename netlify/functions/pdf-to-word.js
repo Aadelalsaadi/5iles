@@ -6,7 +6,7 @@ exports.handler = async (event) => {
     const body = typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
     const { fileBase64, filename } = body;
     const response = await fetch(
-      'https://v2.convertapi.com/convert/pdf/to/docx?Secret=94OMEH5gibAm7FfZHe6cXPB4xcOgLIyZ&StoreFile=true',
+      'https://v2.convertapi.com/convert/pdf/to/docx?Secret=94OMEH5gibAm7FfZHe6cXPB4xcOgLIyZ',
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
