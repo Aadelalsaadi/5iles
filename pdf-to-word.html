@@ -439,7 +439,7 @@ if (!uploadData.FileId) throw new Error('Upload failed: ' + JSON.stringify(uploa
 const convertRes = await fetch(`https://v2.convertapi.com/convert/pdf/to/docx?Secret=${SECRET}`, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ Parameters: [{ Name: 'File', FileValue: String(uploadData.FileId) }, { Name: 'StoreFile', Value: 'true' }] })
+  body: JSON.stringify({ Parameters: [{ Name: 'File', FileValue: uploadData.FileId }] })
 });
 const convertData = await convertRes.json();
       console.log('convertResult:', JSON.stringify(convertData));
