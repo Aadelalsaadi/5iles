@@ -421,7 +421,9 @@ async function processFiles() {
     if (pfEl) pfEl.style.width = '30%';
 
     try {
-      
+      const fileBase64 = await toBase64(f);
+if (pfEl) pfEl.style.width = '60%';
+if (psEl) psEl.textContent = 'Converting...';
       const convertRes = await fetch('/.netlify/functions/pdf-to-word', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
