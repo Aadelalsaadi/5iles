@@ -13,15 +13,10 @@ exports.handler = async (event) => {
   try {
     const body = typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
     const { url } = body;
-    const response = await fetch('https://v2.convertapi.com/convert/pdf/to/docx?Secret=94OMEH5gibAm7FfZHe6cXPB4xcOgLIyZ', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-  Parameters: [
-    { Name: 'Url', Value: url }
-  ]
-})
-    });
+    const response = await fetch(
+      `https://v2.convertapi.com/convert/pdf/to/docx?Secret=94OMEH5gibAm7FfZHe6cXPB4xcOgLIyZ&Url=${encodeURIComponent(url)}&StoreFile=true`,
+      { method: 'POST' }
+    );
     const result = await response.json();
     if (!result.Files || !result.Files[0]) throw new Error(result.Message || 'Conversion failed');
     return {
