@@ -12,9 +12,9 @@ exports.handler = async (event) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           Parameters: [
-            { Name: 'File', FileValue: fileBase64, FileValueName: filename || 'file.pdf' }
-          ]
-        })
+            { Name: 'File', FileValue: fileBase64, FileValueName: filename || 'file.pdf' },
+          { Name: 'StoreFile', Value: 'true' }
+        ]
       }
     );
     const result = await response.json();
