@@ -442,6 +442,7 @@ const convertRes = await fetch(`https://v2.convertapi.com/convert/pdf/to/docx?Se
   body: JSON.stringify({ Parameters: [{ Name: 'File', FileValue: String(uploadData.FileId) }, { Name: 'StoreFile', Value: 'true' }] })
 });
 const convertData = await convertRes.json();
+      console.log('convertResult:', JSON.stringify(convertData));
 if (!convertData.Files || !convertData.Files[0]) throw new Error(convertData.Message || JSON.stringify(convertData));
 const fileRes = await fetch(convertData.Files[0].Url);
 const fileArrayBuffer = await fileRes.arrayBuffer();
