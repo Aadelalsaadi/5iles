@@ -9,11 +9,12 @@ exports.handler = async (event) => {
       'https://v2.convertapi.com/convert/pdf/to/docx?Secret=94OMEH5gibAm7FfZHe6cXPB4xcOgLIyZ&StoreFile=true&Url=' + encodeURIComponent(url),
       { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
     );
-    const text = await response.text();
+    const result = await response.json();
+    if (!result.Files || !result.Files[0]) throw new Error(result.Message || 'Conversion failed');
     return {
       statusCode: 200,
       headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ debug: text })
+      body: JSON.stringify({ url: result.Files[0].Url })
     };
   } catch (err) {
     return { statusCode: 500, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: err.message }) };
