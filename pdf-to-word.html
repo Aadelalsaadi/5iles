@@ -427,7 +427,7 @@ if (psEl) psEl.textContent = 'Converting...';
       const convertRes = await fetch('/.netlify/functions/pdf-to-word', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: uploadData.url })
+        body: JSON.stringify({ fileBase64, filename: f.name })
       });
       const convertData = await convertRes.json();
       if (convertData.error) throw new Error(convertData.error);
