@@ -436,10 +436,11 @@ const uploadRes = await fetch(`https://v2.convertapi.com/upload?Secret=${SECRET}
 const uploadData = await uploadRes.json();
 console.log('uploadData:', JSON.stringify(uploadData));
 if (!uploadData.FileId) throw new Error('Upload failed: ' + JSON.stringify(uploadData));
+const convertForm = new FormData();
+convertForm.append('File', uploadData.FileId);
 const convertRes = await fetch(`https://v2.convertapi.com/convert/pdf/to/docx?Secret=${SECRET}`, {
   method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ Parameters: [{ Name: 'File', FileValue: uploadData.Url }] })
+  body: convertForm
 });
 const convertData = await convertRes.json();
       console.log('convertResult:', JSON.stringify(convertData));
