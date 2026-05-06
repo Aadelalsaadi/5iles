@@ -447,18 +447,7 @@ const convertData = await convertRes.json();
 if (!convertData.Files || !convertData.Files[0]) throw new Error(convertData.Message || JSON.stringify(convertData));
 const fileRes = await fetch(convertData.Files[0].Url);
 const fileArrayBuffer = await fileRes.arrayBuffer();
-const uint8 = new Uint8Array(fileArrayBuffer);
-let base64 = '';
-for (let i = 0; i < uint8.length; i++) base64 += String.fromCharCode(uint8[i]);
-base64 = btoa(base64);
-      if (pfEl) pfEl.style.width = '100%';
-      if (psEl) { psEl.textContent = 'Done'; psEl.style.color = 'var(--accent)'; }
-
-     const outName = f.name.replace('.pdf', '.docx');
-const binary = atob(base64);
-const bytes = new Uint8Array(binary.length);
-for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-const blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+const blob = new Blob([fileArrayBuffer], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
 const docxUrl = URL.createObjectURL(blob);
 const div = document.createElement('div');
 div.className = 'output-file';
