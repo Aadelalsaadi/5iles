@@ -1,0 +1,7 @@
+json{
+  "name": "5iles",
+  "version": "1.0.0",
+  "dependencies": {
+    "convertapi": "^1.4.0"
+  }
+}
