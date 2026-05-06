@@ -434,11 +434,11 @@ if (psEl) psEl.textContent = 'Converting...';
       if (pfEl) pfEl.style.width = '100%';
       if (psEl) { psEl.textContent = 'Done'; psEl.style.color = 'var(--accent)'; }
 
-      const docxUrl = convertData.url;
-      const outName = f.name.replace('.pdf', '.docx');
-      const div = document.createElement('div');
-      div.className = 'output-file';
-      div.innerHTML = `<span style="font-size:20px">📝</span><div style="flex:1"><div style="font-size:14px;font-weight:500">${outName}</div><div style="font-size:12px;color:var(--ink3)">Converted successfully</div></div><button class="btn btn-primary btn-sm" onclick="forceDownload('${docxUrl}','${outName}')">⬇ Download</button>`;
+     const outName = f.name.replace('.pdf', '.docx');
+const docxUrl = 'data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,' + convertData.base64;
+const div = document.createElement('div');
+div.className = 'output-file';
+div.innerHTML = `<span style="font-size:20px">📝</span><div style="flex:1"><div style="font-size:14px;font-weight:500">${outName}</div><div style="font-size:12px;color:var(--ink3)">Converted successfully</div></div><button class="btn btn-primary btn-sm" onclick="forceDownload('${docxUrl}','${outName}')">⬇ Download</button>`;
       filesDiv.appendChild(div);
       anySuccess = true;
 
