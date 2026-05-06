@@ -447,7 +447,7 @@ const base64 = btoa(String.fromCharCode(...new Uint8Array(fileArrayBuffer)));
       if (psEl) { psEl.textContent = 'Done'; psEl.style.color = 'var(--accent)'; }
 
      const outName = f.name.replace('.pdf', '.docx');
-const binary = atob(convertData.base64.replace(/\s/g, ''));
+const binary = atob(base64);
 const bytes = new Uint8Array(binary.length);
 for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
 const blob = new Blob([bytes], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
