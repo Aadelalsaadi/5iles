@@ -22,7 +22,7 @@ exports.handler = async (event) => {
       },
       body: JSON.stringify({
         url,
-        pages: pages || '1-',
+        pages: pages || '0-',
         quality: quality || 90,
         async: false
       })
