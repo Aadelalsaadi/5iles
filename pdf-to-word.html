@@ -438,8 +438,9 @@ if (psEl) psEl.textContent = 'Converting...';
 const docxUrl = 'data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,' + convertData.base64;
 const div = document.createElement('div');
 div.className = 'output-file';
-div.innerHTML = `<span style="font-size:20px">📝</span><div style="flex:1"><div style="font-size:14px;font-weight:500">${outName}</div><div style="font-size:12px;color:var(--ink3)">Converted successfully</div></div><button class="btn btn-primary btn-sm" onclick="forceDownload('${docxUrl}','${outName}')">⬇ Download</button>`;
-      filesDiv.appendChild(div);
+div.innerHTML = `<span style="font-size:20px">📝</span><div style="flex:1"><div style="font-size:14px;font-weight:500">${outName}</div><div style="font-size:12px;color:var(--ink3)">Converted successfully</div></div><button class="btn btn-primary btn-sm" id="dl-${id}">⬇ Download</button>`;
+filesDiv.appendChild(div);
+document.getElementById('dl-'+id).addEventListener('click', () => forceDownload(docxUrl, outName));
       anySuccess = true;
 
     } catch(err) {
