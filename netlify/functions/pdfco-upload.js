@@ -15,7 +15,8 @@ exports.handler = async (event) => {
 
   try {
     const API_KEY = 'alsaadi.legend@gmail.com_7FtrjwweCnnIMe5Kxo8hkWeFREJzYGaHjQK4C7a3OkR2XaK7daD3DVgozSoKAtyj';
-    const { filename, fileBase64 } = JSON.parse(event.body);
+    const body = typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
+const { filename, fileBase64 } = body;
 
     // Step 1: Get a presigned upload URL from PDF.co
     const presignData = await new Promise((resolve, reject) => {
