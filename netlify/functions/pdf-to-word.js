@@ -20,7 +20,7 @@ exports.handler = async (event) => {
         'x-api-key': API_KEY,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ url, async: false })
+      body: JSON.stringify({ url, outputFormat: 'docx', async: false })
     });
     const result = await response.json();
     if (result.error) throw new Error(result.message);
