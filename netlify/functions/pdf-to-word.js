@@ -30,6 +30,7 @@ exports.handler = async (event) => {
       })
     });
     const job = await jobRes.json();
+    if (!job.data) throw new Error('CloudConvert error: ' + JSON.stringify(job));
     const jobId = job.data.id;
 
     // Step 2: Wait for job to finish
