@@ -13,20 +13,21 @@ exports.handler = async (event) => {
         body: JSON.stringify({
           Parameters: [
             { Name: 'File', FileValue: fileBase64, FileValueName: filename || 'file.pdf' },
-          { Name: 'StoreFile', Value: 'true' }
-        ]
+            { Name: 'StoreFile', Value: 'true' }
+          ]
+        })
       }
     );
     const result = await response.json();
     if (!result.Files || !result.Files[0]) throw new Error(result.Message || JSON.stringify(result));
     const fileRes = await fetch(result.Files[0].Url);
-const buffer = await fileRes.arrayBuffer();
-const base64 = Buffer.from(buffer).toString('base64');
-return {
-  statusCode: 200,
-  headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' },
-  body: JSON.stringify({ base64, filename: result.Files[0].FileName })
-};
+    const buffer = await fileRes.arrayBuffer();
+    const base64 = Buffer.from(buffer).toString('base64');
+    return {
+      statusCode: 200,
+      headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ base64, filename: result.Files[0].FileName })
+    };
   } catch (err) {
     return { statusCode: 500, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: err.message }) };
   }
