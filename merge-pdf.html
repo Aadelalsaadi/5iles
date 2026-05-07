@@ -421,7 +421,7 @@ async function processFiles() {
     div.className = 'output-file';
     div.innerHTML = `<span style="font-size:20px">📄</span><div style="flex:1"><div style="font-size:14px;font-weight:500">merged.pdf</div><div style="font-size:12px;color:var(--ink3)">Merged successfully</div></div><button class="btn btn-primary btn-sm" id="dl-merge">⬇ Download</button>`;
     filesDiv.appendChild(div);
-    document.getElementById('dl-merge').addEventListener('click', () => { const a = document.createElement('a'); a.href = pdfUrl; a.download = 'merged.pdf'; a.click(); });
+    filesDiv.querySelector('#dl-merge').addEventListener('click', () => { const a = document.createElement('a'); a.href = pdfUrl; a.download = 'merged.pdf'; a.click(); });
     area.classList.add('show');
     area.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     showToast('Merge complete!', 'success');
