@@ -396,32 +396,48 @@ function removeFile(name) {
   if (files.length === 0) { document.getElementById('options-row').style.display='none'; document.getElementById('action-row').style.display='none'; }
 }
 
-function processFiles() {
-  if (!files.length) return;
+async function processFiles() {
+  if (files.length < 2) { showToast('Please upload at least 2 PDF files to merge', 'error'); return; }
   const btn = document.getElementById('process-btn');
-  btn.disabled = true; btn.textContent = 'Compressing…';
-  let outputFiles = [];
-  const processNext = (i) => {
-    if (i >= files.length) { finishProcessing(btn, outputFiles); return; }
-    const f = files[i];
-    const id = f.name.replace(/\W/g,'_');
-    const pfEl = document.getElementById('pf-'+id);
-    const psEl = document.getElementById('ps-'+id);
-    if (psEl) { psEl.textContent = 'Compressing'; psEl.style.color = 'var(--amber, #c47d0e)'; }
-    let pct = 0;
-    const iv = setInterval(() => {
-      pct = Math.min(100, pct + Math.random()*20);
-      if (pfEl) pfEl.style.width = pct+'%';
-      if (pct >= 100) {
-        clearInterval(iv);
-        if (psEl) { psEl.textContent = 'Done'; psEl.style.color = 'var(--accent)'; }
-        const level = parseInt(document.getElementById('compress-slider').value) / 100;
-        outputFiles.push({ name: 'compressed_'+f.name, originalSize: f.size, newSize: Math.round(f.size * (1 - level * 0.8)) });
-        processNext(i+1);
-      }
-    }, 100);
-  };
-  processNext(0);
+  btn.disabled = true; btn.textContent = '⏳ Merging...';
+  try {
+    const fileDataArray = await Promise.all(files.map(f => toBase64(f)));
+    const payload = files.map((f, i) => ({ name: f.name, base64: fileDataArray[i] }));
+    const res = await fetch('/.netlify/functions/merge-pdf', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ files: payload })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    const fileRes = await fetch(data.url);
+    const buffer = await fileRes.arrayBuffer();
+    const blob = new Blob([buffer], { type: 'application/pdf' });
+    const pdfUrl = URL.createObjectURL(blob);
+    const area = document.getElementById('output-area');
+    const filesDiv = document.getElementById('output-files');
+    filesDiv.innerHTML = '';
+    const div = document.createElement('div');
+    div.className = 'output-file';
+    div.innerHTML = `<span style="font-size:20px">📄</span><div style="flex:1"><div style="font-size:14px;font-weight:500">merged.pdf</div><div style="font-size:12px;color:var(--ink3)">Merged successfully</div></div><button class="btn btn-primary btn-sm" id="dl-merge">⬇ Download</button>`;
+    filesDiv.appendChild(div);
+    document.getElementById('dl-merge').addEventListener('click', () => { const a = document.createElement('a'); a.href = pdfUrl; a.download = 'merged.pdf'; a.click(); });
+    area.classList.add('show');
+    area.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    showToast('Merge complete!', 'success');
+  } catch(err) {
+    showToast('Failed to merge: ' + err.message, 'error');
+  }
+  btn.disabled = false; btn.textContent = '📑 Merge PDF';
+}
+
+function toBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
 function finishProcessing(btn, outputFiles) {
