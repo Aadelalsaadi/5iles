@@ -440,25 +440,6 @@ function toBase64(file) {
   });
 }
 
-function finishProcessing(btn, outputFiles) {
-  btn.disabled = false; btn.textContent = '📑 Merge PDF';
-  const area = document.getElementById('output-area');
-  const filesDiv = document.getElementById('output-files');
-  filesDiv.innerHTML = '';
-  outputFiles.forEach(f => {
-    const origStr = f.originalSize > 1024*1024 ? (f.originalSize/1024/1024).toFixed(1)+' MB' : (f.originalSize/1024).toFixed(0)+' KB';
-    const newStr = f.newSize > 1024*1024 ? (f.newSize/1024/1024).toFixed(1)+' MB' : (f.newSize/1024).toFixed(0)+' KB';
-    const savings = Math.round((1 - f.newSize/f.originalSize)*100);
-    const div = document.createElement('div');
-    div.className = 'output-file';
-    div.innerHTML = `<span style="font-size:20px">📄</span><div style="flex:1"><div style="font-size:14px;font-weight:500">${f.name}</div><div style="font-size:12px;color:var(--ink3)">${origStr} → ${newStr} <span style="color:var(--accent);font-weight:600">(${savings}% smaller)</span></div></div><button class="btn btn-primary btn-sm" onclick="showToast('Downloading ${f.name}…','success')">⬇ Download</button>`;
-    filesDiv.appendChild(div);
-  });
-  area.classList.add('show');
-  area.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  showToast(`${outputFiles.length} file(s) compressed successfully!`, 'success');
-}
-
 function clearAll() { files = []; document.getElementById('queue').innerHTML=''; document.getElementById('output-area').classList.remove('show'); document.getElementById('options-row').style.display='none'; document.getElementById('action-row').style.display='none'; }
 function downloadAll() { showToast('Downloading all files as ZIP…', 'success'); }
 function compressMore() { clearAll(); window.scrollTo({top:0,behavior:'smooth'}); }
