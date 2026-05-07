@@ -430,6 +430,7 @@ if (psEl) psEl.textContent = 'Converting...';
   body: JSON.stringify({ fileBase64, filename: f.name })
 });
 const convertData = await convertRes.json();
+const outName = f.name.replace('.pdf', '.docx');
 if (convertData.error) throw new Error(convertData.error);
 const fileRes = await fetch(convertData.url);
 const fileArrayBuffer = await fileRes.arrayBuffer();
