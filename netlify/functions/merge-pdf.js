@@ -10,7 +10,7 @@ exports.handler = async (event) => {
     files.forEach((file, i) => {
       tasks[`import-${i}`] = { operation: 'import/base64', file: file.base64, filename: file.name };
     });
-    tasks['merge'] = { operation: 'merge', input: files.map((_, i) => `import-${i}`) };
+    tasks['merge'] = { operation: 'merge', input: files.map((_, i) => `import-${i}`), output_format: 'pdf' };
     tasks['export-file'] = { operation: 'export/url', input: ['merge'] };
 
     const jobRes = await fetch('https://api.cloudconvert.com/v2/jobs', {
