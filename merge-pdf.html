@@ -410,14 +410,25 @@ async function processFiles() {
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
-    const fileRes = await fetch(data.url);
+    const { jobId } = data;
+    let fileUrl = null;
+    for (let i = 0; i < 30; i++) {
+      await new Promise(r => setTimeout(r, 2000));
+      const statusRes = await fetch('/.netlify/functions/merge-pdf-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jobId })
+      });
+      const statusData = await statusRes.json();
+      if (statusData.status === 'finished') { fileUrl = statusData.url; break; }
+      if (statusData.status === 'error') throw new Error(statusData.error || 'Merge failed');
+    }
+    if (!fileUrl) throw new Error('Merge timed out');
+    const fileRes = await fetch(fileUrl);
     const buffer = await fileRes.arrayBuffer();
     const blob = new Blob([buffer], { type: 'application/pdf' });
     const pdfUrl = URL.createObjectURL(blob);
-    const area = document.getElementById('output-area');
     const filesDiv = document.getElementById('output-files');
-    filesDiv.innerHTML = '';
-    const div = document.createElement('div');
     div.className = 'output-file';
     div.innerHTML = `<span style="font-size:20px">📄</span><div style="flex:1"><div style="font-size:14px;font-weight:500">merged.pdf</div><div style="font-size:12px;color:var(--ink3)">Merged successfully</div></div><button class="btn btn-primary btn-sm" id="dl-merge">⬇ Download</button>`;
     filesDiv.appendChild(div);
