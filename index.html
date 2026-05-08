@@ -1461,11 +1461,15 @@ async function pdfToJPG() {
     if(convertData.error) throw new Error(convertData.message || 'Conversion failed');
     const urls = convertData.urls || [convertData.url];
     for(let i = 0; i < urls.length; i++) {
-      const imgRes = await fetch(urls[i]);
-      const imgBlob = await imgRes.blob();
-      const imgUrl = URL.createObjectURL(imgBlob);
-      results.push({ name: file.name.replace('.pdf', `_page${i+1}.jpg`), url: imgUrl, info: `Page ${i+1} converted to JPG` });
-    }
+  const imgRes = await fetch('/.netlify/functions/pdfco-proxy', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fetchUrl: urls[i] })
+  });
+  const imgBlob = await imgRes.blob();
+  const imgUrl = URL.createObjectURL(imgBlob);
+  results.push({ name: file.name.replace('.pdf', `_page${i+1}.jpg`), url: imgUrl, info: `Page ${i+1} converted to JPG` });
+}
   }
   return results;
 }
