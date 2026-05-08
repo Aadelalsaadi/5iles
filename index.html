@@ -786,7 +786,7 @@ function openTool(id) {
   } else if(tool.type === 'merge-pdf') {
     document.getElementById('dropSub').textContent = 'Select multiple PDF files to merge';
   } else if(tool.type === 'pdf-to-word') {
-    opts.innerHTML = `<p style="color:var(--text2);font-size:0.85rem;margin-top:8px;">📋 Text and content will be extracted from the PDF and saved as a .txt file (rich Word export requires server-side processing).</p>`;
+    opts.innerHTML = `<p style="color:var(--text2);font-size:0.85rem;margin-top:8px;">📝 Your PDF will be converted to an editable Word (.docx) file.</p>`;
   } else if(tool.type === 'split-pdf') {
     opts.innerHTML = `
       <div style="width:100%;">
