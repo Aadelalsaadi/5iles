@@ -689,7 +689,7 @@ const TOOLS = [
   {id:'merge-pdf',icon:'📑',name:'Merge PDF',desc:'Combine multiple PDF files into one',cat:'pdf',accept:'.pdf',type:'merge-pdf',multiple:true},
   {id:'split-pdf',icon:'✂️',name:'Split PDF',desc:'Extract pages or split into separate files',cat:'pdf',accept:'.pdf',type:'split-pdf'},
   {id:'rotate-pdf',icon:'🔄',name:'Rotate PDF',desc:'Rotate pages to the correct orientation',cat:'pdf',accept:'.pdf',type:'rotate-pdf'},
-  {id:'pdf-to-word',icon:'📝',name:'PDF → Word',desc:'Convert PDF to editable Word document',cat:'pdf convert',accept:'.pdf',type:'pdf-to-word',externalUrl:'/pdf-to-word.html'},
+  {id:'pdf-to-word',icon:'📝',name:'PDF → Word',desc:'Convert PDF to editable Word document',cat:'pdf convert',accept:'.pdf',type:'pdf-to-word'},
   {id:'pdf-to-excel',icon:'📊',name:'PDF → Excel',desc:'Extract tables into spreadsheets',cat:'pdf convert',accept:'.pdf',type:'pdf-to-excel'},
   {id:'pdf-to-jpg',icon:'🖼️',name:'PDF → JPG',desc:'Convert each page to a high-res image',cat:'pdf convert',accept:'.pdf',type:'pdf-to-jpg'},
   {id:'word-to-pdf',icon:'📄',name:'Word → PDF',desc:'Save Word docs as perfect PDF files',cat:'convert',accept:'.doc,.docx',type:'word-to-pdf'},
@@ -732,7 +732,6 @@ function filterTools(cat, btn) {
 function openTool(id) {
   const tool = TOOLS.find(t=>t.id===id);
   if(!tool) return;
-  if(tool.externalUrl) { window.location.href = tool.externalUrl; return; }
   currentTool = tool;
   uploadedFiles = [];
 
@@ -786,7 +785,7 @@ function openTool(id) {
   } else if(tool.type === 'merge-pdf') {
     document.getElementById('dropSub').textContent = 'Select multiple PDF files to merge';
   } else if(tool.type === 'pdf-to-word') {
-    opts.innerHTML = `<p style="color:var(--text2);font-size:0.85rem;margin-top:8px;">📝 Your PDF will be converted to an editable Word (.docx) file.</p>`;
+    opts.innerHTML = `<p style="color:var(--text2);font-size:0.85rem;margin-top:8px;">📋 Text and content will be extracted from the PDF and saved as a .txt file (rich Word export requires server-side processing).</p>`;
   } else if(tool.type === 'split-pdf') {
     opts.innerHTML = `
       <div style="width:100%;">
@@ -1155,7 +1154,7 @@ if (!currentUser) {
     } else if(currentTool.type === 'merge-pdf') {
       results = await mergePDFs();
     } else if(currentTool.type === 'pdf-to-word') {
-      results = await pdfToWord();
+      results = await pdfToText();
     } else if(currentTool.type === 'compress-image') {
       results = await compressImages();
     } else if(currentTool.type === 'split-pdf') {
@@ -1291,21 +1290,25 @@ async function mergePDFs() {
 }
 
 // ===================== PDF TO TEXT =====================
-async function pdfToWord() {
+async function pdfToText() {
   const results = [];
   for(const file of uploadedFiles) {
-    const fileBase64 = await fileToBase64(file);
-    const res = await fetch('/.netlify/functions/pdf-to-word', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fileBase64, filename: file.name })
-    });
-    const data = await res.json();
-    if(data.error) throw new Error(data.error);
-    const byteArray = Uint8Array.from(atob(data.base64), c => c.charCodeAt(0));
-    const blob = new Blob([byteArray], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+    const ab = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({data: ab}).promise;
+    let fullText = '';
+    for(let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      const pageText = content.items.map(item => item.str).join(' ');
+      fullText += `--- Page ${i} ---\n${pageText}\n\n`;
+    }
+    const blob = new Blob([fullText], {type: 'text/plain'});
     const url = URL.createObjectURL(blob);
-    results.push({ name: file.name.replace('.pdf', '.docx'), url, info: `Converted to Word successfully (${formatSize(blob.size)})` });
+    const isEmpty = fullText.trim().replace(/---\s*Page\s*\d+\s*---/g, '').trim().length === 0;
+    const info = isEmpty 
+      ? `⚠️ No text found — this may be a scanned PDF. Try the OCR tool instead.`
+      : `${pdf.numPages} pages extracted (${formatSize(blob.size)})`;
+    results.push({ name: file.name.replace('.pdf', '.txt'), url, info });
   }
   return results;
 }
