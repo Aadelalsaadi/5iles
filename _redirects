@@ -1,11 +1,11 @@
-/pdf-to-word    /pdf-to-word.html    200
-/merge-pdf      /merge-pdf.html      200
-/compress-pdf   /compress-pdf.html   200
-/pdf-to-jpg     /pdf-to-jpg.html     200
-/jpg-to-pdf     /jpg-to-pdf.html     200
-/word-to-pdf    /word-to-pdf.html    200
-/pdf-to-excel   /pdf-to-excel.html   200
-/sign-pdf       /sign-pdf.html       200
+/pdf-to-word    /pdf-to-word.html    200!
+/merge-pdf      /merge-pdf.html      200!
+/compress-pdf   /compress-pdf.html   200!
+/pdf-to-jpg     /pdf-to-jpg.html     200!
+/jpg-to-pdf     /jpg-to-pdf.html     200!
+/word-to-pdf    /word-to-pdf.html    200!
+/pdf-to-excel   /pdf-to-excel.html   200!
+/sign-pdf       /sign-pdf.html       200!
 
 /  /index.html  200
 http://5iles.com/*  https://5iles.com/:splat  301!
