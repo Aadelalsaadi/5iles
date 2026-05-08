@@ -732,6 +732,7 @@ function filterTools(cat, btn) {
 function openTool(id) {
   const tool = TOOLS.find(t=>t.id===id);
   if(!tool) return;
+  if(tool.externalUrl) { window.location.href = tool.externalUrl; return; }
   currentTool = tool;
   uploadedFiles = [];
 
