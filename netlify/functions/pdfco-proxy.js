@@ -99,8 +99,7 @@ exports.handler = async (event) => {
           'Content-Type': contentType,
           'Content-Length': buffer.length.toString()
         },
-        body: buffer.toString('base64'),
-        isBase64Encoded: true
+        body: JSON.stringify({ base64: buffer.toString('base64'), contentType })
       };
     }
  
