@@ -1467,7 +1467,8 @@ async function pdfToJPG() {
     body: JSON.stringify({ fetchUrl: urls[i] })
   });
   const imgBlob = await imgRes.blob();
-  const imgUrl = URL.createObjectURL(imgBlob);
+const forcedBlob = new Blob([imgBlob], { type: 'image/jpeg' });
+const imgUrl = URL.createObjectURL(forcedBlob);
   results.push({ name: file.name.replace('.pdf', `_page${i+1}.jpg`), url: imgUrl, info: `Page ${i+1} converted to JPG` });
 }
   }
