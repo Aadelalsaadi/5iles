@@ -1466,9 +1466,8 @@ async function pdfToJPG() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ fetchUrl: urls[i] })
   });
-  const imgArrayBuffer = await imgRes.arrayBuffer();
-  const imgBlob = new Blob([imgArrayBuffer], { type: 'image/jpeg' });
-  const imgUrl = URL.createObjectURL(imgBlob);
+  const imgData = await imgRes.json();
+  const imgUrl = `data:${imgData.contentType};base64,${imgData.base64}`;
   results.push({ name: file.name.replace('.pdf', `_page${i+1}.jpg`), url: imgUrl, info: `Page ${i+1} converted to JPG` });
 }
   }
