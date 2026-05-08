@@ -1461,7 +1461,8 @@ async function pdfToJPG() {
     if(convertData.error) throw new Error(convertData.message || 'Conversion failed');
     const urls = convertData.urls || [convertData.url];
     urls.forEach((url, i) => {
-      results.push({ name: file.name.replace('.pdf', `_page${i+1}.jpg`), url: '/.netlify/functions/download-proxy?url=' + encodeURIComponent(url), info: `Page ${i+1} converted to JPG` });
+      const proxyUrl = '/.netlify/functions/download-proxy?url=' + encodeURIComponent(url);
+results.push({ name: file.name.replace('.pdf', `_page${i+1}.jpg`), url: proxyUrl, info: `Page ${i+1} converted to JPG` });
     });
   }
   return results;
