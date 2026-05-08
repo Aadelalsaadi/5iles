@@ -1,4 +1,4 @@
-const { PDFDocument } = require('pdf-lib');
+const pdfParse = require('pdf-parse');
 const { Document, Paragraph, TextRun, Packer } = require('docx');
 
 exports.handler = async (event) => {
@@ -8,21 +8,18 @@ exports.handler = async (event) => {
   try {
     const { fileBase64, filename } = JSON.parse(event.body);
     const pdfBytes = Buffer.from(fileBase64, 'base64');
-    const pdfDoc = await PDFDocument.load(pdfBytes);
-    const pages = pdfDoc.getPages();
-
+    
     // Extract text from PDF
-    const paragraphs = [];
-    for (let i = 0; i < pages.length; i++) {
-      paragraphs.push(new Paragraph({
-        children: [new TextRun({ text: `--- Page ${i + 1} ---`, bold: true })]
-      }));
-      // Add page content placeholder
-      paragraphs.push(new Paragraph({
-        children: [new TextRun({ text: '' })]
-      }));
-    }
+    const pdfData = await pdfParse(pdfBytes);
+    const text = pdfData.text;
+    
+    // Split into lines and create paragraphs
+    const lines = text.split('\n');
+    const paragraphs = lines.map(line => new Paragraph({
+      children: [new TextRun({ text: line })]
+    }));
 
+    // Create Word document
     const doc = new Document({
       sections: [{ properties: {}, children: paragraphs }]
     });
