@@ -1155,7 +1155,7 @@ if (!currentUser) {
     } else if(currentTool.type === 'merge-pdf') {
       results = await mergePDFs();
     } else if(currentTool.type === 'pdf-to-word') {
-      results = await pdfToText();
+      results = await pdfToWord();
     } else if(currentTool.type === 'compress-image') {
       results = await compressImages();
     } else if(currentTool.type === 'split-pdf') {
