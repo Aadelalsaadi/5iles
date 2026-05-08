@@ -1291,25 +1291,21 @@ async function mergePDFs() {
 }
 
 // ===================== PDF TO TEXT =====================
-async function pdfToText() {
+async function pdfToWord() {
   const results = [];
   for(const file of uploadedFiles) {
-    const ab = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({data: ab}).promise;
-    let fullText = '';
-    for(let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const content = await page.getTextContent();
-      const pageText = content.items.map(item => item.str).join(' ');
-      fullText += `--- Page ${i} ---\n${pageText}\n\n`;
-    }
-    const blob = new Blob([fullText], {type: 'text/plain'});
+    const fileBase64 = await fileToBase64(file);
+    const res = await fetch('/.netlify/functions/pdf-to-word', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileBase64, filename: file.name })
+    });
+    const data = await res.json();
+    if(data.error) throw new Error(data.error);
+    const byteArray = Uint8Array.from(atob(data.base64), c => c.charCodeAt(0));
+    const blob = new Blob([byteArray], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
     const url = URL.createObjectURL(blob);
-    const isEmpty = fullText.trim().replace(/---\s*Page\s*\d+\s*---/g, '').trim().length === 0;
-    const info = isEmpty 
-      ? `⚠️ No text found — this may be a scanned PDF. Try the OCR tool instead.`
-      : `${pdf.numPages} pages extracted (${formatSize(blob.size)})`;
-    results.push({ name: file.name.replace('.pdf', '.txt'), url, info });
+    results.push({ name: file.name.replace('.pdf', '.docx'), url, info: `Converted to Word successfully (${formatSize(blob.size)})` });
   }
   return results;
 }
