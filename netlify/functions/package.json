@@ -6,6 +6,7 @@
     "@supabase/supabase-js": "^2.39.0",
     "node-fetch": "^2.6.9",
     "form-data": "^4.0.0",
-    "pdf-lib": "^1.17.1"
+    "pdf-lib": "^1.17.1",
+    "docx": "^8.5.0"
   }
 }
