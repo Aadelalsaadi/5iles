@@ -1460,10 +1460,12 @@ async function pdfToJPG() {
     const convertData = await convertRes.json();
     if(convertData.error) throw new Error(convertData.message || 'Conversion failed');
     const urls = convertData.urls || [convertData.url];
-    urls.forEach((url, i) => {
-      const proxyUrl = '/.netlify/functions/download-proxy?url=' + encodeURIComponent(url);
-results.push({ name: file.name.replace('.pdf', `_page${i+1}.jpg`), url: proxyUrl, info: `Page ${i+1} converted to JPG` });
-    });
+    for(let i = 0; i < urls.length; i++) {
+      const imgRes = await fetch(urls[i]);
+      const imgBlob = await imgRes.blob();
+      const imgUrl = URL.createObjectURL(imgBlob);
+      results.push({ name: file.name.replace('.pdf', `_page${i+1}.jpg`), url: imgUrl, info: `Page ${i+1} converted to JPG` });
+    }
   }
   return results;
 }
