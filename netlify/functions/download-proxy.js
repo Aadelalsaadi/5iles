@@ -2,8 +2,12 @@ const https = require('https');
 const http = require('http');
 
 exports.handler = async (event) => {
-  const url = event.queryStringParameters?.url;
+  let url = event.queryStringParameters?.url;
   if (!url) return { statusCode: 400, body: 'Missing url' };
+  
+  try {
+    url = decodeURIComponent(url);
+  } catch(e) {}
 
   return new Promise((resolve) => {
     const client = url.startsWith('https') ? https : http;
