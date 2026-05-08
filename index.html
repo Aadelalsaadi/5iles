@@ -1289,6 +1289,26 @@ async function mergePDFs() {
   return [{ name: 'merged_document.pdf', url, info: `${uploadedFiles.length} files merged → ${totalPages} pages (${formatSize(blob.size)})` }];
 }
 
+// ===================== PDF TO WORD =====================
+async function pdfToWord() {
+  const results = [];
+  for(const file of uploadedFiles) {
+    const fileBase64 = await fileToBase64(file);
+    const res = await fetch('/.netlify/functions/pdf-to-word', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileBase64, filename: file.name })
+    });
+    const data = await res.json();
+    if(data.error) throw new Error(data.error);
+    const byteArray = Uint8Array.from(atob(data.base64), c => c.charCodeAt(0));
+    const blob = new Blob([byteArray], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+    const url = URL.createObjectURL(blob);
+    results.push({ name: file.name.replace('.pdf', '.docx'), url, info: `Converted to Word successfully (${formatSize(blob.size)})` });
+  }
+  return results;
+}
+
 // ===================== PDF TO TEXT =====================
 async function pdfToText() {
   const results = [];
