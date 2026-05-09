@@ -2148,6 +2148,32 @@ async function cropImage() {
   });
 }
 
+  // ===================== QR CODE =====================
+async function generateQRCode() {
+  const file = uploadedFiles[0];
+  if(!file) throw new Error('Please upload a .txt file.');
+  const text = await file.text();
+  if(!text.trim()) throw new Error('The text file is empty.');
+  const size = parseInt(document.getElementById('qrSize')?.value || 256);
+  const errorLevel = document.getElementById('qrError')?.value || 'M';
+  return new Promise((resolve, reject) => {
+    const container = document.createElement('div');
+    container.style.display = 'none';
+    document.body.appendChild(container);
+    try {
+      new QRCode(container, { text: text.trim(), width: size, height: size, correctLevel: QRCode.CorrectLevel[errorLevel] });
+      setTimeout(() => {
+        const canvas = container.querySelector('canvas');
+        if(!canvas) { document.body.removeChild(container); reject(new Error('QR generation failed')); return; }
+        canvas.toBlob(blob => {
+          document.body.removeChild(container);
+          if(!blob) { reject(new Error('Failed to create image')); return; }
+          resolve([{ name: 'qrcode.png', url: URL.createObjectURL(blob), info: `QR Code (${size}×${size}px) — ${text.trim().substring(0,40)}${text.length>40?'...':''}` }]);
+        }, 'image/png');
+      }, 200);
+    } catch(e) { document.body.removeChild(container); reject(e); }
+  });
+}
 // ===================== ADJUST IMAGE =====================
 async function adjustImage() {
   const results = [];
