@@ -1265,8 +1265,10 @@ if (!currentUser) {
       results = await wordToPDF();
     } else if(currentTool.type === 'crop-image') {
       results = await cropImage();
-    } else if(currentTool.type === 'ai-enhance') {
-      results = await aiEnhance();
+    } else if(currentTool.type === 'flip-image') {
+  results = await flipImage();
+} else if(currentTool.type === 'ai-enhance') {
+  results = await aiEnhance();
     } else if(currentTool.type === 'remove-bg') {
       results = await removeBg();
     }
