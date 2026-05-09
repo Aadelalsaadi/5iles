@@ -1025,6 +1025,25 @@ function openTool(id) {
         </div>
         <p id="cropHint" style="color:var(--text2);font-size:0.8rem;margin-top:8px;display:none;">Drag to move · Drag corners to resize · Then click Process</p>
       </div>`;
+    } else if(tool.type === 'adjust-image') {
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div class="slider-row">
+          <span class="slider-label">Brightness:</span>
+          <input type="range" id="adjBrightness" min="-100" max="100" value="0" oninput="document.getElementById('adjBrightnessVal').textContent=this.value">
+          <span class="slider-val" id="adjBrightnessVal">0</span>
+        </div>
+        <div class="slider-row" style="margin-top:10px;">
+          <span class="slider-label">Contrast:</span>
+          <input type="range" id="adjContrast" min="-100" max="100" value="0" oninput="document.getElementById('adjContrastVal').textContent=this.value">
+          <span class="slider-val" id="adjContrastVal">0</span>
+        </div>
+        <div class="slider-row" style="margin-top:10px;">
+          <span class="slider-label">Saturation:</span>
+          <input type="range" id="adjSaturation" min="-100" max="100" value="0" oninput="document.getElementById('adjSaturationVal').textContent=this.value">
+          <span class="slider-val" id="adjSaturationVal">0</span>
+        </div>
+      </div>`;
    } else if(tool.type === 'blur-image') {
     opts.innerHTML = `
       <div class="option-group">
