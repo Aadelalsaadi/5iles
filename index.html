@@ -1138,7 +1138,7 @@ const today = new Date().toDateString();
 const usageKey = 'usage_' + today;
 const usageCount = parseInt(localStorage.getItem(usageKey) || 0);
 
-if (!currentUser && usageCount >= 2) {
+if (!currentUser && usageCount >= 3) {
   showToast('⚠️ Free limit reached! Sign up free to get 10 tasks/day.', 'error');
   btn.disabled = false;
   btn.innerHTML = '<span>⚡</span> <span>Process files</span>';
