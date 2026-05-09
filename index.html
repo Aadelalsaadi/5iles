@@ -858,11 +858,11 @@ function openTool(id) {
     opts.innerHTML = `
       <div class="option-group">
         <div class="option-label">Width (px)</div>
-        <input type="number" id="resizeWidth" placeholder="e.g. 800" min="1" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;width:100%;">
+        <input type="number" id="resizeWidth" placeholder="e.g. 800" min="10" max="10000" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;width:100%;" oninput="syncResizeDimension('width')">
       </div>
       <div class="option-group">
         <div class="option-label">Height (px)</div>
-        <input type="number" id="resizeHeight" placeholder="e.g. 600" min="1" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;width:100%;">
+        <input type="number" id="resizeHeight" placeholder="e.g. 600" min="10" max="10000" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;width:100%;" oninput="syncResizeDimension('height')">
       </div>
       <div class="option-group" style="display:flex;align-items:center;gap:8px;margin-top:22px;">
         <input type="checkbox" id="keepAspect" checked style="accent-color:var(--accent);width:16px;height:16px;">
