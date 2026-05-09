@@ -1028,6 +1028,7 @@ function openTool(id) {
         <p id="cropHint" style="color:var(--text2);font-size:0.8rem;margin-top:8px;display:none;">Drag to move · Drag corners to resize · Then click Process</p>
       </div>`;
     } else if(tool.type === 'qr-code') {
+    document.getElementById('dropZone').style.display = 'none';
     opts.innerHTML = `
       <div style="width:100%;">
         <div class="option-group">
