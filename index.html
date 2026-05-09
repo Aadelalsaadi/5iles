@@ -1137,14 +1137,33 @@ async function processFiles() {
 const today = new Date().toDateString();
 const usageKey = 'usage_' + today;
 const usageCount = parseInt(localStorage.getItem(usageKey) || 0);
-if (!currentUser && usageCount >= 20) {
-  showToast('⚠️ Daily limit reached (20/day). Sign in for unlimited access!', 'error');
+
+if (!currentUser && usageCount >= 2) {
+  showToast('⚠️ Free limit reached! Sign up free to get 10 tasks/day.', 'error');
   btn.disabled = false;
-  btn.innerHTML = '<span>✨</span> <span>Process files</span>';
+  btn.innerHTML = '<span>⚡</span> <span>Process files</span>';
+  setTimeout(() => openModal('signup'), 1000);
   return;
 }
+
+if (currentUser && !currentUser.user_metadata?.plan) {
+  const userUsageKey = 'usage_user_' + currentUser.id + '_' + today;
+  const userUsageCount = parseInt(localStorage.getItem(userUsageKey) || 0);
+  if (userUsageCount >= 10) {
+    showToast('⚠️ Daily limit reached (10/day). Upgrade to Pro for unlimited!', 'error');
+    btn.disabled = false;
+    btn.innerHTML = '<span>⚡</span> <span>Process files</span>';
+    setTimeout(() => openModal('upgrade'), 1000);
+    return;
+  }
+  localStorage.setItem(userUsageKey, userUsageCount + 1);
+}
+
 if (!currentUser) {
   localStorage.setItem(usageKey, usageCount + 1);
+  if (usageCount === 0) {
+    setTimeout(() => showToast('💡 Sign up free for 10 tasks/day!', 'success'), 2000);
+  }
 }
 
   btn.disabled = true;
