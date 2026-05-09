@@ -1024,7 +1024,18 @@ function openTool(id) {
         </div>
         <p id="cropHint" style="color:var(--text2);font-size:0.8rem;margin-top:8px;display:none;">Drag to move · Drag corners to resize · Then click Process</p>
       </div>`;
-   } else if(tool.type === 'flip-image') {
+   } else if(tool.type === 'blur-image') {
+    opts.innerHTML = `
+      <div class="option-group">
+        <div class="option-label">Blur strength</div>
+        <select class="option-select" id="blurStrength">
+          <option value="2">Light</option>
+          <option value="5" selected>Medium</option>
+          <option value="10">Strong</option>
+          <option value="20">Very Strong</option>
+        </select>
+      </div>`;
+} else if(tool.type === 'flip-image') {
     opts.innerHTML = `
       <div class="option-group">
         <div class="option-label">Flip direction</div>
