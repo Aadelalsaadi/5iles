@@ -1027,6 +1027,26 @@ function openTool(id) {
         </div>
         <p id="cropHint" style="color:var(--text2);font-size:0.8rem;margin-top:8px;display:none;">Drag to move · Drag corners to resize · Then click Process</p>
       </div>`;
+    } else if(tool.type === 'qr-code') {
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div class="option-group">
+          <div class="option-label">Size</div>
+          <select class="option-select" id="qrSize">
+            <option value="128">Small (128px)</option>
+            <option value="256" selected>Medium (256px)</option>
+            <option value="512">Large (512px)</option>
+          </select>
+        </div>
+        <div class="option-group" style="margin-top:12px;">
+          <div class="option-label">Error correction</div>
+          <select class="option-select" id="qrError">
+            <option value="L">Low</option>
+            <option value="M" selected>Medium</option>
+            <option value="H">High</option>
+          </select>
+        </div>
+      </div>`;
     } else if(tool.type === 'adjust-image') {
     opts.innerHTML = `
       <div style="width:100%;">
