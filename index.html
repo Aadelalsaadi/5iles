@@ -1545,6 +1545,27 @@ if((targetW && targetW > 10000) || (targetH && targetH > 10000)) throw new Error
   }
   return results;
 }
+  function syncResizeDimension(changed) {
+  if(!uploadedFiles[0]) return;
+  const keep = document.getElementById('keepAspect')?.checked;
+  if(!keep) return;
+  const img = new Image();
+  const reader = new FileReader();
+  reader.onload = e => {
+    img.onload = () => {
+      const ratio = img.width / img.height;
+      if(changed === 'width') {
+        const w = parseInt(document.getElementById('resizeWidth')?.value || 0);
+        if(w) document.getElementById('resizeHeight').value = Math.round(w / ratio);
+      } else {
+        const h = parseInt(document.getElementById('resizeHeight')?.value || 0);
+        if(h) document.getElementById('resizeWidth').value = Math.round(h * ratio);
+      }
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(uploadedFiles[0]);
+}
 
 function resizeImageFile(file, targetW, targetH, keepAspect) {
   return new Promise((resolve, reject) => {
