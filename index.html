@@ -1023,7 +1023,17 @@ function openTool(id) {
         </div>
         <p id="cropHint" style="color:var(--text2);font-size:0.8rem;margin-top:8px;display:none;">Drag to move · Drag corners to resize · Then click Process</p>
       </div>`;
-  } else if(tool.type === 'ai-enhance') {
+   } else if(tool.type === 'flip-image') {
+    opts.innerHTML = `
+      <div class="option-group">
+        <div class="option-label">Flip direction</div>
+        <select class="option-select" id="flipDirection">
+          <option value="horizontal">Horizontal (mirror)</option>
+          <option value="vertical">Vertical (upside down)</option>
+          <option value="both">Both</option>
+        </select>
+      </div>`;
+} else if(tool.type === 'ai-enhance') {
     opts.innerHTML = `
       <div class="option-group">
         <div class="option-label">Enhancement mode</div>
