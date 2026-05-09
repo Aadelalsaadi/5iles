@@ -1232,6 +1232,7 @@ function removeFile(i) {
 function clearFiles() {
   uploadedFiles = [];
   document.getElementById('fileList').innerHTML = '';
+document.getElementById('dropZone').style.display = 'block';
   document.getElementById('processBtn').disabled = true;
   document.getElementById('resultBox').classList.remove('active');
   document.getElementById('progressBar').classList.remove('active');
