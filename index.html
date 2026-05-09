@@ -1800,44 +1800,163 @@ async function wordToPDF() {
 }
 
 // ===================== CROP IMAGE =====================
-async function cropImage() {
-  const results = [];
-  for(const file of uploadedFiles) {
-    const ratio = document.getElementById('cropRatio')?.value || 'free';
-    const blob = await cropImageFile(file, ratio);
-    const baseName = file.name.replace(/\.[^.]+$/, '');
-    results.push({ name: `${baseName}_cropped.png`, url: URL.createObjectURL(blob), info: `Cropped (${formatSize(blob.size)})` });
-  }
-  return results;
+let cropState = { x:0, y:0, w:0, h:0, dragging:false, resizing:null, startX:0, startY:0, startCrop:null, imgNatW:0, imgNatH:0, scale:1 };
+
+function initCropTool(file) {
+  const container = document.getElementById('cropContainer');
+  const canvas = document.getElementById('cropCanvas');
+  const cropBox = document.getElementById('cropBox');
+  if(!container || !canvas) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      const maxW = container.parentElement.offsetWidth - 32;
+      const scale = Math.min(1, maxW / img.width);
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      cropState.imgNatW = img.width;
+      cropState.imgNatH = img.height;
+      cropState.scale = scale;
+      cropState.x = 0; cropState.y = 0;
+      cropState.w = canvas.width; cropState.h = canvas.height;
+      container.style.display = 'block';
+      document.getElementById('cropHint').style.display = 'block';
+      updateCropBox();
+      cropBox.style.display = 'block';
+      attachCropEvents();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
 }
 
-function cropImageFile(file, ratio) {
+function updateCropBox() {
+  const box = document.getElementById('cropBox');
+  if(!box) return;
+  box.style.left = cropState.x + 'px';
+  box.style.top = cropState.y + 'px';
+  box.style.width = cropState.w + 'px';
+  box.style.height = cropState.h + 'px';
+}
+
+function updateCropRatio() {
+  const ratio = document.getElementById('cropRatio')?.value || 'free';
+  const canvas = document.getElementById('cropCanvas');
+  if(!canvas || canvas.width === 0) return;
+  if(ratio === 'free') return;
+  const [rw, rh] = ratio.split(':').map(Number);
+  const targetRatio = rw / rh;
+  let w = canvas.width * 0.8;
+  let h = w / targetRatio;
+  if(h > canvas.height * 0.8) { h = canvas.height * 0.8; w = h * targetRatio; }
+  cropState.w = Math.round(w);
+  cropState.h = Math.round(h);
+  cropState.x = Math.round((canvas.width - w) / 2);
+  cropState.y = Math.round((canvas.height - h) / 2);
+  updateCropBox();
+}
+
+function attachCropEvents() {
+  const box = document.getElementById('cropBox');
+  const canvas = document.getElementById('cropCanvas');
+  if(!box || !canvas) return;
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: clientX - rect.left, y: clientY - rect.top };
+  }
+
+  function clamp(val, min, max) { return Math.max(min, Math.min(max, val)); }
+
+  function onDown(e, mode) {
+    e.preventDefault();
+    const pos = getPos(e);
+    cropState.dragging = mode === 'move';
+    cropState.resizing = mode !== 'move' ? mode : null;
+    cropState.startX = pos.x;
+    cropState.startY = pos.y;
+    cropState.startCrop = { ...cropState };
+  }
+
+  function onMove(e) {
+    e.preventDefault();
+    if(!cropState.dragging && !cropState.resizing) return;
+    const pos = getPos(e);
+    const dx = pos.x - cropState.startX;
+    const dy = pos.y - cropState.startY;
+    const sc = cropState.startCrop;
+    const cw = canvas.width, ch = canvas.height;
+    const ratio = document.getElementById('cropRatio')?.value || 'free';
+    if(cropState.dragging) {
+      cropState.x = clamp(sc.x + dx, 0, cw - sc.w);
+      cropState.y = clamp(sc.y + dy, 0, ch - sc.h);
+    } else {
+      let nx = sc.x, ny = sc.y, nw = sc.w, nh = sc.h;
+      const r = ratio !== 'free' ? (()=>{ const [a,b]=ratio.split(':').map(Number); return a/b; })() : null;
+      if(cropState.resizing === 'br') {
+        nw = clamp(sc.w + dx, 20, cw - sc.x);
+        nh = r ? nw / r : clamp(sc.h + dy, 20, ch - sc.y);
+      } else if(cropState.resizing === 'bl') {
+        nw = clamp(sc.w - dx, 20, sc.x + sc.w);
+        nh = r ? nw / r : clamp(sc.h + dy, 20, ch - sc.y);
+        nx = sc.x + sc.w - nw;
+      } else if(cropState.resizing === 'tr') {
+        nw = clamp(sc.w + dx, 20, cw - sc.x);
+        nh = r ? nw / r : clamp(sc.h - dy, 20, sc.y + sc.h);
+        ny = sc.y + sc.h - nh;
+      } else if(cropState.resizing === 'tl') {
+        nw = clamp(sc.w - dx, 20, sc.x + sc.w);
+        nh = r ? nw / r : clamp(sc.h - dy, 20, sc.y + sc.h);
+        nx = sc.x + sc.w - nw;
+        ny = sc.y + sc.h - nh;
+      }
+      cropState.x = Math.round(nx); cropState.y = Math.round(ny);
+      cropState.w = Math.round(nw); cropState.h = Math.round(nh);
+    }
+    updateCropBox();
+  }
+
+  function onUp() { cropState.dragging = false; cropState.resizing = null; }
+
+  box.addEventListener('mousedown', e => onDown(e, 'move'));
+  box.addEventListener('touchstart', e => onDown(e, 'move'), {passive:false});
+  document.getElementById('ch-br').addEventListener('mousedown', e => { e.stopPropagation(); onDown(e, 'br'); });
+  document.getElementById('ch-bl').addEventListener('mousedown', e => { e.stopPropagation(); onDown(e, 'bl'); });
+  document.getElementById('ch-tr').addEventListener('mousedown', e => { e.stopPropagation(); onDown(e, 'tr'); });
+  document.getElementById('ch-tl').addEventListener('mousedown', e => { e.stopPropagation(); onDown(e, 'tl'); });
+  document.getElementById('ch-br').addEventListener('touchstart', e => { e.stopPropagation(); onDown(e, 'br'); }, {passive:false});
+  document.getElementById('ch-bl').addEventListener('touchstart', e => { e.stopPropagation(); onDown(e, 'bl'); }, {passive:false});
+  document.getElementById('ch-tr').addEventListener('touchstart', e => { e.stopPropagation(); onDown(e, 'tr'); }, {passive:false});
+  document.getElementById('ch-tl').addEventListener('touchstart', e => { e.stopPropagation(); onDown(e, 'tl'); }, {passive:false});
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('touchmove', onMove, {passive:false});
+  window.addEventListener('mouseup', onUp);
+  window.addEventListener('touchend', onUp);
+}
+
+async function cropImage() {
+  const file = uploadedFiles[0];
+  if(!file) throw new Error('No file uploaded.');
   return new Promise((resolve, reject) => {
     const img = new Image();
     const reader = new FileReader();
     reader.onload = e => {
       img.onload = () => {
+        const s = cropState.scale;
+        const sx = cropState.x / s, sy = cropState.y / s;
+        const sw = cropState.w / s, sh = cropState.h / s;
         const canvas = document.createElement('canvas');
-        let cropW = img.width, cropH = img.height;
-        let cropX = 0, cropY = 0;
-
-        if(ratio !== 'free') {
-          const [rw, rh] = ratio.split(':').map(Number);
-          const targetRatio = rw / rh;
-          const imgRatio = img.width / img.height;
-          if(imgRatio > targetRatio) {
-            cropH = img.height;
-            cropW = Math.round(img.height * targetRatio);
-            cropX = Math.round((img.width - cropW) / 2);
-          } else {
-            cropW = img.width;
-            cropH = Math.round(img.width / targetRatio);
-            cropY = Math.round((img.height - cropH) / 2);
-          }
-        }
-        canvas.width = cropW; canvas.height = cropH;
-        canvas.getContext('2d').drawImage(img, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
-        canvas.toBlob(b => b ? resolve(b) : reject(new Error('Crop failed')), 'image/png');
+        canvas.width = Math.round(sw); canvas.height = Math.round(sh);
+        canvas.getContext('2d').drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh);
+        canvas.toBlob(blob => {
+          if(!blob) return reject(new Error('Crop failed'));
+          const baseName = file.name.replace(/\.[^.]+$/, '');
+          resolve([{ name: `${baseName}_cropped.png`, url: URL.createObjectURL(blob), info: `Cropped to ${Math.round(sw)}×${Math.round(sh)}px (${formatSize(blob.size)})` }]);
+        }, 'image/png');
       };
       img.onerror = () => reject(new Error('Failed to load image'));
       img.src = e.target.result;
