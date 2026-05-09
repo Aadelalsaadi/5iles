@@ -1077,6 +1077,9 @@ function handleFiles(files) {
   }
   renderFileList();
   document.getElementById('processBtn').disabled = false;
+  if(currentTool && currentTool.type === 'crop-image') {
+    initCropTool(uploadedFiles[0]);
+  }
 }
 
 function renderFileList() {
