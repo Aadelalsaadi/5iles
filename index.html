@@ -1443,33 +1443,22 @@ function fileToBase64(file) {
 
 async function pdfToJPG() {
   const results = [];
+  const quality = parseInt(document.getElementById('jpgQualitySlider')?.value || 90) / 100;
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   for(const file of uploadedFiles) {
-    const fileBase64 = await fileToBase64(file);
-    const uploadRes = await fetch('/.netlify/functions/pdfco-upload', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ filename: file.name, fileBase64 })
-    });
-    const uploadData = await uploadRes.json();
-    if(uploadData.error) throw new Error(uploadData.message || 'Upload failed');
-    const convertRes = await fetch('/.netlify/functions/pdfco-proxy', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ endpoint: 'pdf/convert/to/jpg', body: { url: uploadData.url, pages: '0-', name: file.name.replace('.pdf','') } })
-    });
-    const convertData = await convertRes.json();
-    if(convertData.error) throw new Error(convertData.message || 'Conversion failed');
-    const urls = convertData.urls || [convertData.url];
-    for(let i = 0; i < urls.length; i++) {
-  const imgRes = await fetch('/.netlify/functions/pdfco-proxy', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ fetchUrl: urls[i] })
-  });
-  const imgData = await imgRes.json();
-  const imgUrl = `data:${imgData.contentType};base64,${imgData.base64}`;
-  results.push({ name: file.name.replace('.pdf', `_page${i+1}.jpg`), url: imgUrl, info: `Page ${i+1} converted to JPG` });
-}
+    const ab = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({data: ab}).promise;
+    for(let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const viewport = page.getViewport({scale: 2.0});
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      await page.render({canvasContext: canvas.getContext('2d'), viewport}).promise;
+      const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', quality));
+      const url = URL.createObjectURL(blob);
+      results.push({ name: file.name.replace('.pdf', `_page${i}.jpg`), url, info: `Page ${i} of ${pdf.numPages} converted to JPG (${formatSize(blob.size)})` });
+    }
   }
   return results;
 }
