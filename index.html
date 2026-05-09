@@ -1536,6 +1536,8 @@ async function resizeImages() {
     const targetH = parseInt(document.getElementById('resizeHeight')?.value || 0);
     const keepAspect = document.getElementById('keepAspect')?.checked !== false;
     if(!targetW && !targetH) throw new Error('Please enter a width or height value.');
+if((targetW && targetW < 10) || (targetH && targetH < 10)) throw new Error('Minimum size is 10px.');
+if((targetW && targetW > 10000) || (targetH && targetH > 10000)) throw new Error('Maximum size is 10,000px.');
     const blob = await resizeImageFile(file, targetW, targetH, keepAspect);
     const baseName = file.name.replace(/\.[^.]+$/, '');
     const ext = file.name.split('.').pop();
