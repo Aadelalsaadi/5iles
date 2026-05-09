@@ -2082,6 +2082,37 @@ async function cropImage() {
   });
 }
 
+// ===================== BLUR IMAGE =====================
+async function blurImage() {
+  const results = [];
+  const blur = parseInt(document.getElementById('blurStrength')?.value || 5);
+  for(const file of uploadedFiles) {
+    const blob = await new Promise((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
+      reader.onload = e => {
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          ctx.filter = `blur(${blur}px)`;
+          ctx.drawImage(img, -blur*2, -blur*2, img.width+blur*4, img.height+blur*4);
+          canvas.toBlob(b => b ? resolve(b) : reject(new Error('Blur failed')), file.type || 'image/jpeg', 0.95);
+        };
+        img.onerror = () => reject(new Error('Failed to load image'));
+        img.src = e.target.result;
+      };
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsDataURL(file);
+    });
+    const baseName = file.name.replace(/\.[^.]+$/, '');
+    const ext = file.name.split('.').pop();
+    results.push({ name: `${baseName}_blurred.${ext}`, url: URL.createObjectURL(blob), info: `Blurred (${blur}px, ${formatSize(blob.size)})` });
+  }
+  return results;
+}
+
 // ===================== FLIP IMAGE =====================
 async function flipImage() {
   const results = [];
