@@ -1339,6 +1339,8 @@ if (!currentUser) {
       results = await wordToPDF();
     } else if(currentTool.type === 'crop-image') {
       results = await cropImage();
+      } else if(currentTool.type === 'qr-code') {
+  results = await generateQRCode();
     } else if(currentTool.type === 'adjust-image') {
   results = await adjustImage();
 } else if(currentTool.type === 'blur-image') {
