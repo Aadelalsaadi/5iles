@@ -792,7 +792,7 @@ function openTool(id) {
   document.getElementById('workspaceTitle').textContent = tool.icon + ' ' + tool.name;
   document.getElementById('fileInput').accept = tool.accept;
   document.getElementById('fileInput').multiple = tool.multiple || (tool.type === 'merge-pdf');
-  document.getElementById('dropSub').textContent = 'Accepts: ' + tool.accept.replace(/\./g,'').toUpperCase();
+  document.getElementById('dropSub').textContent = tool.accept ? 'Accepts: ' + tool.accept.replace(/\./g,'').toUpperCase() : '';
   document.getElementById('fileList').innerHTML = '';
   document.getElementById('resultBox').classList.remove('active');
   document.getElementById('progressBar').classList.remove('active');
