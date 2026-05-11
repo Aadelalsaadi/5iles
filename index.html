@@ -2160,7 +2160,19 @@ async function cropImage() {
     reader.readAsDataURL(file);
   });
 }
-
+// ===================== WORD COUNTER =====================
+async function countWords() {
+  const text = document.getElementById('wcText')?.value || '';
+  if(!text.trim()) throw new Error('Please enter some text first.');
+  const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+  const chars = text.length;
+  const charsNoSpaces = text.replace(/\s/g,'').length;
+  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
+  const readingTime = Math.ceil(words / 200);
+  const content = `Word Count Report\n==================\nWords: ${words}\nCharacters: ${chars}\nCharacters (no spaces): ${charsNoSpaces}\nSentences: ${sentences}\nReading time: ~${readingTime} min\n\nOriginal text:\n${text}`;
+  const blob = new Blob([content], {type:'text/plain'});
+  return [{ name: 'word-count-report.txt', url: URL.createObjectURL(blob), info: `${words} words · ${chars} characters · ~${readingTime} min read` }];
+}
   // ===================== QR CODE =====================
 async function generateQRCode() {
   const file = uploadedFiles[0];
