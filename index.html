@@ -1029,6 +1029,36 @@ function openTool(id) {
         </div>
         <p id="cropHint" style="color:var(--text2);font-size:0.8rem;margin-top:8px;display:none;">Drag to move · Drag corners to resize · Then click Process</p>
       </div>`;
+    } else if(tool.type === 'password-gen') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <div class="option-group">
+            <div class="option-label">Length</div>
+            <select class="option-select" id="pwdLength">
+              <option value="12">12 characters</option>
+              <option value="16" selected>16 characters</option>
+              <option value="24">24 characters</option>
+              <option value="32">32 characters</option>
+            </select>
+          </div>
+          <div class="option-group">
+            <div class="option-label">How many</div>
+            <select class="option-select" id="pwdCount">
+              <option value="1">1 password</option>
+              <option value="5" selected>5 passwords</option>
+              <option value="10">10 passwords</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;color:var(--text2);cursor:pointer;"><input type="checkbox" id="pwdUpper" checked style="accent-color:var(--accent);"> Uppercase</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;color:var(--text2);cursor:pointer;"><input type="checkbox" id="pwdNumbers" checked style="accent-color:var(--accent);"> Numbers</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;color:var(--text2);cursor:pointer;"><input type="checkbox" id="pwdSymbols" checked style="accent-color:var(--accent);"> Symbols</label>
+        </div>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
     } else if(tool.type === 'word-counter') {
     document.getElementById('dropZone').style.display = 'none';
     opts.innerHTML = `
