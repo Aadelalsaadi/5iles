@@ -2193,6 +2193,34 @@ async function cropImage() {
     reader.readAsDataURL(file);
   });
 }
+  // ===================== PASSWORD GENERATOR =====================
+async function generatePasswords() {
+  const length = parseInt(document.getElementById('pwdLength')?.value || 16);
+  const count = parseInt(document.getElementById('pwdCount')?.value || 5);
+  const useUpper = document.getElementById('pwdUpper')?.checked !== false;
+  const useNumbers = document.getElementById('pwdNumbers')?.checked !== false;
+  const useSymbols = document.getElementById('pwdSymbols')?.checked !== false;
+  const lower = 'abcdefghijklmnopqrstuvwxyz';
+  const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const numbers = '0123456789';
+  const symbols = '!@#$%^&*()-_=+[]{}|;:,.<>?';
+  let chars = lower;
+  if(useUpper) chars += upper;
+  if(useNumbers) chars += numbers;
+  if(useSymbols) chars += symbols;
+  if(chars.length === 0) throw new Error('Please select at least one character type.');
+  const passwords = [];
+  for(let i = 0; i < count; i++) {
+    let pwd = '';
+    for(let j = 0; j < length; j++) {
+      pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    passwords.push(pwd);
+  }
+  const content = `Generated Passwords\n${'='.repeat(20)}\n\n${passwords.join('\n')}\n\nSettings: ${length} chars, Upper:${useUpper}, Numbers:${useNumbers}, Symbols:${useSymbols}`;
+  const blob = new Blob([content], {type:'text/plain'});
+  return [{ name: 'passwords.txt', url: URL.createObjectURL(blob), info: `${count} password${count>1?'s':''} generated (${length} characters each)` }];
+}
 // ===================== WORD COUNTER =====================
 async function countWords() {
   const text = document.getElementById('wcText')?.value || '';
