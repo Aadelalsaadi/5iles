@@ -1030,6 +1030,30 @@ function openTool(id) {
         </div>
         <p id="cropHint" style="color:var(--text2);font-size:0.8rem;margin-top:8px;display:none;">Drag to move · Drag corners to resize · Then click Process</p>
       </div>`;
+    } else if(tool.type === 'lorem-ipsum') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <div class="option-group">
+            <div class="option-label">Paragraphs</div>
+            <select class="option-select" id="loremCount">
+              <option value="1">1 paragraph</option>
+              <option value="3" selected>3 paragraphs</option>
+              <option value="5">5 paragraphs</option>
+              <option value="10">10 paragraphs</option>
+            </select>
+          </div>
+          <div class="option-group">
+            <div class="option-label">Format</div>
+            <select class="option-select" id="loremFormat">
+              <option value="plain">Plain text</option>
+              <option value="html">HTML paragraphs</option>
+            </select>
+          </div>
+        </div>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
     } else if(tool.type === 'password-gen') {
     document.getElementById('dropZone').style.display = 'none';
     opts.innerHTML = `
