@@ -1321,7 +1321,7 @@ function formatSize(bytes) {
 // ===================== PROCESSING =====================
 async function processFiles() {
   if(!currentTool) return;
-if(currentTool.type !== 'qr-code' && currentTool.type !== 'word-counter' && currentTool.type !== 'password-gen' && !uploadedFiles.length) return;
+if(currentTool.type !== 'qr-code' && currentTool.type !== 'word-counter' && currentTool.type !== 'password-gen' && currentTool.type !== 'lorem-ipsum' && !uploadedFiles.length) return;
   const btn = document.getElementById('processBtn');
   const bar = document.getElementById('progressBar');
   const fill = document.getElementById('progressFill');
@@ -1406,6 +1406,8 @@ if (!currentUser) {
       results = await wordToPDF();
     } else if(currentTool.type === 'crop-image') {
       results = await cropImage();
+      } else if(currentTool.type === 'lorem-ipsum') {
+  results = await generateLorem();
       } else if(currentTool.type === 'password-gen') {
   results = await generatePasswords();
       } else if(currentTool.type === 'word-counter') {
