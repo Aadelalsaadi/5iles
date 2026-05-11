@@ -2220,6 +2220,38 @@ async function cropImage() {
     reader.readAsDataURL(file);
   });
 }
+  // ===================== LOREM IPSUM GENERATOR =====================
+async function generateLorem() {
+  const count = parseInt(document.getElementById('loremCount')?.value || 3);
+  const format = document.getElementById('loremFormat')?.value || 'plain';
+  const sentences = [
+    'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+    'Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+    'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.',
+    'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum.',
+    'Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia.',
+    'Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit.',
+    'Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet.',
+    'Ut labore et dolore magnam aliquam quaerat voluptatem.',
+    'Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse.',
+    'Nam libero tempore cum soluta nobis est eligendi optio cumque nihil impedit.'
+  ];
+  const paragraphs = [];
+  for(let i = 0; i < count; i++) {
+    const shuffled = [...sentences].sort(() => Math.random() - 0.5);
+    const para = shuffled.slice(0, 4 + Math.floor(Math.random() * 3)).join(' ');
+    paragraphs.push(para);
+  }
+  let content;
+  if(format === 'html') {
+    content = paragraphs.map(p => `<p>${p}</p>`).join('\n\n');
+  } else {
+    content = paragraphs.join('\n\n');
+  }
+  const ext = format === 'html' ? 'html' : 'txt';
+  const blob = new Blob([content], {type:'text/plain'});
+  return [{ name: `lorem-ipsum.${ext}`, url: URL.createObjectURL(blob), info: `${count} paragraph${count>1?'s':''} generated` }];
+}
   // ===================== PASSWORD GENERATOR =====================
 async function generatePasswords() {
   const length = parseInt(document.getElementById('pwdLength')?.value || 16);
