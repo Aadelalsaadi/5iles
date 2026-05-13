@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="styles.css" />
   <style>
     .tool-container { max-width: 800px; margin: 40px auto; padding: 20px; }
+
+    /* DROP ZONE */
     .drop-zone {
       border: 2px dashed var(--border);
       border-radius: 16px;
@@ -22,29 +24,122 @@
     .drop-zone p { margin: 0; color: var(--text2); font-size: 0.9rem; }
     #fileInput { display: none; }
 
-    .file-info {
+    /* BATCH BADGE */
+    .batch-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(124,58,237,0.12);
+      color: var(--accent);
+      border: 1px solid rgba(124,58,237,0.3);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-top: 12px;
+    }
+
+    /* FILE QUEUE */
+    .file-queue {
+      margin: 20px 0;
+      display: none;
+    }
+    .queue-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .queue-header h4 { margin: 0; font-size: 1rem; }
+    .queue-count {
+      background: var(--accent);
+      color: #fff;
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+    .add-more-btn {
+      background: transparent;
+      border: 1.5px solid var(--accent);
+      color: var(--accent);
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .add-more-btn:hover { background: rgba(124,58,237,0.1); }
+
+    .file-item {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px 20px;
-      margin: 20px 0;
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 8px;
       display: flex;
       align-items: center;
       gap: 12px;
+      transition: all 0.2s;
     }
-    .file-info .file-icon { font-size: 2rem; }
-    .file-info .file-details { flex: 1; }
-    .file-info .file-name { font-weight: 600; margin-bottom: 4px; }
-    .file-info .file-size { color: var(--text2); font-size: 0.85rem; }
-    .file-info .remove-btn { background: none; border: none; color: var(--text2); cursor: pointer; font-size: 1.2rem; padding: 4px; }
-    .file-info .remove-btn:hover { color: #ff4d4d; }
+    .file-item .file-icon { font-size: 1.5rem; flex-shrink: 0; }
+    .file-item .file-details { flex: 1; min-width: 0; }
+    .file-item .file-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .file-item .file-size { color: var(--text2); font-size: 0.8rem; margin-top: 2px; }
+    .file-item .file-status {
+      font-size: 0.8rem;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .file-item .status-waiting { background: rgba(148,163,184,0.15); color: var(--text2); }
+    .file-item .status-processing { background: rgba(124,58,237,0.15); color: var(--accent); }
+    .file-item .status-done { background: rgba(34,197,94,0.15); color: #22c55e; }
+    .file-item .status-error { background: rgba(255,77,77,0.15); color: #ff4d4d; }
+    .file-item .remove-btn {
+      background: none; border: none; color: var(--text2);
+      cursor: pointer; font-size: 1.1rem; padding: 4px;
+      flex-shrink: 0;
+    }
+    .file-item .remove-btn:hover { color: #ff4d4d; }
+    .file-item .download-mini {
+      background: none; border: none;
+      color: #22c55e; cursor: pointer;
+      font-size: 1.1rem; padding: 4px;
+      flex-shrink: 0;
+      display: none;
+    }
+    .file-item.done .download-mini { display: block; }
+    .file-item.done .remove-btn { display: none; }
+    .file-item .mini-spinner {
+      width: 16px; height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      flex-shrink: 0;
+      display: none;
+    }
+    .file-item.processing .mini-spinner { display: block; }
+    .file-item.processing .remove-btn { display: none; }
 
+    /* COMPRESSION OPTIONS */
     .compression-options {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 20px;
       margin: 20px 0;
+      display: none;
     }
     .compression-options h4 { margin: 0 0 16px; font-size: 1rem; }
     .quality-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
@@ -63,6 +158,7 @@
     .quality-btn .q-label { font-weight: 600; font-size: 0.9rem; margin-bottom: 4px; }
     .quality-btn .q-desc { font-size: 0.75rem; color: var(--text2); }
 
+    /* PROCESS BUTTON */
     .process-btn {
       width: 100%;
       padding: 16px;
@@ -74,33 +170,45 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
-      margin-top: 20px;
+      margin-top: 4px;
+      display: none;
     }
     .process-btn:hover:not(:disabled) { background: #6d28d9; transform: translateY(-1px); }
     .process-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-    .progress-section {
+    /* OVERALL PROGRESS BAR */
+    .overall-progress {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 24px;
+      padding: 20px;
       margin: 20px 0;
-      text-align: center;
       display: none;
     }
-    .progress-section.visible { display: block; }
-    .spinner {
-      width: 48px; height: 48px;
-      border: 4px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin: 0 auto 16px;
+    .overall-progress.visible { display: block; }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .progress-text { font-size: 1rem; color: var(--text2); }
+    .progress-bar-track {
+      background: var(--border);
+      border-radius: 99px;
+      height: 8px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #a78bfa);
+      border-radius: 99px;
+      transition: width 0.4s ease;
+      width: 0%;
+    }
 
-    .result-section {
+    /* BATCH SUMMARY */
+    .batch-summary {
       background: var(--surface);
       border: 1px solid #22c55e;
       border-radius: 12px;
@@ -108,10 +216,10 @@
       margin: 20px 0;
       display: none;
     }
-    .result-section.visible { display: block; }
-    .result-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
-    .result-header .check { color: #22c55e; font-size: 1.5rem; }
-    .result-header h3 { margin: 0; color: #22c55e; }
+    .batch-summary.visible { display: block; }
+    .summary-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+    .summary-header .check { color: #22c55e; font-size: 1.5rem; }
+    .summary-header h3 { margin: 0; color: #22c55e; }
     .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
     .stat-card {
       background: var(--surface2);
@@ -122,7 +230,8 @@
     .stat-card .stat-label { font-size: 0.8rem; color: var(--text2); margin-bottom: 6px; }
     .stat-card .stat-value { font-size: 1.2rem; font-weight: 700; }
     .stat-card .stat-value.green { color: #22c55e; }
-    .download-btn {
+
+    .download-all-btn {
       width: 100%;
       padding: 16px;
       background: #22c55e;
@@ -137,8 +246,10 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
+      margin-bottom: 12px;
     }
-    .download-btn:hover { background: #16a34a; transform: translateY(-1px); }
+    .download-all-btn:hover { background: #16a34a; transform: translateY(-1px); }
+    .download-all-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
     .compress-again-btn {
       width: 100%;
@@ -151,10 +262,10 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
-      margin-top: 12px;
     }
     .compress-again-btn:hover { background: rgba(124,58,237,0.1); }
 
+    /* ERROR */
     .error-section {
       background: rgba(255,77,77,0.1);
       border: 1px solid #ff4d4d;
@@ -166,6 +277,8 @@
     }
     .error-section.visible { display: block; }
 
+    @keyframes spin { to { transform: rotate(360deg); } }
+
     @media (max-width: 600px) {
       .quality-options { grid-template-columns: 1fr; }
       .stats-grid { grid-template-columns: 1fr; }
@@ -175,16 +288,16 @@
 <body>
   <!-- NAV -->
   <nav>
-    <a href="#" class="logo">
+    <a href="index.html" class="logo">
       <div class="logo-icon">S</div>
       <span>5iles</span>
     </a>
     <ul class="nav-links">
-      <li><a href="#tools">Tools</a></li>
-      <li><a href="#features">Features</a></li>
-      <li><a href="#voice">Voice to Text</a></li>
-      <li><a href="#pricing">Pricing</a></li>
-      <li><a href="#faq">FAQ</a></li>
+      <li><a href="index.html#tools">Tools</a></li>
+      <li><a href="index.html#features">Features</a></li>
+      <li><a href="index.html#voice">Voice to Text</a></li>
+      <li><a href="index.html#pricing">Pricing</a></li>
+      <li><a href="index.html#faq">FAQ</a></li>
     </ul>
     <div class="nav-btns" id="navBtns">
       <button class="btn btn-ghost" onclick="openModal('signin')">Sign in</button>
@@ -198,32 +311,33 @@
       <span style="font-size:2rem;">📉</span>
       <div>
         <h1 style="margin:0; font-size:1.5rem;">Compress PDF</h1>
-        <p style="margin:0; color:var(--text2); font-size:0.9rem;">Reduce PDF file size while maintaining quality</p>
+        <p style="margin:0; color:var(--text2); font-size:0.9rem;">Reduce PDF file size while maintaining quality · Batch process multiple files at once</p>
       </div>
     </div>
   </div>
 
   <div class="tool-container">
+
     <!-- DROP ZONE -->
     <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
       <div class="icon">📁</div>
-      <h3>Drag & drop your PDF here</h3>
-      <p>or click to browse · Max file size: 50MB</p>
-      <input type="file" id="fileInput" accept=".pdf" />
+      <h3>Drag & drop your PDFs here</h3>
+      <p>or click to browse · Max 50MB per file</p>
+      <div class="batch-badge">⚡ Batch mode — add multiple files</div>
+      <input type="file" id="fileInput" accept=".pdf" multiple />
     </div>
 
-    <!-- FILE INFO -->
-    <div class="file-info" id="fileInfo" style="display:none;">
-      <div class="file-icon">📄</div>
-      <div class="file-details">
-        <div class="file-name" id="fileName">file.pdf</div>
-        <div class="file-size" id="fileSize">0 MB</div>
+    <!-- FILE QUEUE -->
+    <div class="file-queue" id="fileQueue">
+      <div class="queue-header">
+        <h4>📋 Files <span class="queue-count" id="queueCount">0</span></h4>
+        <button class="add-more-btn" onclick="document.getElementById('fileInput').click()">+ Add more</button>
       </div>
-      <button class="remove-btn" onclick="removeFile()" title="Remove file">✕</button>
+      <div id="fileList"></div>
     </div>
 
     <!-- COMPRESSION OPTIONS -->
-    <div class="compression-options" id="compressionOptions" style="display:none;">
+    <div class="compression-options" id="compressionOptions">
       <h4>🎚️ Compression Level</h4>
       <div class="quality-options">
         <div class="quality-btn" onclick="selectQuality('screen')" id="q-screen">
@@ -245,131 +359,205 @@
     </div>
 
     <!-- PROCESS BUTTON -->
-    <button class="process-btn" id="processBtn" style="display:none;" onclick="compressPDF()">
-      📉 Compress PDF
+    <button class="process-btn" id="processBtn" onclick="processAll()">
+      📉 Compress <span id="btnLabel">PDF</span>
     </button>
 
-    <!-- PROGRESS -->
-    <div class="progress-section" id="progressSection">
-      <div class="spinner"></div>
-      <div class="progress-text" id="progressText">Uploading your PDF...</div>
+    <!-- OVERALL PROGRESS BAR -->
+    <div class="overall-progress" id="overallProgress">
+      <div class="progress-label">
+        <span id="progressText">Processing files...</span>
+        <span id="progressFraction">0 / 0</span>
+      </div>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="progressFill"></div>
+      </div>
     </div>
 
     <!-- ERROR -->
     <div class="error-section" id="errorSection"></div>
 
-    <!-- RESULT -->
-    <div class="result-section" id="resultSection">
-      <div class="result-header">
+    <!-- BATCH SUMMARY -->
+    <div class="batch-summary" id="batchSummary">
+      <div class="summary-header">
         <span class="check">✅</span>
-        <h3>Compression Complete!</h3>
+        <h3 id="summaryTitle">Compression Complete!</h3>
       </div>
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="stat-label">Original Size</div>
-          <div class="stat-value" id="originalSize">—</div>
+          <div class="stat-label">Files Processed</div>
+          <div class="stat-value" id="statFiles">—</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Compressed Size</div>
-          <div class="stat-value green" id="compressedSize">—</div>
+          <div class="stat-label">Total Saved</div>
+          <div class="stat-value green" id="statSaved">—</div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Size Reduced</div>
-          <div class="stat-value green" id="reduction">—</div>
+          <div class="stat-label">Avg. Reduction</div>
+          <div class="stat-value green" id="statAvg">—</div>
         </div>
       </div>
-      <button class="download-btn" id="downloadBtn" onclick="downloadFile()">
-        ⬇️ Download Compressed PDF
+      <button class="download-all-btn" id="downloadAllBtn" onclick="downloadAll()">
+        ⬇️ Download All Compressed PDFs
       </button>
       <button class="compress-again-btn" onclick="resetTool()">
-        🔄 Compress Another PDF
+        🔄 Compress More PDFs
       </button>
     </div>
+
   </div>
 
   <script src="sw.js" defer></script>
   <script>
     const API_KEY = 'alsaadi.legend@gmail.com_7FtrjwweCnnIMe5Kxo8hkWeFREJzYGaHjQK4C7a3OkR2XaK7daD3DVgozSoKAtyj';
-    let selectedFile = null;
-    let selectedQuality = 'ebook';
-    let downloadUrl = null;
 
-    // Drag and drop
+    // State
+    let files = []; // [{file, status: 'waiting'|'processing'|'done'|'error', downloadUrl, originalSize, compressedSize}]
+    let selectedQuality = 'ebook';
+    let isProcessing = false;
+
+    // ── DROP ZONE ──────────────────────────────────────────────
     const dropZone = document.getElementById('dropZone');
-    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
     dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-    dropZone.addEventListener('drop', (e) => {
+    dropZone.addEventListener('drop', e => {
       e.preventDefault();
       dropZone.classList.remove('dragover');
-      const file = e.dataTransfer.files[0];
-      if (file && file.type === 'application/pdf') handleFile(file);
-      else showError('Please upload a PDF file.');
+      addFiles(Array.from(e.dataTransfer.files));
     });
 
-    document.getElementById('fileInput').addEventListener('change', (e) => {
-      if (e.target.files[0]) handleFile(e.target.files[0]);
+    document.getElementById('fileInput').addEventListener('change', e => {
+      addFiles(Array.from(e.target.files));
+      e.target.value = ''; // allow re-adding same file
     });
 
-    function handleFile(file) {
-      if (file.size > 50 * 1024 * 1024) { showError('File size exceeds 50MB limit.'); return; }
-      selectedFile = file;
-      document.getElementById('fileName').textContent = file.name;
-      document.getElementById('fileSize').textContent = formatSize(file.size);
-      document.getElementById('fileInfo').style.display = 'flex';
-      document.getElementById('dropZone').style.display = 'none';
-      document.getElementById('compressionOptions').style.display = 'block';
-      document.getElementById('processBtn').style.display = 'block';
-      hideError();
-      document.getElementById('resultSection').classList.remove('visible');
+    // ── FILE MANAGEMENT ────────────────────────────────────────
+    function addFiles(newFiles) {
+      const pdfs = newFiles.filter(f => f.type === 'application/pdf');
+      const skipped = newFiles.length - pdfs.length;
+
+      pdfs.forEach(f => {
+        if (f.size > 50 * 1024 * 1024) {
+          showError(`"${f.name}" exceeds the 50MB limit and was skipped.`);
+          return;
+        }
+        // Avoid duplicates
+        if (files.find(x => x.file.name === f.name && x.file.size === f.size)) return;
+        files.push({ file: f, status: 'waiting', downloadUrl: null, originalSize: f.size, compressedSize: 0 });
+      });
+
+      if (skipped > 0) showError(`${skipped} non-PDF file(s) were skipped.`);
+      renderQueue();
     }
 
-    function removeFile() {
-      selectedFile = null;
-      document.getElementById('fileInput').value = '';
-      document.getElementById('fileInfo').style.display = 'none';
-      document.getElementById('dropZone').style.display = 'block';
-      document.getElementById('compressionOptions').style.display = 'none';
-      document.getElementById('processBtn').style.display = 'none';
-      document.getElementById('resultSection').classList.remove('visible');
-      hideError();
+    function removeFile(index) {
+      files.splice(index, 1);
+      renderQueue();
     }
 
+    function renderQueue() {
+      const queue = document.getElementById('fileQueue');
+      const list = document.getElementById('fileList');
+      const count = document.getElementById('queueCount');
+      const processBtn = document.getElementById('processBtn');
+      const compressionOptions = document.getElementById('compressionOptions');
+      const btnLabel = document.getElementById('btnLabel');
+
+      if (files.length === 0) {
+        queue.style.display = 'none';
+        dropZone.style.display = 'block';
+        processBtn.style.display = 'none';
+        compressionOptions.style.display = 'none';
+        return;
+      }
+
+      dropZone.style.display = 'none';
+      queue.style.display = 'block';
+      compressionOptions.style.display = 'block';
+      processBtn.style.display = 'block';
+      count.textContent = files.length;
+      btnLabel.textContent = files.length === 1 ? 'PDF' : `${files.length} PDFs`;
+
+      list.innerHTML = '';
+      files.forEach((item, i) => {
+        const el = document.createElement('div');
+        el.className = `file-item ${item.status}`;
+        el.id = `file-item-${i}`;
+
+        const savingText = item.status === 'done' && item.compressedSize > 0
+          ? ` → ${formatSize(item.compressedSize)} (${((item.originalSize - item.compressedSize) / item.originalSize * 100).toFixed(1)}% saved)`
+          : '';
+
+        const statusMap = {
+          waiting: '<span class="file-status status-waiting">Waiting</span>',
+          processing: '<span class="file-status status-processing">Compressing…</span>',
+          done: '<span class="file-status status-done">✓ Done</span>',
+          error: '<span class="file-status status-error">✗ Failed</span>'
+        };
+
+        el.innerHTML = `
+          <div class="file-icon">📄</div>
+          <div class="file-details">
+            <div class="file-name">${item.file.name}</div>
+            <div class="file-size">${formatSize(item.originalSize)}${savingText}</div>
+          </div>
+          <div class="mini-spinner"></div>
+          ${statusMap[item.status]}
+          <button class="remove-btn" onclick="removeFile(${i})" title="Remove">✕</button>
+          <button class="download-mini" onclick="downloadSingle(${i})" title="Download">⬇️</button>
+        `;
+        list.appendChild(el);
+      });
+    }
+
+    // ── QUALITY ────────────────────────────────────────────────
     function selectQuality(q) {
       selectedQuality = q;
       document.querySelectorAll('.quality-btn').forEach(btn => btn.classList.remove('active'));
       document.getElementById('q-' + q).classList.add('active');
     }
 
-    function formatSize(bytes) {
-      if (bytes < 1024) return bytes + ' B';
-      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-      return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
-    }
-
-    function showError(msg) {
-      const el = document.getElementById('errorSection');
-      el.textContent = '✗ ' + msg;
-      el.classList.add('visible');
-    }
-
-    function hideError() {
-      document.getElementById('errorSection').classList.remove('visible');
-    }
-
-    async function compressPDF() {
-      if (!selectedFile) return;
-
-      const originalSize = selectedFile.size;
+    // ── PROCESSING ─────────────────────────────────────────────
+    async function processAll() {
+      if (files.length === 0 || isProcessing) return;
+      isProcessing = true;
       hideError();
-      document.getElementById('resultSection').classList.remove('visible');
-      document.getElementById('progressSection').classList.add('visible');
+
+      const waiting = files.filter(f => f.status === 'waiting');
+      if (waiting.length === 0) { isProcessing = false; return; }
+
       document.getElementById('processBtn').disabled = true;
+      document.getElementById('overallProgress').classList.add('visible');
+      document.getElementById('batchSummary').classList.remove('visible');
+
+      const total = waiting.length;
+      let done = 0;
+
+      updateOverallProgress(done, total);
+
+      // Process one at a time to respect API rate limits
+      for (let i = 0; i < files.length; i++) {
+        if (files[i].status !== 'waiting') continue;
+        await compressOne(i);
+        done++;
+        updateOverallProgress(done, total);
+      }
+
+      // Show summary
+      showBatchSummary();
+      document.getElementById('processBtn').disabled = false;
+      isProcessing = false;
+    }
+
+    async function compressOne(index) {
+      const item = files[index];
+      item.status = 'processing';
+      renderQueue();
 
       try {
-        // Step 1: Upload file
-        updateProgress('Uploading your PDF...');
+        // Upload
         const formData = new FormData();
-        formData.append('file', selectedFile);
+        formData.append('file', item.file);
 
         const uploadRes = await fetch('https://api.pdf.co/v1/file/upload', {
           method: 'POST',
@@ -379,81 +567,142 @@
         const uploadData = await uploadRes.json();
         if (uploadData.error) throw new Error(uploadData.message || 'Upload failed');
 
-        const fileUrl = uploadData.url;
-
-        // Step 2: Compress
-        updateProgress('Compressing your PDF... This may take a moment.');
+        // Compress
         const compressRes = await fetch('https://api.pdf.co/v1/pdf/optimize', {
           method: 'POST',
-          headers: {
-            'x-api-key': API_KEY,
-            'Content-Type': 'application/json'
-          },
+          headers: { 'x-api-key': API_KEY, 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            url: fileUrl,
+            url: uploadData.url,
             grayscale: false,
-            name: selectedFile.name.replace('.pdf', '_compressed.pdf')
+            name: item.file.name.replace('.pdf', '_compressed.pdf')
           })
         });
         const compressData = await compressRes.json();
         if (compressData.error) throw new Error(compressData.message || 'Compression failed');
 
-        downloadUrl = compressData.url;
+        item.downloadUrl = compressData.url;
 
-        // Step 3: Get compressed file size
-        updateProgress('Finalizing...');
-        const headRes = await fetch(downloadUrl, { method: 'HEAD' });
-        const compressedSize = parseInt(headRes.headers.get('content-length') || 0);
+        // Get compressed size
+        try {
+          const headRes = await fetch(item.downloadUrl, { method: 'HEAD' });
+          item.compressedSize = parseInt(headRes.headers.get('content-length') || 0);
+        } catch { item.compressedSize = 0; }
 
-        // Show results
-        document.getElementById('progressSection').classList.remove('visible');
-        document.getElementById('originalSize').textContent = formatSize(originalSize);
-
-        if (compressedSize > 0) {
-          const saved = ((originalSize - compressedSize) / originalSize * 100).toFixed(1);
-          document.getElementById('compressedSize').textContent = formatSize(compressedSize);
-          document.getElementById('reduction').textContent = saved + '%';
-        } else {
-          document.getElementById('compressedSize').textContent = 'Compressed ✓';
-          document.getElementById('reduction').textContent = 'Optimized ✓';
-        }
-
-        document.getElementById('resultSection').classList.add('visible');
-        document.getElementById('processBtn').disabled = false;
-
+        item.status = 'done';
       } catch (err) {
-        document.getElementById('progressSection').classList.remove('visible');
-        document.getElementById('processBtn').disabled = false;
-        showError(err.message || 'Something went wrong. Please try again.');
+        item.status = 'error';
+        item.errorMsg = err.message;
       }
+
+      renderQueue();
     }
 
-    function updateProgress(text) {
-      document.getElementById('progressText').textContent = text;
+    function updateOverallProgress(done, total) {
+      const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+      document.getElementById('progressFill').style.width = pct + '%';
+      document.getElementById('progressText').textContent =
+        done < total ? `Compressing file ${done + 1} of ${total}…` : 'All done!';
+      document.getElementById('progressFraction').textContent = `${done} / ${total}`;
     }
 
-    async function downloadFile() {
-      if (!downloadUrl) return;
-      const btn = document.getElementById('downloadBtn');
-      btn.textContent = '⏳ Preparing download...';
+    function showBatchSummary() {
+      const done = files.filter(f => f.status === 'done');
+      const failed = files.filter(f => f.status === 'error');
+
+      const totalOriginal = done.reduce((s, f) => s + f.originalSize, 0);
+      const totalCompressed = done.reduce((s, f) => s + f.compressedSize, 0);
+      const totalSaved = totalOriginal - totalCompressed;
+      const avgReduction = totalOriginal > 0 && totalCompressed > 0
+        ? ((totalSaved / totalOriginal) * 100).toFixed(1) + '%'
+        : '—';
+
+      document.getElementById('statFiles').textContent = `${done.length} / ${files.length}`;
+      document.getElementById('statSaved').textContent = totalSaved > 0 ? formatSize(totalSaved) : '—';
+      document.getElementById('statAvg').textContent = avgReduction;
+
+      const title = failed.length > 0
+        ? `${done.length} compressed, ${failed.length} failed`
+        : `${done.length} file${done.length !== 1 ? 's' : ''} compressed!`;
+      document.getElementById('summaryTitle').textContent = title;
+
+      document.getElementById('batchSummary').classList.add('visible');
+      document.getElementById('overallProgress').classList.remove('visible');
+
+      // Show download-all only if multiple done
+      const btn = document.getElementById('downloadAllBtn');
+      btn.style.display = done.length > 1 ? 'flex' : done.length === 1 ? 'flex' : 'none';
+      btn.textContent = done.length === 1
+        ? '⬇️ Download Compressed PDF'
+        : `⬇️ Download All ${done.length} Compressed PDFs`;
+    }
+
+    // ── DOWNLOAD ───────────────────────────────────────────────
+    async function downloadSingle(index) {
+      const item = files[index];
+      if (!item.downloadUrl) return;
+      await triggerDownload(item.downloadUrl, item.file.name.replace('.pdf', '_compressed.pdf'));
+    }
+
+    async function downloadAll() {
+      const done = files.filter(f => f.status === 'done' && f.downloadUrl);
+      const btn = document.getElementById('downloadAllBtn');
+      btn.disabled = true;
+      btn.textContent = '⏳ Preparing downloads…';
+
+      for (const item of done) {
+        await triggerDownload(item.downloadUrl, item.file.name.replace('.pdf', '_compressed.pdf'));
+        await delay(400); // small gap between downloads
+      }
+
+      btn.disabled = false;
+      btn.textContent = done.length === 1
+        ? '⬇️ Download Compressed PDF'
+        : `⬇️ Download All ${done.length} Compressed PDFs`;
+    }
+
+    async function triggerDownload(url, filename) {
       try {
-        const res = await fetch(downloadUrl);
+        const res = await fetch(url);
         const blob = await res.blob();
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = selectedFile.name.replace('.pdf', '_compressed.pdf');
+        a.download = filename;
         a.click();
         URL.revokeObjectURL(a.href);
       } catch {
-        window.open(downloadUrl, '_blank');
+        window.open(url, '_blank');
       }
-      btn.innerHTML = '⬇️ Download Compressed PDF';
     }
 
+    // ── HELPERS ────────────────────────────────────────────────
+    function formatSize(bytes) {
+      if (!bytes || bytes <= 0) return '—';
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('errorSection');
+      el.textContent = '⚠ ' + msg;
+      el.style.display = 'block';
+    }
+
+    function hideError() {
+      document.getElementById('errorSection').style.display = 'none';
+    }
+
+    function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
     function resetTool() {
-      removeFile();
-      document.getElementById('resultSection').classList.remove('visible');
-      downloadUrl = null;
+      files = [];
+      isProcessing = false;
+      document.getElementById('batchSummary').classList.remove('visible');
+      document.getElementById('overallProgress').classList.remove('visible');
+      document.getElementById('processBtn').disabled = false;
+      dropZone.style.display = 'block';
+      hideError();
+      renderQueue();
     }
   </script>
 </body>
