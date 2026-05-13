@@ -1030,6 +1030,21 @@ function openTool(id) {
         </div>
         <p id="cropHint" style="color:var(--text2);font-size:0.8rem;margin-top:8px;display:none;">Drag to move · Drag corners to resize · Then click Process</p>
       </div>`;
+    } else if(tool.type === 'base64') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div class="option-label" style="margin-bottom:8px;">Text to encode or decode</div>
+        <textarea id="b64Text" placeholder="Paste your text here..." style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;min-height:120px;resize:vertical;font-family:inherit;"></textarea>
+        <div class="option-group" style="margin-top:12px;">
+          <div class="option-label">Action</div>
+          <select class="option-select" id="b64Action">
+            <option value="encode">Encode (text → Base64)</option>
+            <option value="decode">Decode (Base64 → text)</option>
+          </select>
+        </div>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
     } else if(tool.type === 'lorem-ipsum') {
     document.getElementById('dropZone').style.display = 'none';
     opts.innerHTML = `
