@@ -782,16 +782,7 @@ function filterTools(cat, btn) {
 
 function openTool(id) {
   const dedicatedPages = {
-    'compress-pdf': 'compress-pdf.html',
-    'merge-pdf': 'merge-pdf.html',
-    'pdf-to-word': 'pdf-to-word.html',
-    'pdf-to-jpg': 'pdf-to-jpg.html',
-    'pdf-to-excel': 'pdf-to-excel.html',
-    'word-to-pdf': 'word-to-pdf.html',
-    'jpg-to-pdf': 'jpg-to-pdf.html',
-    'sign-pdf': 'sign-pdf.html',
-  };
-  if(dedicatedPages[id]) { window.location.href = dedicatedPages[id]; return; }
+ 
   const tool = TOOLS.find(t=>t.id===id);
   if(!tool) return;
   currentTool = tool;
