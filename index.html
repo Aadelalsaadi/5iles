@@ -781,7 +781,6 @@ function filterTools(cat, btn) {
 }
 
 function openTool(id) {
-  if(id === 'compress-pdf') { window.location.href = 'compress-pdf.html'; return; }
   const tool = TOOLS.find(t=>t.id===id);
   if(!tool) return;
   currentTool = tool;
