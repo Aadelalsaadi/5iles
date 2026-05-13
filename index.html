@@ -2237,6 +2237,25 @@ async function cropImage() {
     reader.readAsDataURL(file);
   });
 }
+  // ===================== BASE64 ENCODER/DECODER =====================
+async function encodeDecodeBase64() {
+  const text = document.getElementById('b64Text')?.value || '';
+  if(!text.trim()) throw new Error('Please enter some text first.');
+  const action = document.getElementById('b64Action')?.value || 'encode';
+  let result;
+  if(action === 'encode') {
+    result = btoa(unescape(encodeURIComponent(text)));
+  } else {
+    try {
+      result = decodeURIComponent(escape(atob(text.trim())));
+    } catch(e) {
+      throw new Error('Invalid Base64 text. Please check your input and try again.');
+    }
+  }
+  const blob = new Blob([result], {type:'text/plain'});
+  const filename = action === 'encode' ? 'encoded.txt' : 'decoded.txt';
+  return [{ name: filename, url: URL.createObjectURL(blob), info: `${action === 'encode' ? 'Encoded to' : 'Decoded from'} Base64 (${result.length} characters)` }];
+}
   // ===================== LOREM IPSUM GENERATOR =====================
 async function generateLorem() {
   const count = parseInt(document.getElementById('loremCount')?.value || 3);
