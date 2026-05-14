@@ -1501,7 +1501,7 @@ async function compressPDF() {
     const compressRes = await fetch('https://api.pdf.co/v1/pdf/optimize', {
       method: 'POST',
       headers: { 'x-api-key': API_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url: uploadData.url, grayscale: false, name: file.name.replace('.pdf','_compressed.pdf') })
+      body: JSON.stringify({ url: uploadData.url, grayscale: false, name: file.name.replace('.pdf','_compressed.pdf'), imageQuality: 100 - parseInt(document.getElementById('qualitySlider')?.value || 60) })
     });
     const compressData = await compressRes.json();
     if(compressData.error) throw new Error(compressData.message || 'Compression failed');
