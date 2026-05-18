@@ -3087,9 +3087,16 @@ window.addEventListener('load', function() {
         createSubscription: function(data, actions) {
           return actions.subscription.create({ plan_id: 'P-41N09220EC076120XNHY6LVI' });
         },
-        onApprove: function(data, actions) {
-          document.getElementById('paypal-button-container-P-41N09220EC076120XNHY6LVI').innerHTML = '<div style="background:rgba(67,233,123,0.1);border:1px solid rgba(67,233,123,0.3);border-radius:12px;padding:16px;text-align:center;color:#43e97b;font-weight:700;">✅ Subscription activated!</div>';
-        }
+        onApprove: async function(data, actions) {
+  if (currentUser) {
+    await _supabase
+      .from('profiles')
+      .update({ plan: 'pro' })
+      .eq('id', currentUser.id);
+    currentUser.user_metadata = { ...currentUser.user_metadata, plan: 'pro' };
+  }
+  document.getElementById('paypal-button-container-P-41N09220EC07612BXMHY6LVI').innerHTML = '<div style="background:rgba(67,233,123,0.3);border:1px solid rgba(67,233,123,0.3);border-radius:12px;padding:16px;text-align:center;color:#43e97b;font-weight:700;">✅ Subscription activated! Welcome to 5iles Team!</div>';
+}
       }).render('#paypal-button-container-P-41N09220EC076120XNHY6LVI');
     }
   };
