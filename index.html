@@ -2901,7 +2901,11 @@ const PAYPAL_URLS = {
 let pendingSubscriptionPlan = null;
 
 function startSubscription(plan) {
-  alert('Pro and Team plans are coming soon! Stay tuned.');
+  if(currentUser) {
+    window.open(PAYPAL_URLS[plan], '_blank');
+  } else {
+    openModal('signup-for-plan');
+  }
 }
 function toggleMenu() {
   const h = document.getElementById('hamburger');
