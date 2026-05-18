@@ -1358,7 +1358,8 @@ if (!currentUser && usageCount >= 10) {
 if (currentUser && !currentUser.user_metadata?.plan) {
   const userUsageKey = 'usage_user_' + currentUser.id + '_' + today;
   const userUsageCount = parseInt(localStorage.getItem(userUsageKey) || 0);
-  const limit = currentUser.user_metadata?.plan === 'pro' ? Infinity : 10;
+  const { data: profileData } = await _supabase.from('profiles').select('plan').eq('id', currentUser.id).single();
+const limit = profileData?.plan === 'pro' ? Infinity : 10;
   if (userUsageCount >= limit) {
     showToast('⚠ Daily limit reached (10/day). Upgrade to Pro for unlimited!', 'error');
     btn.disabled = false;
