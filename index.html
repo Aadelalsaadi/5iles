@@ -2899,12 +2899,7 @@ const PAYPAL_URLS = {
 let pendingSubscriptionPlan = null;
 
 function startSubscription(plan) {
-  if(currentUser) {
-    window.open(PAYPAL_URLS[plan], '_blank');
-  } else {
-    pendingSubscriptionPlan = plan;
-    openModal('signup-for-plan');
-  }
+  alert('Pro and Team plans are coming soon! Stay tuned.');
 }
 function toggleMenu() {
   const h = document.getElementById('hamburger');
