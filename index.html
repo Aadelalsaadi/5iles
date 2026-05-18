@@ -1358,8 +1358,9 @@ if (!currentUser && usageCount >= 10) {
 if (currentUser && !currentUser.user_metadata?.plan) {
   const userUsageKey = 'usage_user_' + currentUser.id + '_' + today;
   const userUsageCount = parseInt(localStorage.getItem(userUsageKey) || 0);
-  if (userUsageCount >= 10) {
-    showToast('⚠️ Daily limit reached (10/day). Upgrade to Pro for unlimited!', 'error');
+  const limit = currentUser.user_metadata?.plan === 'pro' ? Infinity : 10;
+  if (userUsageCount >= limit) {
+    showToast('⚠ Daily limit reached (10/day). Upgrade to Pro for unlimited!', 'error');
     btn.disabled = false;
     btn.innerHTML = '<span>⚡</span> <span>Process files</span>';
     setTimeout(() => openModal('upgrade'), 1000);
