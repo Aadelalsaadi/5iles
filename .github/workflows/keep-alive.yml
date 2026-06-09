@@ -2,22 +2,25 @@ name: Keep Supabase Alive
 
 on:
   schedule:
-    - cron: '0 10 * * *'  # Every day at 10am UTC
-  workflow_dispatch:       # Allow manual trigger
+    - cron: '0 10 * * *'
+  workflow_dispatch:
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase
+      - name: Ping Supabase database
         run: |
           response=$(curl -s -o /dev/null -w "%{http_code}" \
-            "${{ secrets.SUPABASE_URL }}/rest/v1/profiles?select=id&limit=1" \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/rpc/ping_db" \
+            -X POST \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}")
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{}')
           echo "Response code: $response"
-          if [ "$response" != "200" ]; then
-            echo "ERROR: Supabase ping failed with status $response"
+          if [ "$response" != "204" ]; then
+            echo "ERROR: ping failed with status $response"
             exit 1
           fi
           echo "SUCCESS: Supabase is active"
