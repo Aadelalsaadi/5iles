@@ -164,7 +164,7 @@ fileInput.addEventListener('change', (e) => {
 
 function handleFile(file) {
   const ext = file.name.split('.').pop().toLowerCase();
-  if (!['pptx', 'ppt'].includes(ext)) {
+  if (!['xlsx', 'xls'].includes(ext)) {
     showError('Please select a .XLSX or .XLS file.');
     return;
   }
