@@ -1,1 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trim Video - 5iles</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✂️</text></svg>">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #fff; min-height: 100vh; }
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; background: #13131f; border-bottom: 1px solid #2a2a3e; }
+  .logo { font-size: 1.4rem; font-weight: 700; color: #fff; text-decoration: none; display: flex; align-items: center; gap: 8px; }
+  .logo span { background: linear-gradient(135deg, #6c63ff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .nav-links { display: flex; gap: 24px; }
+  .nav-links a { color: #9ca3af; text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+  .nav-links a:hover { color: #fff; }
+  .hero { text-align: center; padding: 60px 20px 40px; }
+  .tool-icon { font-size: 3rem; margin-bottom: 16px; }
+  h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 12px; }
+  h1 span { background: linear-gradient(135deg, #6c63ff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .subtitle { color: #9ca3af; font-size: 1rem; max-width: 500px; margin: 0 auto; }
+  .tool-container { max-width: 720px; margin: 0 auto; padding: 0 20px 60px; }
+  .upload-area { border: 2px dashed #3a3a5c; border-radius: 16px; padding: 48px 24px; text-align: center; cursor: pointer; transition: all 0.3s; background: #13131f; position: relative; }
+  .upload-area:hover, .upload-area.dragover { border-color: #6c63ff; background: #1a1a2e; }
+  .upload-area input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .upload-icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .upload-text { font-size: 1.1rem; font-weight: 600; margin-bottom: 6px; }
+  .upload-sub { color: #9ca3af; font-size: 0.85rem; }
 
+  /* Editor */
+  .editor { display: none; margin-top: 24px; }
+  .editor.show { display: block; }
+  video { width: 100%; border-radius: 12px; background: #000; max-height: 360px; }
+  .trim-section { background: #13131f; border-radius: 12px; padding: 20px; margin-top: 16px; }
+  .trim-label { font-size: 0.85rem; color: #9ca3af; margin-bottom: 12px; }
+  .time-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .time-group { display: flex; flex-direction: column; gap: 6px; }
+  .time-group label { font-size: 0.8rem; color: #9ca3af; }
+  .time-group input[type="number"] {
+    background: #1e1e30; border: 1px solid #3a3a5c; border-radius: 8px;
+    color: #fff; padding: 10px 12px; font-size: 0.95rem; width: 100%;
+  }
+  .time-group input[type="number"]:focus { outline: none; border-color: #6c63ff; }
+
+  /* Timeline */
+  .timeline-wrap { position: relative; margin-bottom: 16px; }
+  .timeline-bg { width: 100%; height: 48px; background: #1e1e30; border-radius: 8px; position: relative; overflow: hidden; cursor: pointer; }
+  .timeline-fill { position: absolute; top: 0; height: 100%; background: rgba(108,99,255,0.3); border-left: 3px solid #6c63ff; border-right: 3px solid #6c63ff; }
+  .timeline-playhead { position: absolute; top: 0; width: 2px; height: 100%; background: #fff; pointer-events: none; }
+  .timeline-handle { position: absolute; top: 0; width: 12px; height: 100%; background: #6c63ff; cursor: ew-resize; border-radius: 4px; }
+  .timeline-handle.end { right: 0; left: auto; }
+  .timeline-times { display: flex; justify-content: space-between; font-size: 0.75rem; color: #9ca3af; margin-top: 4px; }
+
+  .preview-btn { width: 100%; padding: 12px; background: #1e1e30; color: #a78bfa; border: 1px solid #3a3a5c; border-radius: 10px; font-size: 0.95rem; font-weight: 600; cursor: pointer; margin-bottom: 12px; transition: background 0.2s; }
+  .preview-btn:hover { background: #2a2a40; }
+  .trim-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #6c63ff, #a78bfa); color: #fff; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+  .trim-btn:hover:not(:disabled) { opacity: 0.9; }
+  .trim-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .progress { display: none; margin-top: 16px; }
+  .progress.show { display: block; }
+  .progress-bar-bg { background: #1e1e30; border-radius: 8px; height: 8px; overflow: hidden; }
+  .progress-bar { height: 100%; background: linear-gradient(135deg, #6c63ff, #a78bfa); border-radius: 8px; transition: width 0.3s; width: 0%; }
+  .progress-text { text-align: center; color: #9ca3af; font-size: 0.85rem; margin-top: 8px; }
+
+  .result { display: none; margin-top: 16px; background: #0d2e1a; border: 1px solid #16a34a; border-radius: 12px; padding: 20px; text-align: center; }
+  .result.show { display: block; }
+  .result-icon { font-size: 2rem; margin-bottom: 8px; }
+  .result-text { color: #4ade80; font-weight: 600; margin-bottom: 16px; }
+  .download-btn { display: inline-block; padding: 12px 32px; background: #16a34a; color: #fff; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; text-decoration: none; transition: background 0.2s; }
+  .download-btn:hover { background: #15803d; }
+
+  .error { display: none; margin-top: 16px; background: #2d0a0a; border: 1px solid #ef4444; border-radius: 12px; padding: 16px; color: #f87171; text-align: center; }
+  .error.show { display: block; }
+
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 32px; }
+  .feature { background: #13131f; border-radius: 12px; padding: 16px; text-align: center; }
+  .feature-icon { font-size: 1.5rem; margin-bottom: 8px; }
+  .feature-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
+  .feature-desc { font-size: 0.75rem; color: #9ca3af; }
+  footer { text-align: center; padding: 24px; color: #6b7280; font-size: 0.8rem; border-top: 1px solid #2a2a3e; }
+  footer a { color: #6b7280; text-decoration: none; }
+  @media (max-width: 600px) { h1 { font-size: 1.6rem; } .features { grid-template-columns: 1fr; } .time-inputs { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="logo"><span>5</span>iles</a>
+  <div class="nav-links">
+    <a href="/">Tools</a>
+    <a href="/pricing.html">Pricing</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="tool-icon">✂️</div>
+  <h1>Trim <span>Video</span></h1>
+  <p class="subtitle">Cut your video to the perfect length. Free, no upload required — runs in your browser.</p>
+</div>
+
+<div class="tool-container">
+  <div class="upload-area" id="uploadArea">
+    <input type="file" id="fileInput" accept="video/*">
+    <div class="upload-icon">🎬</div>
+    <div class="upload-text">Drop your video file here</div>
+    <div class="upload-sub">Supports MP4, MOV, AVI, WebM • Processed locally in your browser</div>
+  </div>
+
+  <div class="editor" id="editor">
+    <video id="videoPlayer" controls></video>
+
+    <div class="trim-section">
+      <div class="trim-label">Drag the handles or enter times to set trim points:</div>
+
+      <div class="timeline-wrap">
+        <div class="timeline-bg" id="timeline">
+          <div class="timeline-fill" id="timelineFill"></div>
+          <div class="timeline-playhead" id="playhead"></div>
+          <div class="timeline-handle start" id="handleStart"></div>
+          <div class="timeline-handle end" id="handleEnd"></div>
+        </div>
+        <div class="timeline-times">
+          <span id="tStart">0:00</span>
+          <span id="tEnd">0:00</span>
+        </div>
+      </div>
+
+      <div class="time-inputs">
+        <div class="time-group">
+          <label>Start time (seconds)</label>
+          <input type="number" id="startInput" min="0" step="0.1" value="0">
+        </div>
+        <div class="time-group">
+          <label>End time (seconds)</label>
+          <input type="number" id="endInput" min="0" step="0.1" value="0">
+        </div>
+      </div>
+
+      <button class="preview-btn" onclick="previewTrim()">▶ Preview Trimmed Section</button>
+      <button class="trim-btn" id="trimBtn" onclick="trimVideo()">✂️ Trim & Download</button>
+    </div>
+
+    <div class="progress" id="progress">
+      <div class="progress-bar-bg"><div class="progress-bar" id="progressBar"></div></div>
+      <div class="progress-text" id="progressText">Processing...</div>
+    </div>
+
+    <div class="result" id="result">
+      <div class="result-icon">✅</div>
+      <div class="result-text">Video trimmed successfully!</div>
+      <a class="download-btn" id="downloadBtn">⬇ Download Trimmed Video</a>
+    </div>
+
+    <div class="error" id="errorBox"></div>
+  </div>
+
+  <div class="features">
+    <div class="feature">
+      <div class="feature-icon">🔒</div>
+      <div class="feature-title">100% Private</div>
+      <div class="feature-desc">Never uploaded — processed in browser</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">⚡</div>
+      <div class="feature-title">Instant</div>
+      <div class="feature-desc">No waiting for uploads</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🎯</div>
+      <div class="feature-title">Precise</div>
+      <div class="feature-desc">Set exact start & end times</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <a href="/">← Back to all tools</a> · © 2025 5iles.com
+</footer>
+
+<script>
+let videoFile = null;
+let videoDuration = 0;
+let startTime = 0;
+let endTime = 0;
+let dragging = null;
+
+const uploadArea = document.getElementById('uploadArea');
+const fileInput = document.getElementById('fileInput');
+const editor = document.getElementById('editor');
+const videoPlayer = document.getElementById('videoPlayer');
+const startInput = document.getElementById('startInput');
+const endInput = document.getElementById('endInput');
+const timeline = document.getElementById('timeline');
+const timelineFill = document.getElementById('timelineFill');
+const playhead = document.getElementById('playhead');
+const handleStart = document.getElementById('handleStart');
+const handleEnd = document.getElementById('handleEnd');
+const tStart = document.getElementById('tStart');
+const tEnd = document.getElementById('tEnd');
+const trimBtn = document.getElementById('trimBtn');
+const progress = document.getElementById('progress');
+const progressBar = document.getElementById('progressBar');
+const progressText = document.getElementById('progressText');
+const result = document.getElementById('result');
+const downloadBtn = document.getElementById('downloadBtn');
+const errorBox = document.getElementById('errorBox');
+
+uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+uploadArea.addEventListener('drop', e => { e.preventDefault(); uploadArea.classList.remove('dragover'); if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+
+function handleFile(file) {
+  if (!file.type.startsWith('video/')) { showError('Please select a video file.'); return; }
+  if (file.size > 500 * 1024 * 1024) { showError('File too large. Maximum size is 500MB.'); return; }
+  videoFile = file;
+  const url = URL.createObjectURL(file);
+  videoPlayer.src = url;
+  videoPlayer.onloadedmetadata = () => {
+    videoDuration = videoPlayer.duration;
+    startTime = 0;
+    endTime = videoDuration;
+    startInput.max = videoDuration;
+    endInput.max = videoDuration;
+    startInput.value = 0;
+    endInput.value = videoDuration.toFixed(1);
+    updateTimeline();
+    editor.classList.add('show');
+    uploadArea.style.display = 'none';
+    hideMessages();
+  };
+}
+
+function updateTimeline() {
+  const startPct = (startTime / videoDuration) * 100;
+  const endPct = (endTime / videoDuration) * 100;
+  timelineFill.style.left = startPct + '%';
+  timelineFill.style.width = (endPct - startPct) + '%';
+  handleStart.style.left = startPct + '%';
+  handleEnd.style.right = (100 - endPct) + '%';
+  tStart.textContent = formatTime(startTime);
+  tEnd.textContent = formatTime(endTime);
+  startInput.value = startTime.toFixed(1);
+  endInput.value = endTime.toFixed(1);
+}
+
+function formatTime(s) {
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return m + ':' + sec.toString().padStart(2, '0');
+}
+
+// Timeline drag
+handleStart.addEventListener('mousedown', e => { dragging = 'start'; e.preventDefault(); });
+handleEnd.addEventListener('mousedown', e => { dragging = 'end'; e.preventDefault(); });
+document.addEventListener('mousemove', e => {
+  if (!dragging) return;
+  const rect = timeline.getBoundingClientRect();
+  const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  const t = pct * videoDuration;
+  if (dragging === 'start') { startTime = Math.min(t, endTime - 0.5); }
+  else { endTime = Math.max(t, startTime + 0.5); }
+  updateTimeline();
+});
+document.addEventListener('mouseup', () => { dragging = null; });
+
+// Touch support
+handleStart.addEventListener('touchstart', e => { dragging = 'start'; e.preventDefault(); }, { passive: false });
+handleEnd.addEventListener('touchstart', e => { dragging = 'end'; e.preventDefault(); }, { passive: false });
+document.addEventListener('touchmove', e => {
+  if (!dragging) return;
+  const rect = timeline.getBoundingClientRect();
+  const pct = Math.max(0, Math.min(1, (e.touches[0].clientX - rect.left) / rect.width));
+  const t = pct * videoDuration;
+  if (dragging === 'start') { startTime = Math.min(t, endTime - 0.5); }
+  else { endTime = Math.max(t, startTime + 0.5); }
+  updateTimeline();
+}, { passive: false });
+document.addEventListener('touchend', () => { dragging = null; });
+
+// Playhead update
+videoPlayer.addEventListener('timeupdate', () => {
+  const pct = (videoPlayer.currentTime / videoDuration) * 100;
+  playhead.style.left = pct + '%';
+});
+
+// Manual input
+startInput.addEventListener('input', () => {
+  startTime = Math.max(0, Math.min(parseFloat(startInput.value) || 0, endTime - 0.5));
+  updateTimeline();
+});
+endInput.addEventListener('input', () => {
+  endTime = Math.min(videoDuration, Math.max(parseFloat(endInput.value) || 0, startTime + 0.5));
+  updateTimeline();
+});
+
+function previewTrim() {
+  videoPlayer.currentTime = startTime;
+  videoPlayer.play();
+  const stopAt = endTime;
+  const check = () => {
+    if (videoPlayer.currentTime >= stopAt) { videoPlayer.pause(); }
+    else { requestAnimationFrame(check); }
+  };
+  requestAnimationFrame(check);
+}
+
+function hideMessages() {
+  result.classList.remove('show');
+  errorBox.classList.remove('show');
+  progress.classList.remove('show');
+}
+
+function showError(msg) {
+  errorBox.textContent = msg;
+  errorBox.classList.add('show');
+}
+
+async function trimVideo() {
+  if (!videoFile) return;
+  hideMessages();
+  trimBtn.disabled = true;
+  progress.classList.add('show');
+  progressBar.style.width = '10%';
+  progressText.textContent = 'Starting trim...';
+
+  try {
+    // Use MediaRecorder to capture the video segment
+    const stream = videoPlayer.captureStream ? videoPlayer.captureStream() : videoPlayer.mozCaptureStream();
+
+    // Determine best supported mime type
+    const mimeTypes = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'];
+    let mimeType = mimeTypes.find(m => MediaRecorder.isTypeSupported(m)) || 'video/webm';
+
+    const recorder = new MediaRecorder(stream, { mimeType });
+    const chunks = [];
+
+    recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+
+    recorder.onstop = () => {
+      const blob = new Blob(chunks, { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const ext = mimeType.includes('webm') ? '.webm' : '.mp4';
+      const baseName = videoFile.name.replace(/\.[^.]+$/, '');
+      downloadBtn.href = url;
+      downloadBtn.download = baseName + '_trimmed' + ext;
+      progressBar.style.width = '100%';
+      progress.classList.remove('show');
+      result.classList.add('show');
+      trimBtn.disabled = false;
+    };
+
+    videoPlayer.currentTime = startTime;
+    await new Promise(r => { videoPlayer.onseeked = r; });
+
+    progressBar.style.width = '30%';
+    progressText.textContent = 'Recording trimmed segment...';
+
+    recorder.start(100);
+    videoPlayer.play();
+
+    const duration = (endTime - startTime) * 1000;
+    const totalSteps = 50;
+    const stepDuration = duration / totalSteps;
+
+    for (let i = 0; i < totalSteps; i++) {
+      await new Promise(r => setTimeout(r, stepDuration));
+      progressBar.style.width = (30 + (i / totalSteps) * 65) + '%';
+      progressText.textContent = `Processing... ${Math.round((i / totalSteps) * 100)}%`;
+      if (videoPlayer.currentTime >= endTime) break;
+    }
+
+    videoPlayer.pause();
+    recorder.stop();
+
+  } catch (err) {
+    progress.classList.remove('show');
+    showError('Trim failed: ' + err.message + '. Try a different browser (Chrome recommended).');
+    trimBtn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>
