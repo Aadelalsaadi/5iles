@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PowerPoint to PDF - 5iles</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📄</text></svg>">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #fff; min-height: 100vh; }
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; background: #13131f; border-bottom: 1px solid #2a2a3e; }
+  .logo { font-size: 1.4rem; font-weight: 700; color: #fff; text-decoration: none; display: flex; align-items: center; gap: 8px; }
+  .logo span { background: linear-gradient(135deg, #6c63ff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .nav-links { display: flex; gap: 24px; }
+  .nav-links a { color: #9ca3af; text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+  .nav-links a:hover { color: #fff; }
+  .hero { text-align: center; padding: 60px 20px 40px; }
+  .tool-icon { font-size: 3rem; margin-bottom: 16px; }
+  h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 12px; }
+  h1 span { background: linear-gradient(135deg, #6c63ff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .subtitle { color: #9ca3af; font-size: 1rem; max-width: 500px; margin: 0 auto; }
+  .tool-container { max-width: 680px; margin: 0 auto; padding: 0 20px 60px; }
+  .upload-area { border: 2px dashed #3a3a5c; border-radius: 16px; padding: 48px 24px; text-align: center; cursor: pointer; transition: all 0.3s; background: #13131f; position: relative; }
+  .upload-area:hover, .upload-area.dragover { border-color: #6c63ff; background: #1a1a2e; }
+  .upload-area input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .upload-icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .upload-text { font-size: 1.1rem; font-weight: 600; margin-bottom: 6px; }
+  .upload-sub { color: #9ca3af; font-size: 0.85rem; }
+  .file-info { display: none; margin-top: 20px; background: #1e1e30; border-radius: 12px; padding: 16px; align-items: center; gap: 12px; }
+  .file-info.show { display: flex; }
+  .file-icon { font-size: 1.8rem; }
+  .file-details { flex: 1; text-align: left; }
+  .file-name { font-weight: 600; font-size: 0.95rem; word-break: break-all; }
+  .file-size { color: #9ca3af; font-size: 0.8rem; margin-top: 2px; }
+  .remove-btn { background: none; border: none; color: #9ca3af; cursor: pointer; font-size: 1.2rem; padding: 4px; transition: color 0.2s; }
+  .remove-btn:hover { color: #ef4444; }
+  .convert-btn { width: 100%; margin-top: 20px; padding: 16px; background: linear-gradient(135deg, #6c63ff, #a78bfa); color: #fff; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s, transform 0.1s; }
+  .convert-btn:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+  .convert-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .progress { display: none; margin-top: 20px; }
+  .progress.show { display: block; }
+  .progress-bar-bg { background: #1e1e30; border-radius: 8px; height: 8px; overflow: hidden; }
+  .progress-bar { height: 100%; background: linear-gradient(135deg, #6c63ff, #a78bfa); border-radius: 8px; transition: width 0.3s; width: 0%; }
+  .progress-text { text-align: center; color: #9ca3af; font-size: 0.85rem; margin-top: 8px; }
+  .result { display: none; margin-top: 20px; background: #0d2e1a; border: 1px solid #16a34a; border-radius: 12px; padding: 20px; text-align: center; }
+  .result.show { display: block; }
+  .result-icon { font-size: 2rem; margin-bottom: 8px; }
+  .result-text { color: #4ade80; font-weight: 600; margin-bottom: 16px; }
+  .download-btn { display: inline-block; padding: 12px 32px; background: #16a34a; color: #fff; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; text-decoration: none; transition: background 0.2s; }
+  .download-btn:hover { background: #15803d; }
+  .error { display: none; margin-top: 20px; background: #2d0a0a; border: 1px solid #ef4444; border-radius: 12px; padding: 16px; color: #f87171; text-align: center; }
+  .error.show { display: block; }
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 32px; }
+  .feature { background: #13131f; border-radius: 12px; padding: 16px; text-align: center; }
+  .feature-icon { font-size: 1.5rem; margin-bottom: 8px; }
+  .feature-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
+  .feature-desc { font-size: 0.75rem; color: #9ca3af; }
+  footer { text-align: center; padding: 24px; color: #6b7280; font-size: 0.8rem; border-top: 1px solid #2a2a3e; }
+  footer a { color: #6b7280; text-decoration: none; }
+  @media (max-width: 600px) { h1 { font-size: 1.6rem; } .features { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="logo"><span>5</span>iles</a>
+  <div class="nav-links">
+    <a href="/">Tools</a>
+    <a href="/pricing.html">Pricing</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="tool-icon">📊</div>
+  <h1>PowerPoint to <span>PDF</span></h1>
+  <p class="subtitle">Convert PPTX and PPT presentations to PDF instantly. Free, no sign-up required.</p>
+</div>
+
+<div class="tool-container">
+  <div class="upload-area" id="uploadArea">
+    <input type="file" id="fileInput" accept=".pptx,.ppt">
+    <div class="upload-icon">📂</div>
+    <div class="upload-text">Drop your PowerPoint file here</div>
+    <div class="upload-sub">Supports .PPTX and .PPT • Max 50MB</div>
+  </div>
+
+  <div class="file-info" id="fileInfo">
+    <div class="file-icon">📊</div>
+    <div class="file-details">
+      <div class="file-name" id="fileName"></div>
+      <div class="file-size" id="fileSize"></div>
+    </div>
+    <button class="remove-btn" onclick="removeFile()">✕</button>
+  </div>
+
+  <button class="convert-btn" id="convertBtn" onclick="convertFile()" disabled>
+    Convert to PDF
+  </button>
+
+  <div class="progress" id="progress">
+    <div class="progress-bar-bg"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="progress-text" id="progressText">Converting...</div>
+  </div>
+
+  <div class="result" id="result">
+    <div class="result-icon">✅</div>
+    <div class="result-text">Conversion complete!</div>
+    <a class="download-btn" id="downloadBtn">⬇ Download PDF</a>
+  </div>
+
+  <div class="error" id="errorBox"></div>
+
+  <div class="features">
+    <div class="feature">
+      <div class="feature-icon">🔒</div>
+      <div class="feature-title">Secure</div>
+      <div class="feature-desc">Files deleted after conversion</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">⚡</div>
+      <div class="feature-title">Fast</div>
+      <div class="feature-desc">Converted in seconds</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🎯</div>
+      <div class="feature-title">High Quality</div>
+      <div class="feature-desc">Powered by LibreOffice</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <a href="/">← Back to all tools</a> · © 2025 5iles.com
+</footer>
+
+<script>
+const CONVERTER_URL = 'https://5iles-converter-production.up.railway.app';
+let selectedFile = null;
+
+const uploadArea = document.getElementById('uploadArea');
+const fileInput = document.getElementById('fileInput');
+const fileInfo = document.getElementById('fileInfo');
+const fileName = document.getElementById('fileName');
+const fileSize = document.getElementById('fileSize');
+const convertBtn = document.getElementById('convertBtn');
+const progress = document.getElementById('progress');
+const progressBar = document.getElementById('progressBar');
+const progressText = document.getElementById('progressText');
+const result = document.getElementById('result');
+const downloadBtn = document.getElementById('downloadBtn');
+const errorBox = document.getElementById('errorBox');
+
+uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+uploadArea.addEventListener('drop', (e) => {
+  e.preventDefault();
+  uploadArea.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) handleFile(file);
+});
+
+fileInput.addEventListener('change', (e) => {
+  if (e.target.files[0]) handleFile(e.target.files[0]);
+});
+
+function handleFile(file) {
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (!['pptx', 'ppt'].includes(ext)) {
+    showError('Please select a .PPTX or .PPT file.');
+    return;
+  }
+  if (file.size > 50 * 1024 * 1024) {
+    showError('File too large. Maximum size is 50MB.');
+    return;
+  }
+  selectedFile = file;
+  fileName.textContent = file.name;
+  fileSize.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+  fileInfo.classList.add('show');
+  convertBtn.disabled = false;
+  hideMessages();
+}
+
+function removeFile() {
+  selectedFile = null;
+  fileInput.value = '';
+  fileInfo.classList.remove('show');
+  convertBtn.disabled = true;
+  hideMessages();
+}
+
+function hideMessages() {
+  result.classList.remove('show');
+  errorBox.classList.remove('show');
+  progress.classList.remove('show');
+}
+
+function showError(msg) {
+  errorBox.textContent = msg;
+  errorBox.classList.add('show');
+}
+
+async function convertFile() {
+  if (!selectedFile) return;
+
+  convertBtn.disabled = true;
+  hideMessages();
+  progress.classList.add('show');
+  progressBar.style.width = '30%';
+  progressText.textContent = 'Uploading file...';
+
+  const formData = new FormData();
+  formData.append('file', selectedFile);
+
+  try {
+    progressBar.style.width = '60%';
+    progressText.textContent = 'Converting to PDF...';
+
+    const response = await fetch(`${CONVERTER_URL}/convert`, {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!response.ok) {
+      const err = await response.json();
+      throw new Error(err.error || 'Conversion failed');
+    }
+
+    progressBar.style.width = '90%';
+    progressText.textContent = 'Preparing download...';
+
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const outName = selectedFile.name.replace(/\.(pptx|ppt)$/i, '.pdf');
+
+    downloadBtn.href = url;
+    downloadBtn.download = outName;
+
+    progressBar.style.width = '100%';
+    progress.classList.remove('show');
+    result.classList.add('show');
+
+  } catch (err) {
+    progress.classList.remove('show');
+    showError('Error: ' + err.message);
+  } finally {
+    convertBtn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>
