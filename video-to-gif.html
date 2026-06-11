@@ -1,1 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Video to GIF - 5iles</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎞️</text></svg>">
+<script src="https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #fff; min-height: 100vh; }
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; background: #13131f; border-bottom: 1px solid #2a2a3e; }
+  .logo { font-size: 1.4rem; font-weight: 700; color: #fff; text-decoration: none; display: flex; align-items: center; gap: 8px; }
+  .logo span { background: linear-gradient(135deg, #6c63ff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .nav-links { display: flex; gap: 24px; }
+  .nav-links a { color: #9ca3af; text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+  .nav-links a:hover { color: #fff; }
+  .hero { text-align: center; padding: 60px 20px 40px; }
+  .tool-icon { font-size: 3rem; margin-bottom: 16px; }
+  h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 12px; }
+  h1 span { background: linear-gradient(135deg, #6c63ff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .subtitle { color: #9ca3af; font-size: 1rem; max-width: 500px; margin: 0 auto; }
+  .tool-container { max-width: 720px; margin: 0 auto; padding: 0 20px 60px; }
+  .upload-area { border: 2px dashed #3a3a5c; border-radius: 16px; padding: 48px 24px; text-align: center; cursor: pointer; transition: all 0.3s; background: #13131f; position: relative; }
+  .upload-area:hover, .upload-area.dragover { border-color: #6c63ff; background: #1a1a2e; }
+  .upload-area input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .upload-icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .upload-text { font-size: 1.1rem; font-weight: 600; margin-bottom: 6px; }
+  .upload-sub { color: #9ca3af; font-size: 0.85rem; }
 
+  .editor { display: none; margin-top: 24px; }
+  .editor.show { display: block; }
+  video { width: 100%; border-radius: 12px; background: #000; max-height: 320px; }
+
+  .settings { background: #13131f; border-radius: 12px; padding: 20px; margin-top: 16px; }
+  .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .setting-group { display: flex; flex-direction: column; gap: 6px; }
+  .setting-group label { font-size: 0.8rem; color: #9ca3af; }
+  .setting-group input[type="number"], .setting-group select {
+    background: #1e1e30; border: 1px solid #3a3a5c; border-radius: 8px;
+    color: #fff; padding: 10px 12px; font-size: 0.95rem; width: 100%;
+  }
+  .setting-group input:focus, .setting-group select:focus { outline: none; border-color: #6c63ff; }
+
+  .range-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+
+  .convert-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #6c63ff, #a78bfa); color: #fff; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+  .convert-btn:hover:not(:disabled) { opacity: 0.9; }
+  .convert-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .progress { display: none; margin-top: 16px; }
+  .progress.show { display: block; }
+  .progress-bar-bg { background: #1e1e30; border-radius: 8px; height: 8px; overflow: hidden; }
+  .progress-bar { height: 100%; background: linear-gradient(135deg, #6c63ff, #a78bfa); border-radius: 8px; transition: width 0.3s; width: 0%; }
+  .progress-text { text-align: center; color: #9ca3af; font-size: 0.85rem; margin-top: 8px; }
+
+  .result { display: none; margin-top: 16px; background: #0d2e1a; border: 1px solid #16a34a; border-radius: 12px; padding: 20px; text-align: center; }
+  .result.show { display: block; }
+  .result-icon { font-size: 2rem; margin-bottom: 8px; }
+  .result-text { color: #4ade80; font-weight: 600; margin-bottom: 12px; }
+  .result img { max-width: 100%; border-radius: 8px; margin-bottom: 16px; border: 1px solid #2a2a3e; }
+  .download-btn { display: inline-block; padding: 12px 32px; background: #16a34a; color: #fff; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; text-decoration: none; transition: background 0.2s; }
+  .download-btn:hover { background: #15803d; }
+
+  .error { display: none; margin-top: 16px; background: #2d0a0a; border: 1px solid #ef4444; border-radius: 12px; padding: 16px; color: #f87171; text-align: center; }
+  .error.show { display: block; }
+
+  .tip { background: #1a1a0a; border: 1px solid #a16207; border-radius: 10px; padding: 10px 14px; color: #fbbf24; font-size: 0.8rem; margin-bottom: 16px; }
+
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 32px; }
+  .feature { background: #13131f; border-radius: 12px; padding: 16px; text-align: center; }
+  .feature-icon { font-size: 1.5rem; margin-bottom: 8px; }
+  .feature-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
+  .feature-desc { font-size: 0.75rem; color: #9ca3af; }
+  footer { text-align: center; padding: 24px; color: #6b7280; font-size: 0.8rem; border-top: 1px solid #2a2a3e; }
+  footer a { color: #6b7280; text-decoration: none; }
+  @media (max-width: 600px) { h1 { font-size: 1.6rem; } .features { grid-template-columns: 1fr; } .settings-grid, .range-row { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="logo"><span>5</span>iles</a>
+  <div class="nav-links">
+    <a href="/">Tools</a>
+    <a href="/pricing.html">Pricing</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="tool-icon">🎞️</div>
+  <h1>Video to <span>GIF</span></h1>
+  <p class="subtitle">Convert any video clip to an animated GIF. Free, runs entirely in your browser.</p>
+</div>
+
+<div class="tool-container">
+  <div class="upload-area" id="uploadArea">
+    <input type="file" id="fileInput" accept="video/*">
+    <div class="upload-icon">🎬</div>
+    <div class="upload-text">Drop your video file here</div>
+    <div class="upload-sub">Supports MP4, MOV, WebM, AVI • Best with short clips (under 15s)</div>
+  </div>
+
+  <div class="editor" id="editor">
+    <video id="videoPlayer" controls muted></video>
+
+    <div class="settings">
+      <div class="tip">💡 For best results, keep the clip under 10 seconds. Longer clips produce large GIF files.</div>
+
+      <div class="range-row">
+        <div class="setting-group">
+          <label>Start time (seconds)</label>
+          <input type="number" id="startInput" min="0" step="0.1" value="0">
+        </div>
+        <div class="setting-group">
+          <label>End time (seconds)</label>
+          <input type="number" id="endInput" min="0" step="0.1" value="5">
+        </div>
+      </div>
+
+      <div class="settings-grid">
+        <div class="setting-group">
+          <label>Width (px)</label>
+          <input type="number" id="widthInput" min="100" max="800" step="10" value="480">
+        </div>
+        <div class="setting-group">
+          <label>Frame rate (fps)</label>
+          <select id="fpsSelect">
+            <option value="10">10 fps (smaller file)</option>
+            <option value="15" selected>15 fps (balanced)</option>
+            <option value="20">20 fps (smoother)</option>
+            <option value="25">25 fps (large file)</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="convert-btn" id="convertBtn" onclick="convertToGif()">🎞️ Convert to GIF</button>
+    </div>
+
+    <div class="progress" id="progress">
+      <div class="progress-bar-bg"><div class="progress-bar" id="progressBar"></div></div>
+      <div class="progress-text" id="progressText">Processing frames...</div>
+    </div>
+
+    <div class="result" id="result">
+      <div class="result-icon">✅</div>
+      <div class="result-text">GIF created successfully!</div>
+      <img id="gifPreview" src="" alt="GIF preview">
+      <br>
+      <a class="download-btn" id="downloadBtn">⬇ Download GIF</a>
+    </div>
+
+    <div class="error" id="errorBox"></div>
+  </div>
+
+  <div class="features">
+    <div class="feature">
+      <div class="feature-icon">🔒</div>
+      <div class="feature-title">100% Private</div>
+      <div class="feature-desc">Never uploaded — processed in browser</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🎨</div>
+      <div class="feature-title">Customizable</div>
+      <div class="feature-desc">Set size, speed, and duration</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">⚡</div>
+      <div class="feature-title">Instant Preview</div>
+      <div class="feature-desc">See your GIF before downloading</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <a href="/">← Back to all tools</a> · © 2025 5iles.com
+</footer>
+
+<canvas id="canvas" style="display:none"></canvas>
+
+<script>
+let videoFile = null;
+let videoDuration = 0;
+
+const uploadArea = document.getElementById('uploadArea');
+const fileInput = document.getElementById('fileInput');
+const editor = document.getElementById('editor');
+const videoPlayer = document.getElementById('videoPlayer');
+const startInput = document.getElementById('startInput');
+const endInput = document.getElementById('endInput');
+const widthInput = document.getElementById('widthInput');
+const fpsSelect = document.getElementById('fpsSelect');
+const convertBtn = document.getElementById('convertBtn');
+const progress = document.getElementById('progress');
+const progressBar = document.getElementById('progressBar');
+const progressText = document.getElementById('progressText');
+const result = document.getElementById('result');
+const downloadBtn = document.getElementById('downloadBtn');
+const gifPreview = document.getElementById('gifPreview');
+const errorBox = document.getElementById('errorBox');
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+uploadArea.addEventListener('drop', e => { e.preventDefault(); uploadArea.classList.remove('dragover'); if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+
+function handleFile(file) {
+  if (!file.type.startsWith('video/')) { showError('Please select a video file.'); return; }
+  videoFile = file;
+  const url = URL.createObjectURL(file);
+  videoPlayer.src = url;
+  videoPlayer.onloadedmetadata = () => {
+    videoDuration = videoPlayer.duration;
+    startInput.max = videoDuration;
+    endInput.max = videoDuration;
+    endInput.value = Math.min(5, videoDuration).toFixed(1);
+    editor.classList.add('show');
+    uploadArea.style.display = 'none';
+    hideMessages();
+  };
+}
+
+function hideMessages() {
+  result.classList.remove('show');
+  errorBox.classList.remove('show');
+  progress.classList.remove('show');
+}
+
+function showError(msg) {
+  errorBox.textContent = msg;
+  errorBox.classList.add('show');
+}
+
+async function captureFrame(time) {
+  return new Promise(resolve => {
+    videoPlayer.currentTime = time;
+    videoPlayer.onseeked = () => {
+      ctx.drawImage(videoPlayer, 0, 0, canvas.width, canvas.height);
+      resolve();
+    };
+  });
+}
+
+async function convertToGif() {
+  const startTime = parseFloat(startInput.value) || 0;
+  const endTime = parseFloat(endInput.value) || 5;
+  const width = parseInt(widthInput.value) || 480;
+  const fps = parseInt(fpsSelect.value) || 15;
+
+  if (endTime <= startTime) { showError('End time must be greater than start time.'); return; }
+  if (endTime - startTime > 30) { showError('Maximum clip length is 30 seconds.'); return; }
+
+  hideMessages();
+  convertBtn.disabled = true;
+  progress.classList.add('show');
+  progressBar.style.width = '5%';
+  progressText.textContent = 'Preparing frames...';
+
+  try {
+    // Set canvas size maintaining aspect ratio
+    const aspectRatio = videoPlayer.videoHeight / videoPlayer.videoWidth;
+    canvas.width = width;
+    canvas.height = Math.round(width * aspectRatio);
+
+    const duration = endTime - startTime;
+    const totalFrames = Math.round(duration * fps);
+    const frameDelay = 1000 / fps;
+
+    // Check gif.js loaded
+    if (typeof GIF === 'undefined') {
+      throw new Error('GIF library not loaded. Please refresh and try again.');
+    }
+
+    const gif = new GIF({
+      workers: 2,
+      quality: 8,
+      width: canvas.width,
+      height: canvas.height,
+      workerScript: 'https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js'
+    });
+
+    // Capture frames
+    for (let i = 0; i < totalFrames; i++) {
+      const t = startTime + (i / fps);
+      await captureFrame(t);
+      gif.addFrame(canvas, { copy: true, delay: frameDelay });
+      const pct = Math.round((i / totalFrames) * 70);
+      progressBar.style.width = (5 + pct) + '%';
+      progressText.textContent = `Capturing frame ${i + 1} of ${totalFrames}...`;
+    }
+
+    progressBar.style.width = '80%';
+    progressText.textContent = 'Encoding GIF...';
+
+    gif.on('progress', p => {
+      progressBar.style.width = (80 + p * 18) + '%';
+      progressText.textContent = `Encoding GIF... ${Math.round(p * 100)}%`;
+    });
+
+    gif.on('finished', blob => {
+      const url = URL.createObjectURL(blob);
+      gifPreview.src = url;
+      downloadBtn.href = url;
+      const baseName = videoFile.name.replace(/\.[^.]+$/, '');
+      downloadBtn.download = baseName + '.gif';
+      progressBar.style.width = '100%';
+      progress.classList.remove('show');
+      result.classList.add('show');
+      convertBtn.disabled = false;
+    });
+
+    gif.render();
+
+  } catch (err) {
+    progress.classList.remove('show');
+    showError('Conversion failed: ' + err.message);
+    convertBtn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>
