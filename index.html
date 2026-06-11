@@ -754,7 +754,10 @@ const TOOLS = [
   {id:'protect-pdf',icon:'🔐',name:'Protect PDF',desc:'Add password protection to PDF files',cat:'security',accept:'.pdf',type:'protect-pdf'},
   {id:'unlock-pdf',icon:'🔓',name:'Unlock PDF',desc:'Remove password from PDF documents',cat:'security',accept:'.pdf',type:'unlock-pdf'},
   {id:'ocr-pdf',icon:'🔍',name:'OCR PDF',desc:'Make scanned PDFs searchable',cat:'pdf',accept:'.pdf,.jpg,.jpeg,.png',badge:'AI',type:'ocr-pdf'},
-  {id:'watermark',icon:'🏷️',name:'Add Watermark',desc:'Stamp text or image watermarks on PDF',cat:'pdf',accept:'.pdf',type:'watermark-pdf'},
+  {id:'watermark',icon:'💧',name:'Add Watermark',desc:'Stamp text or image watermarks on PDF',cat:'pdf',accept:'.pdf',type:'watermark-pdf'},
+{id:'pptx-to-pdf',icon:'📊',name:'PPT → PDF',desc:'Convert PowerPoint presentations to PDF',cat:'convert',accept:'.pptx,.ppt',type:'external',url:'pptx-to-pdf.html'},
+{id:'xlsx-to-pdf',icon:'📈',name:'Excel → PDF',desc:'Convert Excel spreadsheets to PDF',cat:'convert',accept:'.xlsx,.xls',type:'external',url:'xlsx-to-pdf.html'},
+{id:'pdf-to-pptx',icon:'📑',name:'PDF → PPT',desc:'Convert PDF files to PowerPoint presentations',cat:'convert',accept:'.pdf',type:'external',url:'pdf-to-pptx.html'},
 ];
 
 let currentTool = null;
@@ -784,7 +787,10 @@ function openTool(id) {
   if(!tool) return;
   currentTool = tool;
   uploadedFiles = [];
-
+if(tool.type === 'external') {
+  window.location.href = tool.url;
+  return;
+}
   if(tool.type === 'coming') {
     closeWorkspace();
     showToast('🚧 Coming soon! This tool is under development.', 'error');
