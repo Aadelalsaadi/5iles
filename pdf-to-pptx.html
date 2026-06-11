@@ -40,14 +40,14 @@
   .progress { display: none; margin-top: 20px; }
   .progress.show { display: block; }
   .progress-bar-bg { background: #1e1e30; border-radius: 8px; height: 8px; overflow: hidden; }
-  .progress-bar { height: 100%; background: linear-gradient(135deg, #6c63ff, #a78bfa); border-radius: 8px; transition: width 0.3s; width: 0%; }
+  .progress-bar { height: 100%; background: linear-gradient(135deg, #6c63ff, #a78bfa); border-radius: 8px; transition: width 0.4s ease; width: 0%; }
   .progress-text { text-align: center; color: #9ca3af; font-size: 0.85rem; margin-top: 8px; }
   .result { display: none; margin-top: 20px; background: #0d2e1a; border: 1px solid #16a34a; border-radius: 12px; padding: 20px; text-align: center; }
   .result.show { display: block; }
   .result-icon { font-size: 2rem; margin-bottom: 8px; }
   .result-text { color: #4ade80; font-weight: 600; margin-bottom: 16px; }
-  .download-btn { display: inline-block; padding: 12px 32px; background: #16a34a; color: #fff; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; text-decoration: none; transition: background 0.2s; }
-  .download-btn:hover { background: #15803d; }
+  .convert-again-btn { display: inline-block; padding: 12px 32px; background: #16a34a; color: #fff; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; text-decoration: none; transition: background 0.2s; }
+  .convert-again-btn:hover { background: #15803d; }
   .error { display: none; margin-top: 20px; background: #2d0a0a; border: 1px solid #ef4444; border-radius: 12px; padding: 16px; color: #f87171; text-align: center; }
   .error.show { display: block; }
   .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 32px; }
@@ -72,7 +72,7 @@
 <div class="hero">
   <div class="tool-icon">📑</div>
   <h1>PDF to <span>PowerPoint</span></h1>
-  <p class="subtitle">Convert PDF files to editable PowerPoint presentations instantly. Free, no sign-up required.</p>
+  <p class="subtitle">Convert PDF pages into PowerPoint slides instantly — free, no sign-up, nothing uploaded to any server.</p>
 </div>
 
 <div class="tool-container">
@@ -80,7 +80,7 @@
     <input type="file" id="fileInput" accept=".pdf">
     <div class="upload-icon">📂</div>
     <div class="upload-text">Drop your PDF file here</div>
-    <div class="upload-sub">Supports .PDF files • Max 50MB</div>
+    <div class="upload-sub">Supports .PDF files • Max 50MB • Runs entirely in your browser</div>
   </div>
 
   <div class="file-info" id="fileInfo">
@@ -93,18 +93,18 @@
   </div>
 
   <button class="convert-btn" id="convertBtn" onclick="convertFile()" disabled>
-    Convert to PDF
+    Convert to PowerPoint
   </button>
 
   <div class="progress" id="progress">
     <div class="progress-bar-bg"><div class="progress-bar" id="progressBar"></div></div>
-    <div class="progress-text" id="progressText">Converting...</div>
+    <div class="progress-text" id="progressText">Loading PDF...</div>
   </div>
 
   <div class="result" id="result">
     <div class="result-icon">✅</div>
-    <div class="result-text">Conversion complete!</div>
-    <a class="download-btn" id="downloadBtn">⬇ Download PDF</a>
+    <div class="result-text" id="resultText">Conversion complete!</div>
+    <button class="convert-again-btn" onclick="convertAnother()">Convert Another File</button>
   </div>
 
   <div class="error" id="errorBox"></div>
@@ -112,18 +112,18 @@
   <div class="features">
     <div class="feature">
       <div class="feature-icon">🔒</div>
-      <div class="feature-title">Secure</div>
-      <div class="feature-desc">Files deleted after conversion</div>
+      <div class="feature-title">100% Private</div>
+      <div class="feature-desc">Runs in your browser — your file never leaves your device</div>
     </div>
     <div class="feature">
       <div class="feature-icon">⚡</div>
       <div class="feature-title">Fast</div>
-      <div class="feature-desc">Converted in seconds</div>
+      <div class="feature-desc">Each page rendered and packed in seconds</div>
     </div>
     <div class="feature">
       <div class="feature-icon">🎯</div>
-      <div class="feature-title">High Quality</div>
-      <div class="feature-desc">Powered by LibreOffice</div>
+      <div class="feature-title">One Slide Per Page</div>
+      <div class="feature-desc">Every PDF page becomes a crisp widescreen slide</div>
     </div>
   </div>
 </div>
@@ -132,23 +132,26 @@
   <a href="/">← Back to all tools</a> · © 2025 5iles.com
 </footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pptxgenjs/3.12.0/pptxgen.bundle.js"></script>
+
 <script>
-const CONVERTER_URL = 'https://5iles-converter-production.up.railway.app';
-const CONVERT_ENDPOINT = `${CONVERTER_URL}/convert-to-pptx`er-production.up.railway.app';
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
 let selectedFile = null;
 
-const uploadArea = document.getElementById('uploadArea');
-const fileInput = document.getElementById('fileInput');
-const fileInfo = document.getElementById('fileInfo');
-const fileName = document.getElementById('fileName');
-const fileSize = document.getElementById('fileSize');
-const convertBtn = document.getElementById('convertBtn');
-const progress = document.getElementById('progress');
+const uploadArea  = document.getElementById('uploadArea');
+const fileInput   = document.getElementById('fileInput');
+const fileInfo    = document.getElementById('fileInfo');
+const fileName    = document.getElementById('fileName');
+const fileSize    = document.getElementById('fileSize');
+const convertBtn  = document.getElementById('convertBtn');
+const progress    = document.getElementById('progress');
 const progressBar = document.getElementById('progressBar');
-const progressText = document.getElementById('progressText');
-const result = document.getElementById('result');
-const downloadBtn = document.getElementById('downloadBtn');
-const errorBox = document.getElementById('errorBox');
+const progressText= document.getElementById('progressText');
+const result      = document.getElementById('result');
+const resultText  = document.getElementById('resultText');
+const errorBox    = document.getElementById('errorBox');
 
 uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
 uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
@@ -158,21 +161,14 @@ uploadArea.addEventListener('drop', (e) => {
   const file = e.dataTransfer.files[0];
   if (file) handleFile(file);
 });
-
 fileInput.addEventListener('change', (e) => {
   if (e.target.files[0]) handleFile(e.target.files[0]);
 });
 
 function handleFile(file) {
   const ext = file.name.split('.').pop().toLowerCase();
-  if (!['pptx', 'ppt'].includes(ext)) {
-    showError('Please select a .PDF file.');
-    return;
-  }
-  if (file.size > 50 * 1024 * 1024) {
-    showError('File too large. Maximum size is 50MB.');
-    return;
-  }
+  if (ext !== 'pdf') { showError('Please select a .PDF file.'); return; }
+  if (file.size > 50 * 1024 * 1024) { showError('File too large. Maximum size is 50MB.'); return; }
   selectedFile = file;
   fileName.textContent = file.name;
   fileSize.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
@@ -189,9 +185,14 @@ function removeFile() {
   hideMessages();
 }
 
+function convertAnother() {
+  removeFile();
+}
+
 function hideMessages() {
   result.classList.remove('show');
   errorBox.classList.remove('show');
+  errorBox.textContent = '';
   progress.classList.remove('show');
 }
 
@@ -200,50 +201,88 @@ function showError(msg) {
   errorBox.classList.add('show');
 }
 
+function setProgress(pct, text) {
+  progressBar.style.width = pct + '%';
+  progressText.textContent = text;
+}
+
 async function convertFile() {
   if (!selectedFile) return;
-
   convertBtn.disabled = true;
   hideMessages();
   progress.classList.add('show');
-  progressBar.style.width = '30%';
-  progressText.textContent = 'Uploading file...';
-
-  const formData = new FormData();
-  formData.append('file', selectedFile);
+  setProgress(5, 'Reading PDF...');
 
   try {
-    progressBar.style.width = '60%';
-    progressText.textContent = 'Converting to PDF...';
+    const arrayBuffer = await selectedFile.arrayBuffer();
+    setProgress(10, 'Loading PDF...');
 
-    const response = await fetch(`${CONVERTER_URL = 'https://5iles-converter-production.up.railway.app';
-const CONVERT_ENDPOINT = `${CONVERTER_URL}/convert-to-pptx``, {
-      method: 'POST',
-      body: formData
-    });
+    const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const totalPages = pdfDoc.numPages;
+    setProgress(15, `PDF loaded — ${totalPages} page${totalPages !== 1 ? 's' : ''} found`);
 
-    if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.error || 'Conversion failed');
+    const pptx = new PptxGenJS();
+    pptx.layout = 'LAYOUT_WIDE'; // 13.33" x 7.5"
+    const SLIDE_W = 13.33;
+    const SLIDE_H = 7.5;
+    const RENDER_SCALE = 2; // 2× for crisp output
+
+    for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+      const pct = 15 + Math.round(((pageNum - 1) / totalPages) * 75);
+      setProgress(pct, `Rendering page ${pageNum} of ${totalPages}...`);
+
+      const page = await pdfDoc.getPage(pageNum);
+      const baseViewport = page.getViewport({ scale: 1 });
+
+      // Scale to fill slide at 96dpi, 2× for sharpness
+      const scaleX = (SLIDE_W * 96 * RENDER_SCALE) / baseViewport.width;
+      const scaleY = (SLIDE_H * 96 * RENDER_SCALE) / baseViewport.height;
+      const renderScale = Math.min(scaleX, scaleY);
+      const scaledViewport = page.getViewport({ scale: renderScale });
+
+      const canvas = document.createElement('canvas');
+      canvas.width  = Math.round(scaledViewport.width);
+      canvas.height = Math.round(scaledViewport.height);
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      await page.render({ canvasContext: ctx, viewport: scaledViewport }).promise;
+
+      const imageData = canvas.toDataURL('image/jpeg', 0.93);
+
+      // Fit image into slide, centered, preserving aspect ratio
+      const imgAspect   = canvas.width / canvas.height;
+      const slideAspect = SLIDE_W / SLIDE_H;
+      let imgW, imgH, imgX, imgY;
+      if (imgAspect >= slideAspect) {
+        imgW = SLIDE_W; imgH = SLIDE_W / imgAspect;
+        imgX = 0;       imgY = (SLIDE_H - imgH) / 2;
+      } else {
+        imgH = SLIDE_H; imgW = SLIDE_H * imgAspect;
+        imgY = 0;       imgX = (SLIDE_W - imgW) / 2;
+      }
+
+      const slide = pptx.addSlide();
+      // White bg when image fills full slide width; black for letterboxed
+      slide.background = { color: Math.abs(imgW - SLIDE_W) < 0.05 ? 'FFFFFF' : '000000' };
+      slide.addImage({ data: imageData, x: imgX, y: imgY, w: imgW, h: imgH });
     }
 
-    progressBar.style.width = '90%';
-    progressText.textContent = 'Preparing download...';
+    setProgress(93, 'Building .pptx file...');
+    const outName = selectedFile.name.replace(/\.pdf$/i, '.pptx');
+    await pptx.writeFile({ fileName: outName });
 
-    const blob = await response.blob();
-    const url = URL.createObjectURL(blob);
-    const outName = selectedFile.name.replace(/\.pdf$/i, '.pptx')');
-
-    downloadBtn.href = url;
-    downloadBtn.download = outName;
-
-    progressBar.style.width = '100%';
-    progress.classList.remove('show');
-    result.classList.add('show');
+    setProgress(100, 'Done!');
+    setTimeout(() => {
+      progress.classList.remove('show');
+      resultText.textContent = `✓ ${totalPages} slide${totalPages !== 1 ? 's' : ''} — download started automatically.`;
+      result.classList.add('show');
+    }, 300);
 
   } catch (err) {
     progress.classList.remove('show');
-    showError('Error: ' + err.message);
+    console.error(err);
+    showError('Conversion failed: ' + (err.message || 'Unknown error. Please try again.'));
   } finally {
     convertBtn.disabled = false;
   }
