@@ -1,1 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Time Zone Converter - 5iles</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕐</text></svg>">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #fff; min-height: 100vh; }
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; background: #13131f; border-bottom: 1px solid #2a2a3e; }
+  .logo { font-size: 1.4rem; font-weight: 700; color: #fff; text-decoration: none; display: flex; align-items: center; gap: 8px; }
+  .logo span { background: linear-gradient(135deg, #6c63ff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .nav-links { display: flex; gap: 24px; }
+  .nav-links a { color: #9ca3af; text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+  .nav-links a:hover { color: #fff; }
+  .hero { text-align: center; padding: 60px 20px 40px; }
+  .tool-icon { font-size: 3rem; margin-bottom: 16px; }
+  h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 12px; }
+  h1 span { background: linear-gradient(135deg, #6c63ff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .subtitle { color: #9ca3af; font-size: 1rem; max-width: 500px; margin: 0 auto; }
+  .tool-container { max-width: 720px; margin: 0 auto; padding: 0 20px 60px; }
 
+  .converter-box { background: #13131f; border-radius: 16px; padding: 24px; }
+  .input-row { display: flex; gap: 12px; margin-bottom: 16px; }
+  .input-group { flex: 1; }
+  .input-group label { font-size: 0.8rem; color: #9ca3af; margin-bottom: 6px; display: block; }
+  .input-group input[type="date"], .input-group input[type="time"] { width: 100%; background: #1e1e30; border: 1px solid #3a3a5c; border-radius: 10px; color: #fff; padding: 12px; font-size: 0.95rem; }
+  .input-group input:focus { outline: none; border-color: #6c63ff; }
+  .input-group select { width: 100%; background: #1e1e30; border: 1px solid #3a3a5c; border-radius: 10px; color: #fff; padding: 12px; font-size: 0.9rem; cursor: pointer; }
+  .input-group select:focus { outline: none; border-color: #6c63ff; }
+
+  .now-btn { width: 100%; padding: 12px; background: #1e1e30; border: 1px solid #3a3a5c; border-radius: 10px; color: #a78bfa; font-size: 0.9rem; font-weight: 600; cursor: pointer; margin-bottom: 16px; transition: all 0.2s; }
+  .now-btn:hover { border-color: #6c63ff; background: rgba(108,99,255,0.1); }
+
+  .results-grid { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+  .zone-result { background: #0f0f1a; border-radius: 10px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; }
+  .zone-name { font-size: 0.9rem; color: #9ca3af; }
+  .zone-time { font-size: 1.1rem; font-weight: 700; color: #4ade80; }
+  .zone-add-row { display: flex; gap: 10px; margin-top: 16px; }
+  .zone-add-row select { flex: 1; background: #1e1e30; border: 1px solid #3a3a5c; border-radius: 10px; color: #fff; padding: 10px; font-size: 0.85rem; }
+  .add-btn { background: linear-gradient(135deg, #6c63ff, #a78bfa); border: none; border-radius: 10px; color: #fff; padding: 10px 20px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+  .add-btn:hover { opacity: 0.9; }
+  .remove-btn { background: none; border: none; color: #6b7280; cursor: pointer; font-size: 1rem; padding: 4px; }
+  .remove-btn:hover { color: #ef4444; }
+
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 32px; }
+  .feature { background: #13131f; border-radius: 12px; padding: 16px; text-align: center; }
+  .feature-icon { font-size: 1.5rem; margin-bottom: 8px; }
+  .feature-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
+  .feature-desc { font-size: 0.75rem; color: #9ca3af; }
+  footer { text-align: center; padding: 24px; color: #6b7280; font-size: 0.8rem; border-top: 1px solid #2a2a3e; }
+  footer a { color: #6b7280; text-decoration: none; }
+  @media (max-width: 600px) { h1 { font-size: 1.6rem; } .features { grid-template-columns: 1fr; } .input-row { flex-direction: column; } }
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="logo"><span>5</span>iles</a>
+  <div class="nav-links">
+    <a href="/">Tools</a>
+    <a href="/pricing.html">Pricing</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="tool-icon">🕐</div>
+  <h1>Time Zone <span>Converter</span></h1>
+  <p class="subtitle">Convert times across multiple time zones instantly.</p>
+</div>
+
+<div class="tool-container">
+  <div class="converter-box">
+    <button class="now-btn" onclick="setNow()">🕐 Use Current Time</button>
+
+    <div class="input-row">
+      <div class="input-group">
+        <label>Date</label>
+        <input type="date" id="dateInput">
+      </div>
+      <div class="input-group">
+        <label>Time</label>
+        <input type="time" id="timeInput">
+      </div>
+    </div>
+
+    <div class="input-group" style="margin-bottom: 16px;">
+      <label>Source time zone</label>
+      <select id="sourceZone"></select>
+    </div>
+
+    <div class="results-grid" id="resultsGrid"></div>
+
+    <div class="zone-add-row">
+      <select id="addZoneSelect"></select>
+      <button class="add-btn" onclick="addZone()">+ Add Zone</button>
+    </div>
+  </div>
+
+  <div class="features">
+    <div class="feature">
+      <div class="feature-icon">🌍</div>
+      <div class="feature-title">Multiple Zones</div>
+      <div class="feature-desc">Compare as many zones as you need</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">⚡</div>
+      <div class="feature-title">Instant</div>
+      <div class="feature-desc">Updates as you change time or zones</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🔒</div>
+      <div class="feature-title">Private</div>
+      <div class="feature-desc">Runs entirely in your browser</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <a href="/">← Back to all tools</a> · © 2025 5iles.com
+</footer>
+
+<script>
+const TIMEZONES = [
+  { id: 'UTC', label: 'UTC' },
+  { id: 'America/Los_Angeles', label: 'Los Angeles (PT)' },
+  { id: 'America/Denver', label: 'Denver (MT)' },
+  { id: 'America/Chicago', label: 'Chicago (CT)' },
+  { id: 'America/New_York', label: 'New York (ET)' },
+  { id: 'America/Sao_Paulo', label: 'São Paulo' },
+  { id: 'Europe/London', label: 'London (GMT/BST)' },
+  { id: 'Europe/Paris', label: 'Paris (CET)' },
+  { id: 'Europe/Berlin', label: 'Berlin (CET)' },
+  { id: 'Europe/Moscow', label: 'Moscow' },
+  { id: 'Africa/Cairo', label: 'Cairo' },
+  { id: 'Asia/Qatar', label: 'Doha (Qatar)' },
+  { id: 'Asia/Dubai', label: 'Dubai (UAE)' },
+  { id: 'Asia/Karachi', label: 'Karachi' },
+  { id: 'Asia/Kolkata', label: 'Mumbai/Delhi (IST)' },
+  { id: 'Asia/Dhaka', label: 'Dhaka' },
+  { id: 'Asia/Bangkok', label: 'Bangkok' },
+  { id: 'Asia/Singapore', label: 'Singapore' },
+  { id: 'Asia/Hong_Kong', label: 'Hong Kong' },
+  { id: 'Asia/Shanghai', label: 'Shanghai/Beijing' },
+  { id: 'Asia/Tokyo', label: 'Tokyo' },
+  { id: 'Asia/Seoul', label: 'Seoul' },
+  { id: 'Australia/Sydney', label: 'Sydney' },
+  { id: 'Pacific/Auckland', label: 'Auckland' }
+];
+
+let activeZones = ['UTC', 'Asia/Qatar', 'Europe/London', 'America/New_York'];
+
+const dateInput = document.getElementById('dateInput');
+const timeInput = document.getElementById('timeInput');
+const sourceZone = document.getElementById('sourceZone');
+const addZoneSelect = document.getElementById('addZoneSelect');
+const resultsGrid = document.getElementById('resultsGrid');
+
+function buildZoneOptions(selectEl, selected) {
+  selectEl.innerHTML = TIMEZONES.map(tz => `<option value="${tz.id}" ${tz.id === selected ? 'selected' : ''}>${tz.label}</option>`).join('');
+}
+
+buildZoneOptions(sourceZone, 'Asia/Qatar');
+buildZoneOptions(addZoneSelect, 'America/Los_Angeles');
+
+function setNow() {
+  const now = new Date();
+  dateInput.value = now.toISOString().split('T')[0];
+  timeInput.value = now.toTimeString().slice(0, 5);
+  convert();
+}
+
+function getZoneLabel(id) {
+  const tz = TIMEZONES.find(t => t.id === id);
+  return tz ? tz.label : id;
+}
+
+function convert() {
+  const dateVal = dateInput.value;
+  const timeVal = timeInput.value;
+  if (!dateVal || !timeVal) return;
+
+  const srcZone = sourceZone.value;
+
+  // Build a date string and interpret it as being in the source timezone
+  // We use a trick: format current moment in source TZ to find offset, then construct correctly
+  const [year, month, day] = dateVal.split('-').map(Number);
+  const [hour, minute] = timeVal.split(':').map(Number);
+
+  // Create a UTC-based date as a baseline
+  const naiveDate = new Date(Date.UTC(year, month - 1, day, hour, minute));
+
+  // Find the offset of source timezone at this date
+  const offsetMinutes = getTimezoneOffsetMinutes(srcZone, naiveDate);
+  const utcDate = new Date(naiveDate.getTime() - offsetMinutes * 60000);
+
+  resultsGrid.innerHTML = activeZones.map(zoneId => {
+    const formatted = formatInZone(utcDate, zoneId);
+    const isSource = zoneId === srcZone;
+    return `
+      <div class="zone-result">
+        <div>
+          <div class="zone-name">${getZoneLabel(zoneId)} ${isSource ? '(source)' : ''}</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div class="zone-time">${formatted}</div>
+          ${activeZones.length > 1 ? `<button class="remove-btn" onclick="removeZone('${zoneId}')">✕</button>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function getTimezoneOffsetMinutes(timeZone, date) {
+  const utcDate = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' }));
+  const tzDate = new Date(date.toLocaleString('en-US', { timeZone }));
+  return (tzDate.getTime() - utcDate.getTime()) / 60000;
+}
+
+function formatInZone(utcDate, timeZone) {
+  const options = {
+    timeZone,
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  };
+  return new Intl.DateTimeFormat('en-US', options).format(utcDate);
+}
+
+function addZone() {
+  const zone = addZoneSelect.value;
+  if (!activeZones.includes(zone)) {
+    activeZones.push(zone);
+    convert();
+  }
+}
+
+function removeZone(zoneId) {
+  activeZones = activeZones.filter(z => z !== zoneId);
+  convert();
+}
+
+dateInput.addEventListener('change', convert);
+timeInput.addEventListener('change', convert);
+sourceZone.addEventListener('change', convert);
+
+// Initialize with current time
+setNow();
+</script>
+</body>
+</html>
