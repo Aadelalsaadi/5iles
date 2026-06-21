@@ -1,1 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Currency Converter - 5iles</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💱</text></svg>">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #fff; min-height: 100vh; }
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; background: #13131f; border-bottom: 1px solid #2a2a3e; }
+  .logo { font-size: 1.4rem; font-weight: 700; color: #fff; text-decoration: none; display: flex; align-items: center; gap: 8px; }
+  .logo span { background: linear-gradient(135deg, #6c63ff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .nav-links { display: flex; gap: 24px; }
+  .nav-links a { color: #9ca3af; text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+  .nav-links a:hover { color: #fff; }
+  .hero { text-align: center; padding: 60px 20px 40px; }
+  .tool-icon { font-size: 3rem; margin-bottom: 16px; }
+  h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 12px; }
+  h1 span { background: linear-gradient(135deg, #6c63ff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .subtitle { color: #9ca3af; font-size: 1rem; max-width: 500px; margin: 0 auto; }
+  .tool-container { max-width: 680px; margin: 0 auto; padding: 0 20px 60px; }
 
+  .converter-box { background: #13131f; border-radius: 16px; padding: 24px; }
+  .conv-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .conv-input-group { flex: 1; }
+  .conv-input-group label { font-size: 0.8rem; color: #9ca3af; margin-bottom: 6px; display: block; }
+  .conv-input-group input { width: 100%; background: #1e1e30; border: 1px solid #3a3a5c; border-radius: 10px; color: #fff; padding: 14px; font-size: 1.2rem; font-weight: 600; }
+  .conv-input-group input:focus { outline: none; border-color: #6c63ff; }
+  .conv-input-group select { width: 100%; background: #1e1e30; border: 1px solid #3a3a5c; border-radius: 10px; color: #fff; padding: 14px; font-size: 0.95rem; margin-top: 8px; cursor: pointer; }
+  .conv-input-group select:focus { outline: none; border-color: #6c63ff; }
+  .swap-btn { background: #1e1e30; border: 1px solid #3a3a5c; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #a78bfa; font-size: 1.2rem; transition: all 0.2s; flex-shrink: 0; margin-top: 20px; }
+  .swap-btn:hover { background: rgba(108,99,255,0.15); border-color: #6c63ff; transform: rotate(180deg); }
+
+  .rate-info { text-align: center; margin-top: 16px; padding: 12px; background: #0f0f1a; border-radius: 10px; color: #9ca3af; font-size: 0.85rem; }
+  .rate-info .rate-value { color: #a78bfa; font-weight: 600; }
+  .last-updated { text-align: center; margin-top: 8px; color: #6b7280; font-size: 0.75rem; }
+
+  .quick-results { margin-top: 20px; background: #0f0f1a; border-radius: 12px; padding: 16px; }
+  .quick-results-title { font-size: 0.8rem; color: #9ca3af; margin-bottom: 10px; }
+  .quick-result-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #1e1e30; font-size: 0.9rem; }
+  .quick-result-item:last-child { border-bottom: none; }
+  .quick-result-item .unit { color: #9ca3af; }
+  .quick-result-item .value { font-weight: 600; color: #fff; }
+
+  .loading { text-align: center; color: #9ca3af; padding: 20px; }
+  .error-msg { display: none; margin-top: 16px; background: #2d0a0a; border: 1px solid #ef4444; border-radius: 12px; padding: 16px; color: #f87171; text-align: center; }
+  .error-msg.show { display: block; }
+
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 32px; }
+  .feature { background: #13131f; border-radius: 12px; padding: 16px; text-align: center; }
+  .feature-icon { font-size: 1.5rem; margin-bottom: 8px; }
+  .feature-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
+  .feature-desc { font-size: 0.75rem; color: #9ca3af; }
+  footer { text-align: center; padding: 24px; color: #6b7280; font-size: 0.8rem; border-top: 1px solid #2a2a3e; }
+  footer a { color: #6b7280; text-decoration: none; }
+  @media (max-width: 600px) { h1 { font-size: 1.6rem; } .features { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="logo"><span>5</span>iles</a>
+  <div class="nav-links">
+    <a href="/">Tools</a>
+    <a href="/pricing.html">Pricing</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="tool-icon">💱</div>
+  <h1>Currency <span>Converter</span></h1>
+  <p class="subtitle">Convert between 30+ world currencies with live ECB exchange rates.</p>
+</div>
+
+<div class="tool-container">
+  <div class="converter-box">
+    <div id="loadingMsg" class="loading">Loading exchange rates...</div>
+
+    <div id="converterContent" style="display:none;">
+      <div class="conv-row">
+        <div class="conv-input-group">
+          <label>From</label>
+          <input type="number" id="fromValue" value="1">
+          <select id="fromCurrency"></select>
+        </div>
+        <div class="swap-btn" onclick="swapCurrencies()">⇄</div>
+        <div class="conv-input-group">
+          <label>To</label>
+          <input type="number" id="toValue" readonly>
+          <select id="toCurrency"></select>
+        </div>
+      </div>
+
+      <div class="rate-info" id="rateInfo"></div>
+      <div class="last-updated" id="lastUpdated"></div>
+
+      <div class="quick-results" id="quickResults">
+        <div class="quick-results-title">Popular conversions:</div>
+        <div id="quickResultsList"></div>
+      </div>
+    </div>
+
+    <div class="error-msg" id="errorMsg"></div>
+  </div>
+
+  <div class="features">
+    <div class="feature">
+      <div class="feature-icon">🌍</div>
+      <div class="feature-title">30+ Currencies</div>
+      <div class="feature-desc">All major world currencies</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">📊</div>
+      <div class="feature-title">Live Rates</div>
+      <div class="feature-desc">Updated daily exchange rates</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">⚡</div>
+      <div class="feature-title">Instant</div>
+      <div class="feature-desc">Real-time conversion as you type</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <a href="/">← Back to all tools</a> · © 2025 5iles.com
+</footer>
+
+<script>
+const CURRENCY_NAMES = {
+  USD: 'US Dollar', EUR: 'Euro', GBP: 'British Pound', JPY: 'Japanese Yen',
+  AUD: 'Australian Dollar', CAD: 'Canadian Dollar', CHF: 'Swiss Franc', CNY: 'Chinese Yuan',
+  HKD: 'Hong Kong Dollar', NZD: 'New Zealand Dollar', SEK: 'Swedish Krona', KRW: 'South Korean Won',
+  SGD: 'Singapore Dollar', NOK: 'Norwegian Krone', MXN: 'Mexican Peso', INR: 'Indian Rupee',
+  RUB: 'Russian Ruble', ZAR: 'South African Rand', TRY: 'Turkish Lira', BRL: 'Brazilian Real',
+  TWD: 'Taiwan Dollar', DKK: 'Danish Krone', PLN: 'Polish Zloty', THB: 'Thai Baht',
+  IDR: 'Indonesian Rupiah', HUF: 'Hungarian Forint', CZK: 'Czech Koruna', ILS: 'Israeli Shekel',
+  CLP: 'Chilean Peso', PHP: 'Philippine Peso', AED: 'UAE Dirham', SAR: 'Saudi Riyal',
+  QAR: 'Qatari Riyal', MYR: 'Malaysian Ringgit', RON: 'Romanian Leu', VND: 'Vietnamese Dong',
+  EGP: 'Egyptian Pound', KWD: 'Kuwaiti Dinar', BHD: 'Bahraini Dinar', OMR: 'Omani Rial',
+  JOD: 'Jordanian Dinar', PKR: 'Pakistani Rupee', BDT: 'Bangladeshi Taka', NGN: 'Nigerian Naira',
+  UAH: 'Ukrainian Hryvnia', COP: 'Colombian Peso', PEN: 'Peruvian Sol', ARS: 'Argentine Peso'
+};
+
+let rates = {};
+let baseCurrency = 'USD';
+let lastUpdate = '';
+
+const fromValue = document.getElementById('fromValue');
+const toValue = document.getElementById('toValue');
+const fromCurrency = document.getElementById('fromCurrency');
+const toCurrency = document.getElementById('toCurrency');
+const loadingMsg = document.getElementById('loadingMsg');
+const converterContent = document.getElementById('converterContent');
+const errorMsg = document.getElementById('errorMsg');
+const rateInfo = document.getElementById('rateInfo');
+const lastUpdated = document.getElementById('lastUpdated');
+const quickResultsList = document.getElementById('quickResultsList');
+
+async function loadRates() {
+  try {
+    const response = await fetch('https://api.frankfurter.dev/v2/latest?base=USD');
+    const data = await response.json();
+
+    if (!data.rates) throw new Error('API error');
+
+    rates = data.rates;
+    rates.USD = 1; // Frankfurter omits the base currency itself
+    lastUpdate = data.date;
+
+    buildCurrencySelectors();
+    loadingMsg.style.display = 'none';
+    converterContent.style.display = 'block';
+    convert();
+
+  } catch (err) {
+    loadingMsg.style.display = 'none';
+    errorMsg.textContent = 'Unable to load exchange rates. Please try again later.';
+    errorMsg.classList.add('show');
+  }
+}
+
+function buildCurrencySelectors() {
+  const availableCurrencies = Object.keys(rates).filter(c => CURRENCY_NAMES[c] || rates[c]);
+  const sortedCurrencies = availableCurrencies.sort((a, b) => {
+    const aHasName = CURRENCY_NAMES[a] ? 0 : 1;
+    const bHasName = CURRENCY_NAMES[b] ? 0 : 1;
+    if (aHasName !== bHasName) return aHasName - bHasName;
+    return a.localeCompare(b);
+  });
+
+  const options = sortedCurrencies.map(c => {
+    const name = CURRENCY_NAMES[c] || c;
+    return `<option value="${c}">${c} - ${name}</option>`;
+  }).join('');
+
+  fromCurrency.innerHTML = options;
+  toCurrency.innerHTML = options;
+
+  fromCurrency.value = 'USD';
+  toCurrency.value = 'EUR';
+}
+
+function convert() {
+  const val = parseFloat(fromValue.value) || 0;
+  const from = fromCurrency.value;
+  const to = toCurrency.value;
+
+  if (!rates[from] || !rates[to]) return;
+
+  // Convert via USD base
+  const usdValue = val / rates[from];
+  const result = usdValue * rates[to];
+
+  toValue.value = formatNumber(result);
+
+  const rate = rates[to] / rates[from];
+  rateInfo.innerHTML = `1 ${from} = <span class="rate-value">${formatNumber(rate)}</span> ${to}`;
+  lastUpdated.textContent = lastUpdate ? `Last updated: ${lastUpdate}` : '';
+
+  updateQuickResults(val, from);
+}
+
+function formatNumber(num) {
+  if (Math.abs(num) >= 1e9) return num.toExponential(4);
+  return parseFloat(num.toFixed(4)).toLocaleString('en-US', { maximumFractionDigits: 4 });
+}
+
+function updateQuickResults(val, from) {
+  const popularCurrencies = ['USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD'].filter(c => c !== from);
+
+  quickResultsList.innerHTML = popularCurrencies.slice(0, 5).map(c => {
+    if (!rates[c]) return '';
+    const usdValue = val / rates[from];
+    const result = usdValue * rates[c];
+    return `<div class="quick-result-item"><span class="unit">${c}</span><span class="value">${formatNumber(result)}</span></div>`;
+  }).join('');
+}
+
+function swapCurrencies() {
+  const tempCurrency = fromCurrency.value;
+  fromCurrency.value = toCurrency.value;
+  toCurrency.value = tempCurrency;
+  const tempVal = fromValue.value;
+  fromValue.value = toValue.value;
+  convert();
+}
+
+fromValue.addEventListener('input', convert);
+fromCurrency.addEventListener('change', convert);
+toCurrency.addEventListener('change', convert);
+
+loadRates();
+</script>
+</body>
+</html>
