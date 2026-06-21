@@ -1,1 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Percentage Calculator - 5iles</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>%</text></svg>">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #fff; min-height: 100vh; }
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; background: #13131f; border-bottom: 1px solid #2a2a3e; }
+  .logo { font-size: 1.4rem; font-weight: 700; color: #fff; text-decoration: none; display: flex; align-items: center; gap: 8px; }
+  .logo span { background: linear-gradient(135deg, #6c63ff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .nav-links { display: flex; gap: 24px; }
+  .nav-links a { color: #9ca3af; text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+  .nav-links a:hover { color: #fff; }
+  .hero { text-align: center; padding: 60px 20px 40px; }
+  .tool-icon { font-size: 3rem; margin-bottom: 16px; }
+  h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 12px; }
+  h1 span { background: linear-gradient(135deg, #6c63ff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .subtitle { color: #9ca3af; font-size: 1rem; max-width: 500px; margin: 0 auto; }
+  .tool-container { max-width: 680px; margin: 0 auto; padding: 0 20px 60px; }
 
+  .calc-tabs { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+  .calc-tab { padding: 14px 16px; background: #13131f; border: 1px solid #2a2a3e; border-radius: 12px; color: #9ca3af; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
+  .calc-tab.active { background: rgba(108,99,255,0.15); border-color: #6c63ff; color: #fff; }
+  .calc-tab .tab-title { font-weight: 700; color: #a78bfa; margin-bottom: 2px; }
+  .calc-tab.active .tab-title { color: #fff; }
+  .calc-tab .tab-example { font-size: 0.78rem; color: #6b7280; }
+
+  .calc-panel { background: #13131f; border-radius: 16px; padding: 24px; }
+  .calc-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; font-size: 1.05rem; }
+  .calc-row input { width: 110px; background: #1e1e30; border: 1px solid #3a3a5c; border-radius: 10px; color: #fff; padding: 12px; font-size: 1rem; text-align: center; }
+  .calc-row input:focus { outline: none; border-color: #6c63ff; }
+  .calc-row span { color: #9ca3af; }
+
+  .result-box { margin-top: 20px; background: #0f0f1a; border-radius: 14px; padding: 24px; text-align: center; }
+  .result-value { font-size: 2.2rem; font-weight: 800; color: #4ade80; }
+  .result-label { font-size: 0.85rem; color: #9ca3af; margin-top: 6px; }
+
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 32px; }
+  .feature { background: #13131f; border-radius: 12px; padding: 16px; text-align: center; }
+  .feature-icon { font-size: 1.5rem; margin-bottom: 8px; }
+  .feature-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
+  .feature-desc { font-size: 0.75rem; color: #9ca3af; }
+  footer { text-align: center; padding: 24px; color: #6b7280; font-size: 0.8rem; border-top: 1px solid #2a2a3e; }
+  footer a { color: #6b7280; text-decoration: none; }
+  @media (max-width: 600px) { h1 { font-size: 1.6rem; } .features { grid-template-columns: 1fr; } .calc-row input { width: 80px; } }
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="logo"><span>5</span>iles</a>
+  <div class="nav-links">
+    <a href="/">Tools</a>
+    <a href="/pricing.html">Pricing</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="tool-icon">%</div>
+  <h1>Percentage <span>Calculator</span></h1>
+  <p class="subtitle">Calculate percentages, increases, decreases, and differences instantly.</p>
+</div>
+
+<div class="tool-container">
+  <div class="calc-tabs">
+    <div class="calc-tab active" onclick="setMode('basic', this)">
+      <div class="tab-title">What is X% of Y?</div>
+      <div class="tab-example">e.g. What is 25% of 200?</div>
+    </div>
+    <div class="calc-tab" onclick="setMode('isWhat', this)">
+      <div class="tab-title">X is what % of Y?</div>
+      <div class="tab-example">e.g. 50 is what % of 200?</div>
+    </div>
+    <div class="calc-tab" onclick="setMode('change', this)">
+      <div class="tab-title">% change from X to Y</div>
+      <div class="tab-example">e.g. % change from 80 to 100</div>
+    </div>
+    <div class="calc-tab" onclick="setMode('increase', this)">
+      <div class="tab-title">Increase X by Y%</div>
+      <div class="tab-example">e.g. Increase 200 by 15%</div>
+    </div>
+    <div class="calc-tab" onclick="setMode('decrease', this)">
+      <div class="tab-title">Decrease X by Y%</div>
+      <div class="tab-example">e.g. Decrease 200 by 15%</div>
+    </div>
+  </div>
+
+  <div class="calc-panel">
+    <div class="calc-row" id="calcRow"></div>
+    <div class="result-box">
+      <div class="result-value" id="resultValue">—</div>
+      <div class="result-label" id="resultLabel">Enter values above</div>
+    </div>
+  </div>
+
+  <div class="features">
+    <div class="feature">
+      <div class="feature-icon">%</div>
+      <div class="feature-title">5 Calculators</div>
+      <div class="feature-desc">All common percentage operations</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">⚡</div>
+      <div class="feature-title">Instant</div>
+      <div class="feature-desc">Updates as you type</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🔒</div>
+      <div class="feature-title">Private</div>
+      <div class="feature-desc">Runs entirely in your browser</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <a href="/">← Back to all tools</a> · © 2025 5iles.com
+</footer>
+
+<script>
+let currentMode = 'basic';
+
+const calcRow = document.getElementById('calcRow');
+const resultValue = document.getElementById('resultValue');
+const resultLabel = document.getElementById('resultLabel');
+
+const modeConfig = {
+  basic: {
+    template: () => `<span>What is</span><input type="number" id="val1" placeholder="25"><span>% of</span><input type="number" id="val2" placeholder="200"><span>?</span>`,
+    calc: (v1, v2) => ({ value: (v1 / 100) * v2, label: `${v1}% of ${v2} is` })
+  },
+  isWhat: {
+    template: () => `<input type="number" id="val1" placeholder="50"><span>is what % of</span><input type="number" id="val2" placeholder="200"><span>?</span>`,
+    calc: (v1, v2) => ({ value: (v1 / v2) * 100, label: `${v1} is this % of ${v2}`, suffix: '%' })
+  },
+  change: {
+    template: () => `<span>% change from</span><input type="number" id="val1" placeholder="80"><span>to</span><input type="number" id="val2" placeholder="100">`,
+    calc: (v1, v2) => ({ value: ((v2 - v1) / v1) * 100, label: `Change from ${v1} to ${v2}`, suffix: '%', showSign: true })
+  },
+  increase: {
+    template: () => `<span>Increase</span><input type="number" id="val1" placeholder="200"><span>by</span><input type="number" id="val2" placeholder="15"><span>%</span>`,
+    calc: (v1, v2) => ({ value: v1 * (1 + v2 / 100), label: `${v1} increased by ${v2}% is` })
+  },
+  decrease: {
+    template: () => `<span>Decrease</span><input type="number" id="val1" placeholder="200"><span>by</span><input type="number" id="val2" placeholder="15"><span>%</span>`,
+    calc: (v1, v2) => ({ value: v1 * (1 - v2 / 100), label: `${v1} decreased by ${v2}% is` })
+  }
+};
+
+function setMode(mode, el) {
+  currentMode = mode;
+  document.querySelectorAll('.calc-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  calcRow.innerHTML = modeConfig[mode].template();
+  document.getElementById('val1').addEventListener('input', calculate);
+  document.getElementById('val2').addEventListener('input', calculate);
+  resultValue.textContent = '—';
+  resultLabel.textContent = 'Enter values above';
+}
+
+function calculate() {
+  const v1 = parseFloat(document.getElementById('val1').value);
+  const v2 = parseFloat(document.getElementById('val2').value);
+
+  if (isNaN(v1) || isNaN(v2)) {
+    resultValue.textContent = '—';
+    resultLabel.textContent = 'Enter values above';
+    return;
+  }
+
+  if (currentMode === 'isWhat' && v2 === 0) {
+    resultValue.textContent = '—';
+    resultLabel.textContent = 'Cannot divide by zero';
+    return;
+  }
+
+  const result = modeConfig[currentMode].calc(v1, v2);
+  let displayValue = result.value;
+
+  let formatted = Math.abs(displayValue) < 0.01 && displayValue !== 0
+    ? displayValue.toFixed(4)
+    : displayValue.toLocaleString('en-US', { maximumFractionDigits: 2 });
+
+  if (result.showSign && displayValue > 0) formatted = '+' + formatted;
+
+  resultValue.textContent = formatted + (result.suffix || '');
+  resultLabel.textContent = result.label;
+}
+
+// Initialize
+setMode('basic', document.querySelector('.calc-tab'));
+</script>
+</body>
+</html>
