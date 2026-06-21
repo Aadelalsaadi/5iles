@@ -1,1 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>URL Encoder/Decoder - 5iles</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔗</text></svg>">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #fff; min-height: 100vh; }
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; background: #13131f; border-bottom: 1px solid #2a2a3e; }
+  .logo { font-size: 1.4rem; font-weight: 700; color: #fff; text-decoration: none; display: flex; align-items: center; gap: 8px; }
+  .logo span { background: linear-gradient(135deg, #6c63ff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .nav-links { display: flex; gap: 24px; }
+  .nav-links a { color: #9ca3af; text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+  .nav-links a:hover { color: #fff; }
+  .hero { text-align: center; padding: 60px 20px 40px; }
+  .tool-icon { font-size: 3rem; margin-bottom: 16px; }
+  h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 12px; }
+  h1 span { background: linear-gradient(135deg, #6c63ff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .subtitle { color: #9ca3af; font-size: 1rem; max-width: 500px; margin: 0 auto; }
+  .tool-container { max-width: 720px; margin: 0 auto; padding: 0 20px 60px; }
 
+  .mode-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+  .mode-tab { flex: 1; padding: 12px; background: #13131f; border: 1px solid #2a2a3e; border-radius: 10px; color: #9ca3af; font-size: 0.9rem; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.2s; }
+  .mode-tab.active { background: rgba(108,99,255,0.15); border-color: #6c63ff; color: #a78bfa; }
+
+  textarea { width: 100%; min-height: 160px; background: #13131f; border: 1px solid #2a2a3e; border-radius: 12px; color: #fff; padding: 16px; font-size: 0.95rem; resize: vertical; line-height: 1.6; font-family: 'Consolas', monospace; }
+  textarea:focus { outline: none; border-color: #6c63ff; }
+
+  .action-btn { width: 100%; margin-top: 16px; padding: 16px; background: linear-gradient(135deg, #6c63ff, #a78bfa); color: #fff; border: none; border-radius: 12px; font-size: 1.05rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+  .action-btn:hover { opacity: 0.9; }
+
+  .result-box { margin-top: 20px; background: #13131f; border-radius: 12px; padding: 16px; display: none; }
+  .result-box.show { display: block; }
+  .result-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .result-label span { font-size: 0.8rem; color: #9ca3af; font-weight: 600; }
+  .copy-btn { background: #1e1e30; border: 1px solid #3a3a5c; border-radius: 8px; color: #a78bfa; padding: 6px 14px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
+  .copy-btn:hover { background: rgba(108,99,255,0.15); border-color: #6c63ff; }
+  .result-text { background: #0f0f1a; border-radius: 8px; padding: 14px; font-size: 0.9rem; white-space: pre-wrap; word-break: break-all; color: #4ade80; min-height: 50px; font-family: 'Consolas', monospace; }
+  .result-text.error { color: #f87171; }
+
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 32px; }
+  .feature { background: #13131f; border-radius: 12px; padding: 16px; text-align: center; }
+  .feature-icon { font-size: 1.5rem; margin-bottom: 8px; }
+  .feature-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
+  .feature-desc { font-size: 0.75rem; color: #9ca3af; }
+  footer { text-align: center; padding: 24px; color: #6b7280; font-size: 0.8rem; border-top: 1px solid #2a2a3e; }
+  footer a { color: #6b7280; text-decoration: none; }
+  @media (max-width: 600px) { h1 { font-size: 1.6rem; } .features { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="logo"><span>5</span>iles</a>
+  <div class="nav-links">
+    <a href="/">Tools</a>
+    <a href="/pricing.html">Pricing</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="tool-icon">🔗</div>
+  <h1>URL <span>Encoder/Decoder</span></h1>
+  <p class="subtitle">Encode or decode URLs and query strings instantly.</p>
+</div>
+
+<div class="tool-container">
+  <div class="mode-tabs">
+    <div class="mode-tab active" onclick="setMode('encode', this)">Encode</div>
+    <div class="mode-tab" onclick="setMode('decode', this)">Decode</div>
+  </div>
+
+  <textarea id="inputText" placeholder="Paste your URL or text here..."></textarea>
+
+  <button class="action-btn" id="actionBtn" onclick="process()">🔗 Encode URL</button>
+
+  <div class="result-box" id="resultBox">
+    <div class="result-label">
+      <span id="resultLabel">Result</span>
+      <button class="copy-btn" onclick="copyResult()">📋 Copy</button>
+    </div>
+    <div class="result-text" id="resultText"></div>
+  </div>
+
+  <div class="features">
+    <div class="feature">
+      <div class="feature-icon">🔗</div>
+      <div class="feature-title">Encode & Decode</div>
+      <div class="feature-desc">Full URL component encoding</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">⚡</div>
+      <div class="feature-title">Instant</div>
+      <div class="feature-desc">Real-time conversion</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🔒</div>
+      <div class="feature-title">Private</div>
+      <div class="feature-desc">Runs entirely in your browser</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <a href="/">← Back to all tools</a> · © 2025 5iles.com
+</footer>
+
+<script>
+let currentMode = 'encode';
+
+const inputText = document.getElementById('inputText');
+const actionBtn = document.getElementById('actionBtn');
+const resultBox = document.getElementById('resultBox');
+const resultLabel = document.getElementById('resultLabel');
+const resultText = document.getElementById('resultText');
+
+function setMode(mode, el) {
+  currentMode = mode;
+  document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  actionBtn.textContent = mode === 'encode' ? '🔗 Encode URL' : '🔓 Decode URL';
+  resultBox.classList.remove('show');
+}
+
+function process() {
+  const text = inputText.value;
+  if (!text.trim()) return;
+
+  try {
+    let result;
+    if (currentMode === 'encode') {
+      result = encodeURIComponent(text);
+      resultLabel.textContent = 'Encoded URL';
+    } else {
+      result = decodeURIComponent(text);
+      resultLabel.textContent = 'Decoded URL';
+    }
+    resultText.textContent = result;
+    resultText.classList.remove('error');
+    resultBox.classList.add('show');
+  } catch (err) {
+    resultText.textContent = 'Error: ' + err.message + '\n\nMake sure the input is a valid encoded string.';
+    resultText.classList.add('error');
+    resultBox.classList.add('show');
+  }
+}
+
+function copyResult() {
+  const text = resultText.textContent;
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    const original = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+  });
+}
+
+inputText.addEventListener('input', process);
+</script>
+</body>
+</html>
