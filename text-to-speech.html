@@ -1,1 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Text to Speech Online Free | 5iles</title>
+<meta name="description" content="Convert text to speech online for free. Listen to any text read aloud with natural voices. No signup, works in your browser.">
+<meta name="keywords" content="text to speech, tts online, text to voice, read aloud tool">
+<meta property="og:title" content="Text to Speech Online Free | 5iles">
+<meta property="og:description" content="Convert text to speech online for free. Listen to any text read aloud with natural voices. No signup, works in your browser.">
+<meta property="og:url" content="https://5iles.com/text-to-speech.html">
+<meta property="og:type" content="website">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://5iles.com/text-to-speech.html">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔊</text></svg>">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f0f1a; color: #fff; min-height: 100vh; }
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 32px; background: #13131f; border-bottom: 1px solid #2a2a3e; }
+  .logo { font-size: 1.4rem; font-weight: 700; color: #fff; text-decoration: none; display: flex; align-items: center; gap: 8px; }
+  .logo span { background: linear-gradient(135deg, #6c63ff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .nav-links { display: flex; gap: 24px; }
+  .nav-links a { color: #9ca3af; text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+  .nav-links a:hover { color: #fff; }
+  .hero { text-align: center; padding: 60px 20px 40px; }
+  .tool-icon { font-size: 3rem; margin-bottom: 16px; }
+  h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 12px; }
+  h1 span { background: linear-gradient(135deg, #6c63ff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .subtitle { color: #9ca3af; font-size: 1rem; max-width: 500px; margin: 0 auto; }
+  .tool-container { max-width: 720px; margin: 0 auto; padding: 0 20px 60px; }
 
+  textarea { width: 100%; min-height: 180px; background: #13131f; border: 1px solid #2a2a3e; border-radius: 12px; color: #fff; padding: 16px; font-size: 0.95rem; resize: vertical; line-height: 1.6; }
+  textarea:focus { outline: none; border-color: #6c63ff; }
+  .char-count { text-align: right; color: #9ca3af; font-size: 0.8rem; margin-top: 6px; }
+
+  .options-box { background: #13131f; border-radius: 12px; padding: 20px; margin-top: 16px; }
+  .option-row { margin-bottom: 16px; }
+  .option-row:last-child { margin-bottom: 0; }
+  .option-row label { font-size: 0.85rem; color: #9ca3af; margin-bottom: 8px; display: block; }
+  .option-row select { width: 100%; background: #1e1e30; border: 1px solid #3a3a5c; border-radius: 10px; color: #fff; padding: 12px; font-size: 0.9rem; cursor: pointer; }
+  .option-row select:focus { outline: none; border-color: #6c63ff; }
+
+  .slider-row { display: flex; align-items: center; gap: 12px; }
+  .slider-row input[type="range"] { flex: 1; accent-color: #6c63ff; }
+  .slider-value { color: #a78bfa; font-weight: 600; font-size: 0.85rem; min-width: 40px; text-align: right; }
+
+  .controls-row { display: flex; gap: 10px; margin-top: 16px; }
+  .control-btn { flex: 1; padding: 16px; border: none; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+  .control-btn:hover:not(:disabled) { opacity: 0.9; }
+  .control-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .play-btn { background: linear-gradient(135deg, #6c63ff, #a78bfa); color: #fff; }
+  .pause-btn { background: #1e1e30; border: 1px solid #3a3a5c; color: #fbbf24; }
+  .stop-btn { background: #1e1e30; border: 1px solid #3a3a5c; color: #f87171; }
+
+  .status-text { text-align: center; margin-top: 14px; color: #9ca3af; font-size: 0.85rem; }
+  .error { display: none; margin-top: 16px; background: #2d0a0a; border: 1px solid #ef4444; border-radius: 12px; padding: 16px; color: #f87171; text-align: center; font-size: 0.9rem; }
+  .error.show { display: block; }
+
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 32px; }
+  .feature { background: #13131f; border-radius: 12px; padding: 16px; text-align: center; }
+  .feature-icon { font-size: 1.5rem; margin-bottom: 8px; }
+  .feature-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
+  .feature-desc { font-size: 0.75rem; color: #9ca3af; }
+  footer { text-align: center; padding: 24px; color: #6b7280; font-size: 0.8rem; border-top: 1px solid #2a2a3e; }
+  footer a { color: #6b7280; text-decoration: none; }
+  @media (max-width: 600px) { h1 { font-size: 1.6rem; } .features { grid-template-columns: 1fr; } .controls-row { flex-direction: column; } }
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="logo"><span>5</span>iles</a>
+  <div class="nav-links">
+    <a href="/">Tools</a>
+    <a href="/pricing.html">Pricing</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="tool-icon">🔊</div>
+  <h1>Text to <span>Speech</span></h1>
+  <p class="subtitle">Type or paste text and listen to it read aloud. Free, runs in your browser.</p>
+</div>
+
+<div class="tool-container">
+  <textarea id="textInput" placeholder="Type or paste text here to convert it to speech...">Welcome to 5iles. This is a free text to speech tool that works right in your browser.</textarea>
+  <div class="char-count" id="charCount">0 characters</div>
+
+  <div class="options-box">
+    <div class="option-row">
+      <label>Voice</label>
+      <select id="voiceSelect"></select>
+    </div>
+
+    <div class="option-row">
+      <label>Speed: <span class="slider-value" id="rateValue">1.0x</span></label>
+      <div class="slider-row">
+        <input type="range" id="rateSlider" min="0.5" max="2" step="0.1" value="1">
+      </div>
+    </div>
+
+    <div class="option-row">
+      <label>Pitch: <span class="slider-value" id="pitchValue">1.0</span></label>
+      <div class="slider-row">
+        <input type="range" id="pitchSlider" min="0" max="2" step="0.1" value="1">
+      </div>
+    </div>
+  </div>
+
+  <div class="controls-row">
+    <button class="control-btn play-btn" id="playBtn" onclick="playSpeech()">▶ Play</button>
+    <button class="control-btn pause-btn" id="pauseBtn" onclick="togglePause()" disabled>⏸ Pause</button>
+    <button class="control-btn stop-btn" id="stopBtn" onclick="stopSpeech()" disabled>⏹ Stop</button>
+  </div>
+
+  <div class="status-text" id="statusText">Ready to speak</div>
+  <div class="error" id="errorBox"></div>
+
+  <div class="features">
+    <div class="feature">
+      <div class="feature-icon">🗣️</div>
+      <div class="feature-title">Natural Voices</div>
+      <div class="feature-desc">Uses your browser's built-in voices</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🎛️</div>
+      <div class="feature-title">Customizable</div>
+      <div class="feature-desc">Adjust speed and pitch to your liking</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🔒</div>
+      <div class="feature-title">Private</div>
+      <div class="feature-desc">Processed entirely in your browser</div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <a href="/">← Back to all tools</a> · © 2025 5iles.com
+</footer>
+
+<script>
+const textInput = document.getElementById('textInput');
+const charCount = document.getElementById('charCount');
+const voiceSelect = document.getElementById('voiceSelect');
+const rateSlider = document.getElementById('rateSlider');
+const rateValue = document.getElementById('rateValue');
+const pitchSlider = document.getElementById('pitchSlider');
+const pitchValue = document.getElementById('pitchValue');
+const playBtn = document.getElementById('playBtn');
+const pauseBtn = document.getElementById('pauseBtn');
+const stopBtn = document.getElementById('stopBtn');
+const statusText = document.getElementById('statusText');
+const errorBox = document.getElementById('errorBox');
+
+let voices = [];
+let utterance = null;
+let isPaused = false;
+
+if (!('speechSynthesis' in window)) {
+  showError('Text-to-speech is not supported in this browser.');
+  playBtn.disabled = true;
+}
+
+function loadVoices() {
+  voices = speechSynthesis.getVoices();
+  if (voices.length === 0) return;
+
+  voiceSelect.innerHTML = voices.map((v, i) =>
+    `<option value="${i}">${v.name} (${v.lang})</option>`
+  ).join('');
+
+  // Try to default to an English voice
+  const defaultIndex = voices.findIndex(v => v.lang.startsWith('en'));
+  if (defaultIndex >= 0) voiceSelect.value = defaultIndex;
+}
+
+speechSynthesis.onvoiceschanged = loadVoices;
+loadVoices();
+
+function updateCharCount() {
+  charCount.textContent = `${textInput.value.length.toLocaleString()} characters`;
+}
+textInput.addEventListener('input', updateCharCount);
+updateCharCount();
+
+rateSlider.addEventListener('input', () => {
+  rateValue.textContent = parseFloat(rateSlider.value).toFixed(1) + 'x';
+});
+
+pitchSlider.addEventListener('input', () => {
+  pitchValue.textContent = parseFloat(pitchSlider.value).toFixed(1);
+});
+
+function playSpeech() {
+  const text = textInput.value.trim();
+  if (!text) {
+    showError('Please enter some text first.');
+    return;
+  }
+
+  errorBox.classList.remove('show');
+  speechSynthesis.cancel();
+
+  utterance = new SpeechSynthesisUtterance(text);
+  const selectedVoice = voices[voiceSelect.value];
+  if (selectedVoice) utterance.voice = selectedVoice;
+  utterance.rate = parseFloat(rateSlider.value);
+  utterance.pitch = parseFloat(pitchSlider.value);
+
+  utterance.onstart = () => {
+    statusText.textContent = '🔊 Speaking...';
+    playBtn.disabled = true;
+    pauseBtn.disabled = false;
+    stopBtn.disabled = false;
+    isPaused = false;
+    pauseBtn.textContent = '⏸ Pause';
+  };
+
+  utterance.onend = () => {
+    statusText.textContent = 'Finished speaking';
+    resetControls();
+  };
+
+  utterance.onerror = (e) => {
+    if (e.error !== 'canceled' && e.error !== 'interrupted') {
+      showError('Speech error: ' + e.error);
+    }
+    resetControls();
+  };
+
+  speechSynthesis.speak(utterance);
+}
+
+function togglePause() {
+  if (isPaused) {
+    speechSynthesis.resume();
+    pauseBtn.textContent = '⏸ Pause';
+    statusText.textContent = '🔊 Speaking...';
+    isPaused = false;
+  } else {
+    speechSynthesis.pause();
+    pauseBtn.textContent = '▶ Resume';
+    statusText.textContent = '⏸ Paused';
+    isPaused = true;
+  }
+}
+
+function stopSpeech() {
+  speechSynthesis.cancel();
+  statusText.textContent = 'Stopped';
+  resetControls();
+}
+
+function resetControls() {
+  playBtn.disabled = false;
+  pauseBtn.disabled = true;
+  stopBtn.disabled = true;
+  isPaused = false;
+}
+
+function showError(msg) {
+  errorBox.textContent = msg;
+  errorBox.classList.add('show');
+}
+</script>
+</body>
+</html>
