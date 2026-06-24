@@ -396,32 +396,49 @@ function removeFile(name) {
   if (files.length === 0) { document.getElementById('options-row').style.display='none'; document.getElementById('action-row').style.display='none'; }
 }
 
-function processFiles() {
+function compressImageFile(file, quality) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onload = e => {
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        const outType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+        canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Failed to compress image')), outType, quality);
+      };
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('Failed to read file'));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function processFiles() {
   if (!files.length) return;
   const btn = document.getElementById('process-btn');
   btn.disabled = true; btn.textContent = 'Compressing…';
+  const quality = parseInt(document.getElementById('compress-slider').value) / 100;
   let outputFiles = [];
-  const processNext = (i) => {
-    if (i >= files.length) { finishProcessing(btn, outputFiles); return; }
-    const f = files[i];
+
+  for (const f of files) {
     const id = f.name.replace(/\W/g,'_');
-    const pfEl = document.getElementById('pf-'+id);
     const psEl = document.getElementById('ps-'+id);
     if (psEl) { psEl.textContent = 'Compressing'; psEl.style.color = 'var(--amber, #c47d0e)'; }
-    let pct = 0;
-    const iv = setInterval(() => {
-      pct = Math.min(100, pct + Math.random()*20);
-      if (pfEl) pfEl.style.width = pct+'%';
-      if (pct >= 100) {
-        clearInterval(iv);
-        if (psEl) { psEl.textContent = 'Done'; psEl.style.color = 'var(--accent)'; }
-        const level = parseInt(document.getElementById('compress-slider').value) / 100;
-        outputFiles.push({ name: 'compressed_'+f.name, originalSize: f.size, newSize: Math.round(f.size * (1 - level * 0.8)) });
-        processNext(i+1);
-      }
-    }, 100);
-  };
-  processNext(0);
+    try {
+      const blob = await compressImageFile(f, quality);
+      outputFiles.push({ name: 'compressed_'+f.name, url: URL.createObjectURL(blob), originalSize: f.size, newSize: blob.size });
+      if (psEl) { psEl.textContent = 'Done'; psEl.style.color = 'var(--accent)'; }
+    } catch(err) {
+      if (psEl) { psEl.textContent = 'Failed'; psEl.style.color = '#b02e4a'; }
+      showToast('Failed to compress ' + f.name + ': ' + err.message, 'error');
+    }
+  }
+  finishProcessing(btn, outputFiles);
 }
 
 function finishProcessing(btn, outputFiles) {
@@ -435,7 +452,8 @@ function finishProcessing(btn, outputFiles) {
     const savings = Math.round((1 - f.newSize/f.originalSize)*100);
     const div = document.createElement('div');
     div.className = 'output-file';
-    div.innerHTML = `<span style="font-size:20px">📄</span><div style="flex:1"><div style="font-size:14px;font-weight:500">${f.name}</div><div style="font-size:12px;color:var(--ink3)">${origStr} → ${newStr} <span style="color:var(--accent);font-weight:600">(${savings}% smaller)</span></div></div><button class="btn btn-primary btn-sm" onclick="showToast('Downloading ${f.name}…','success')">⬇ Download</button>`;
+    div.innerHTML = `<span style="font-size:20px">📄</span><div style="flex:1"><div style="font-size:14px;font-weight:500">${f.name}</div><div style="font-size:12px;color:var(--ink3)">${origStr} → ${newStr} <span style="color:var(--accent);font-weight:600">(${savings > 0 ? savings : 0}% smaller)</span></div></div><button class="btn btn-primary btn-sm">⬇ Download</button>`;
+    div.querySelector('button').addEventListener('click', () => { const a = document.createElement('a'); a.href = f.url; a.download = f.name; a.click(); });
     filesDiv.appendChild(div);
   });
   area.classList.add('show');

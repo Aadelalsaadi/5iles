@@ -396,32 +396,34 @@ function removeFile(name) {
   if (files.length === 0) { document.getElementById('options-row').style.display='none'; document.getElementById('action-row').style.display='none'; }
 }
 
-function processFiles() {
+async function processFiles() {
   if (!files.length) return;
+  const CONVERTER_URL = 'https://fiveiles-converter.onrender.com';
   const btn = document.getElementById('process-btn');
-  btn.disabled = true; btn.textContent = 'Compressing…';
+  btn.disabled = true; btn.textContent = 'Converting…';
   let outputFiles = [];
-  const processNext = (i) => {
-    if (i >= files.length) { finishProcessing(btn, outputFiles); return; }
-    const f = files[i];
+
+  for (const f of files) {
     const id = f.name.replace(/\W/g,'_');
-    const pfEl = document.getElementById('pf-'+id);
     const psEl = document.getElementById('ps-'+id);
-    if (psEl) { psEl.textContent = 'Compressing'; psEl.style.color = 'var(--amber, #c47d0e)'; }
-    let pct = 0;
-    const iv = setInterval(() => {
-      pct = Math.min(100, pct + Math.random()*20);
-      if (pfEl) pfEl.style.width = pct+'%';
-      if (pct >= 100) {
-        clearInterval(iv);
-        if (psEl) { psEl.textContent = 'Done'; psEl.style.color = 'var(--accent)'; }
-        const level = parseInt(document.getElementById('compress-slider').value) / 100;
-        outputFiles.push({ name: 'compressed_'+f.name, originalSize: f.size, newSize: Math.round(f.size * (1 - level * 0.8)) });
-        processNext(i+1);
+    if (psEl) { psEl.textContent = 'Converting'; psEl.style.color = 'var(--amber, #c47d0e)'; }
+    try {
+      const formData = new FormData();
+      formData.append('file', f);
+      const res = await fetch(`${CONVERTER_URL}/pdf-to-excel`, { method: 'POST', body: formData });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Conversion failed');
       }
-    }, 100);
-  };
-  processNext(0);
+      const blob = await res.blob();
+      outputFiles.push({ name: f.name.replace(/\.pdf$/i, '.xlsx'), url: URL.createObjectURL(blob), size: blob.size });
+      if (psEl) { psEl.textContent = 'Done'; psEl.style.color = 'var(--accent)'; }
+    } catch(err) {
+      if (psEl) { psEl.textContent = 'Failed'; psEl.style.color = '#b02e4a'; }
+      showToast('Failed to convert ' + f.name + ': ' + err.message, 'error');
+    }
+  }
+  finishProcessing(btn, outputFiles);
 }
 
 function finishProcessing(btn, outputFiles) {
@@ -430,21 +432,20 @@ function finishProcessing(btn, outputFiles) {
   const filesDiv = document.getElementById('output-files');
   filesDiv.innerHTML = '';
   outputFiles.forEach(f => {
-    const origStr = f.originalSize > 1024*1024 ? (f.originalSize/1024/1024).toFixed(1)+' MB' : (f.originalSize/1024).toFixed(0)+' KB';
-    const newStr = f.newSize > 1024*1024 ? (f.newSize/1024/1024).toFixed(1)+' MB' : (f.newSize/1024).toFixed(0)+' KB';
-    const savings = Math.round((1 - f.newSize/f.originalSize)*100);
+    const sizeStr = f.size > 1024*1024 ? (f.size/1024/1024).toFixed(1)+' MB' : (f.size/1024).toFixed(0)+' KB';
     const div = document.createElement('div');
     div.className = 'output-file';
-    div.innerHTML = `<span style="font-size:20px">📄</span><div style="flex:1"><div style="font-size:14px;font-weight:500">${f.name}</div><div style="font-size:12px;color:var(--ink3)">${origStr} → ${newStr} <span style="color:var(--accent);font-weight:600">(${savings}% smaller)</span></div></div><button class="btn btn-primary btn-sm" onclick="showToast('Downloading ${f.name}…','success')">⬇ Download</button>`;
+    div.innerHTML = `<span style="font-size:20px">📄</span><div style="flex:1"><div style="font-size:14px;font-weight:500">${f.name}</div><div style="font-size:12px;color:var(--ink3)">Converted (${sizeStr})</div></div><button class="btn btn-primary btn-sm">⬇ Download</button>`;
+    div.querySelector('button').addEventListener('click', () => { const a = document.createElement('a'); a.href = f.url; a.download = f.name; a.click(); });
     filesDiv.appendChild(div);
   });
   area.classList.add('show');
   area.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  showToast(`${outputFiles.length} file(s) compressed successfully!`, 'success');
+  if (outputFiles.length) showToast(`${outputFiles.length} file(s) converted successfully!`, 'success');
 }
 
 function clearAll() { files = []; document.getElementById('queue').innerHTML=''; document.getElementById('output-area').classList.remove('show'); document.getElementById('options-row').style.display='none'; document.getElementById('action-row').style.display='none'; }
-function downloadAll() { showToast('Downloading all files as ZIP…', 'success'); }
+function downloadAll() { document.querySelectorAll('#output-files button').forEach(b => b.click()); }
 function compressMore() { clearAll(); window.scrollTo({top:0,behavior:'smooth'}); }
 
 function toggleFaq(btn) {

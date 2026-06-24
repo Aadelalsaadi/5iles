@@ -8,6 +8,7 @@
 <meta name="keywords" content="sign pdf, esign pdf, electronic signature pdf, sign pdf online free, digital signature">
 <meta property="og:title" content="Sign PDF Online Free | 5iles">
 <meta property="og:description" content="Reduce your PDF file size instantly. Free online PDF compressor — no signup needed.">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231a6b4a'/%3E%3Crect x='16' y='14' width='52' height='11' rx='5.5' fill='white'/%3E%3Crect x='16' y='14' width='11' height='35' rx='5.5' fill='white'/%3E%3Crect x='16' y='38' width='40' height='11' rx='5.5' fill='white'/%3E%3Crect x='16' y='72' width='52' height='11' rx='5.5' fill='white'/%3E%3Crect x='57' y='49' width='11' height='34' rx='5.5' fill='white'/%3E%3Cpolygon points='52,30 82,48.5 52,67' fill='%234ade80'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -215,18 +216,22 @@ footer{background:var(--ink);color:rgba(255,255,255,.5);padding:40px 0;border-to
 
       <div class="options-row" id="options-row" style="display:none">
         <div class="option-group">
-          <span class="option-label">Compression level</span>
-          <div class="slider-wrap">
-            <input type="range" min="1" max="100" value="70" id="compress-slider" oninput="document.getElementById('cval').textContent=this.value+'%'">
-            <span class="slider-val" id="cval">70%</span>
-          </div>
+          <span class="option-label">Signature text</span>
+          <input type="text" class="option-select" id="sign-text" placeholder="Type your name" style="width:100%">
         </div>
         <div class="option-group">
-          <span class="option-label">Quality preset</span>
-          <select class="option-select" id="quality-select">
-            <option value="recommended">Recommended (best balance)</option>
-            <option value="high">High quality (larger file)</option>
-            <option value="low">Maximum compression (smallest)</option>
+          <span class="option-label">Position</span>
+          <select class="option-select" id="sign-position">
+            <option value="bottom-right">Bottom right</option>
+            <option value="bottom-left">Bottom left</option>
+            <option value="bottom-center">Bottom center</option>
+          </select>
+        </div>
+        <div class="option-group">
+          <span class="option-label">Apply to</span>
+          <select class="option-select" id="sign-pages">
+            <option value="last">Last page only</option>
+            <option value="all">All pages</option>
           </select>
         </div>
       </div>
@@ -396,32 +401,53 @@ function removeFile(name) {
   if (files.length === 0) { document.getElementById('options-row').style.display='none'; document.getElementById('action-row').style.display='none'; }
 }
 
-function processFiles() {
+async function processFiles() {
   if (!files.length) return;
+  const signText = (document.getElementById('sign-text').value || '').trim();
+  if (!signText) { showToast('Please enter your signature text', 'error'); return; }
+  const position = document.getElementById('sign-position').value;
+  const applyTo = document.getElementById('sign-pages').value;
+
   const btn = document.getElementById('process-btn');
-  btn.disabled = true; btn.textContent = 'Compressing…';
+  btn.disabled = true; btn.textContent = 'Signing…';
+  const { PDFDocument, rgb, StandardFonts } = PDFLib;
   let outputFiles = [];
-  const processNext = (i) => {
-    if (i >= files.length) { finishProcessing(btn, outputFiles); return; }
-    const f = files[i];
+
+  for (const f of files) {
     const id = f.name.replace(/\W/g,'_');
-    const pfEl = document.getElementById('pf-'+id);
     const psEl = document.getElementById('ps-'+id);
-    if (psEl) { psEl.textContent = 'Compressing'; psEl.style.color = 'var(--amber, #c47d0e)'; }
-    let pct = 0;
-    const iv = setInterval(() => {
-      pct = Math.min(100, pct + Math.random()*20);
-      if (pfEl) pfEl.style.width = pct+'%';
-      if (pct >= 100) {
-        clearInterval(iv);
-        if (psEl) { psEl.textContent = 'Done'; psEl.style.color = 'var(--accent)'; }
-        const level = parseInt(document.getElementById('compress-slider').value) / 100;
-        outputFiles.push({ name: 'compressed_'+f.name, originalSize: f.size, newSize: Math.round(f.size * (1 - level * 0.8)) });
-        processNext(i+1);
-      }
-    }, 100);
-  };
-  processNext(0);
+    if (psEl) { psEl.textContent = 'Signing'; psEl.style.color = 'var(--amber, #c47d0e)'; }
+    try {
+      const ab = await f.arrayBuffer();
+      const pdfDoc = await PDFDocument.load(ab, { ignoreEncryption: true });
+      const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+      const pages = pdfDoc.getPages();
+      const targetPages = applyTo === 'all' ? pages : [pages[pages.length - 1]];
+
+      targetPages.forEach(page => {
+        const { width, height } = page.getSize();
+        const fontSize = 14;
+        const textWidth = font.widthOfTextAtSize(signText, fontSize);
+        const margin = 30;
+        let x, y;
+        if (position === 'bottom-right') { x = width - textWidth - margin; y = margin; }
+        else if (position === 'bottom-left') { x = margin; y = margin; }
+        else { x = (width - textWidth) / 2; y = margin; }
+        page.drawLine({ start: {x: x - 5, y: y + fontSize + 8}, end: {x: x + textWidth + 5, y: y + fontSize + 8}, thickness: 1, color: rgb(0.4,0.4,0.4) });
+        page.drawText(signText, { x, y: y + 2, size: fontSize, font, color: rgb(0.1,0.1,0.6) });
+        page.drawText(new Date().toLocaleDateString(), { x, y: y - 14, size: 9, font, color: rgb(0.5,0.5,0.5) });
+      });
+
+      const bytes = await pdfDoc.save({ useObjectStreams: true });
+      const blob = new Blob([bytes], {type:'application/pdf'});
+      outputFiles.push({ name: f.name.replace('.pdf','_signed.pdf'), url: URL.createObjectURL(blob), size: blob.size, pages: targetPages.length });
+      if (psEl) { psEl.textContent = 'Done'; psEl.style.color = 'var(--accent)'; }
+    } catch(err) {
+      if (psEl) { psEl.textContent = 'Failed'; psEl.style.color = '#b02e4a'; }
+      showToast('Failed to sign ' + f.name + ': ' + err.message, 'error');
+    }
+  }
+  finishProcessing(btn, outputFiles);
 }
 
 function finishProcessing(btn, outputFiles) {
@@ -430,17 +456,16 @@ function finishProcessing(btn, outputFiles) {
   const filesDiv = document.getElementById('output-files');
   filesDiv.innerHTML = '';
   outputFiles.forEach(f => {
-    const origStr = f.originalSize > 1024*1024 ? (f.originalSize/1024/1024).toFixed(1)+' MB' : (f.originalSize/1024).toFixed(0)+' KB';
-    const newStr = f.newSize > 1024*1024 ? (f.newSize/1024/1024).toFixed(1)+' MB' : (f.newSize/1024).toFixed(0)+' KB';
-    const savings = Math.round((1 - f.newSize/f.originalSize)*100);
+    const sizeStr = f.size > 1024*1024 ? (f.size/1024/1024).toFixed(1)+' MB' : (f.size/1024).toFixed(0)+' KB';
     const div = document.createElement('div');
     div.className = 'output-file';
-    div.innerHTML = `<span style="font-size:20px">📄</span><div style="flex:1"><div style="font-size:14px;font-weight:500">${f.name}</div><div style="font-size:12px;color:var(--ink3)">${origStr} → ${newStr} <span style="color:var(--accent);font-weight:600">(${savings}% smaller)</span></div></div><button class="btn btn-primary btn-sm" onclick="showToast('Downloading ${f.name}…','success')">⬇ Download</button>`;
+    div.innerHTML = `<span style="font-size:20px">📄</span><div style="flex:1"><div style="font-size:14px;font-weight:500">${f.name}</div><div style="font-size:12px;color:var(--ink3)">Signed on ${f.pages} page(s) (${sizeStr})</div></div><button class="btn btn-primary btn-sm">⬇ Download</button>`;
+    div.querySelector('button').addEventListener('click', () => { const a = document.createElement('a'); a.href = f.url; a.download = f.name; a.click(); });
     filesDiv.appendChild(div);
   });
   area.classList.add('show');
   area.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  showToast(`${outputFiles.length} file(s) compressed successfully!`, 'success');
+  if (outputFiles.length) showToast(`${outputFiles.length} file(s) signed successfully!`, 'success');
 }
 
 function clearAll() { files = []; document.getElementById('queue').innerHTML=''; document.getElementById('output-area').classList.remove('show'); document.getElementById('options-row').style.display='none'; document.getElementById('action-row').style.display='none'; }

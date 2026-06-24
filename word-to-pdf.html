@@ -315,43 +315,35 @@ async function processFiles() {
   filesDiv.innerHTML = '';
   outputUrls = [];
   let anySuccess = false;
+  const CONVERTER_URL = 'https://fiveiles-converter.onrender.com';
 
   for (const f of files) {
     const id = f.name.replace(/\W/g,'_');
     const pfEl = document.getElementById('pf-'+id);
     const psEl = document.getElementById('ps-'+id);
-    if (psEl) { psEl.textContent = 'Uploading...'; psEl.style.color = 'var(--amber,#c47d0e)'; }
-    if (pfEl) pfEl.style.width = '30%';
+    if (psEl) { psEl.textContent = 'Converting...'; psEl.style.color = 'var(--amber,#c47d0e)'; }
+    if (pfEl) pfEl.style.width = '40%';
 
     try {
-      const fileBase64 = await toBase64(f);
-      const uploadRes = await fetch('/.netlify/functions/pdfco-upload', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename: f.name, fileBase64 })
-      });
-      const uploadData = await uploadRes.json();
-      if (uploadData.error) throw new Error(uploadData.error);
-      if (pfEl) pfEl.style.width = '60%';
-      if (psEl) psEl.textContent = 'Converting...';
-
-      const convertRes = await fetch('/.netlify/functions/word-to-pdf', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: uploadData.url })
-      });
-      const convertData = await convertRes.json();
-      if (convertData.error) throw new Error(convertData.error);
-      if (pfEl) pfEl.style.width = '100%';
-      if (psEl) { psEl.textContent = 'Done'; psEl.style.color = 'var(--accent)'; }
-
-      const pdfUrl = convertData.url;
+      const formData = new FormData();
+      formData.append('file', f);
+      const res = await fetch(`${CONVERTER_URL}/convert`, { method: 'POST', body: formData });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Conversion failed');
+      }
+      const blob = await res.blob();
+      const pdfUrl = URL.createObjectURL(blob);
       const outName = f.name.replace(/\.(doc|docx)$/i, '.pdf');
       outputUrls.push({ url: pdfUrl, name: outName });
 
+      if (pfEl) pfEl.style.width = '100%';
+      if (psEl) { psEl.textContent = 'Done'; psEl.style.color = 'var(--accent)'; }
+
       const div = document.createElement('div');
       div.className = 'output-file';
-      div.innerHTML = `<span style="font-size:20px">📄</span><div style="flex:1"><div style="font-size:14px;font-weight:500">${outName}</div><div style="font-size:12px;color:var(--ink3)">Converted successfully</div></div><button class="btn btn-primary btn-sm" onclick="forceDownload('${pdfUrl}','${outName}')">⬇ Download</button>`;
+      div.innerHTML = `<span style="font-size:20px">📄</span><div style="flex:1"><div style="font-size:14px;font-weight:500">${outName}</div><div style="font-size:12px;color:var(--ink3)">Converted successfully</div></div><button class="btn btn-primary btn-sm">⬇ Download</button>`;
+      div.querySelector('button').addEventListener('click', () => { const a = document.createElement('a'); a.href = pdfUrl; a.download = outName; a.click(); });
       filesDiv.appendChild(div);
       anySuccess = true;
 
@@ -367,20 +359,6 @@ async function processFiles() {
     area.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     showToast('Conversion complete!', 'success');
   }
-}
-
-async function forceDownload(url, filename) {
-  const res = await fetch('/.netlify/functions/download-proxy', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ url })
-  });
-  const blob = await res.blob();
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(a.href);
 }
 
 function downloadAll() { outputUrls.forEach(f => forceDownload(f.url, f.name)); }

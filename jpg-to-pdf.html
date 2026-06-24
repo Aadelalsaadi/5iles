@@ -8,6 +8,7 @@
 <meta name="keywords" content="jpg to pdf, convert jpg to pdf, image to pdf, jpeg to pdf online free">
 <meta property="og:title" content="JPG to PDF Converter | 5iles">
 <meta property="og:description" content="Reduce your PDF file size instantly. Free online PDF compressor — no signup needed.">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%231a6b4a'/%3E%3Crect x='16' y='14' width='52' height='11' rx='5.5' fill='white'/%3E%3Crect x='16' y='14' width='11' height='35' rx='5.5' fill='white'/%3E%3Crect x='16' y='38' width='40' height='11' rx='5.5' fill='white'/%3E%3Crect x='16' y='72' width='52' height='11' rx='5.5' fill='white'/%3E%3Crect x='57' y='49' width='11' height='34' rx='5.5' fill='white'/%3E%3Cpolygon points='52,30 82,48.5 52,67' fill='%234ade80'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -215,18 +216,18 @@ footer{background:var(--ink);color:rgba(255,255,255,.5);padding:40px 0;border-to
 
       <div class="options-row" id="options-row" style="display:none">
         <div class="option-group">
-          <span class="option-label">Compression level</span>
-          <div class="slider-wrap">
-            <input type="range" min="1" max="100" value="70" id="compress-slider" oninput="document.getElementById('cval').textContent=this.value+'%'">
-            <span class="slider-val" id="cval">70%</span>
-          </div>
+          <span class="option-label">Page size</span>
+          <select class="option-select" id="page-size">
+            <option value="A4">A4</option>
+            <option value="Letter">Letter</option>
+            <option value="fit">Fit to image</option>
+          </select>
         </div>
         <div class="option-group">
-          <span class="option-label">Quality preset</span>
-          <select class="option-select" id="quality-select">
-            <option value="recommended">Recommended (best balance)</option>
-            <option value="high">High quality (larger file)</option>
-            <option value="low">Maximum compression (smallest)</option>
+          <span class="option-label">Orientation</span>
+          <select class="option-select" id="page-orientation">
+            <option value="portrait">Portrait</option>
+            <option value="landscape">Landscape</option>
           </select>
         </div>
       </div>
@@ -396,32 +397,46 @@ function removeFile(name) {
   if (files.length === 0) { document.getElementById('options-row').style.display='none'; document.getElementById('action-row').style.display='none'; }
 }
 
-function processFiles() {
+async function processFiles() {
   if (!files.length) return;
   const btn = document.getElementById('process-btn');
-  btn.disabled = true; btn.textContent = 'Compressing…';
-  let outputFiles = [];
-  const processNext = (i) => {
-    if (i >= files.length) { finishProcessing(btn, outputFiles); return; }
-    const f = files[i];
-    const id = f.name.replace(/\W/g,'_');
-    const pfEl = document.getElementById('pf-'+id);
-    const psEl = document.getElementById('ps-'+id);
-    if (psEl) { psEl.textContent = 'Compressing'; psEl.style.color = 'var(--amber, #c47d0e)'; }
-    let pct = 0;
-    const iv = setInterval(() => {
-      pct = Math.min(100, pct + Math.random()*20);
-      if (pfEl) pfEl.style.width = pct+'%';
-      if (pct >= 100) {
-        clearInterval(iv);
-        if (psEl) { psEl.textContent = 'Done'; psEl.style.color = 'var(--accent)'; }
-        const level = parseInt(document.getElementById('compress-slider').value) / 100;
-        outputFiles.push({ name: 'compressed_'+f.name, originalSize: f.size, newSize: Math.round(f.size * (1 - level * 0.8)) });
-        processNext(i+1);
+  btn.disabled = true; btn.textContent = 'Converting…';
+
+  try {
+    const { PDFDocument } = PDFLib;
+    const pdfDoc = await PDFDocument.create();
+    const size = document.getElementById('page-size').value;
+    const orientation = document.getElementById('page-orientation').value;
+    const pageSizes = { A4: [595, 842], Letter: [612, 792] };
+    let [pw, ph] = pageSizes[size] || [595, 842];
+    if (orientation === 'landscape') [pw, ph] = [ph, pw];
+
+    for (const f of files) {
+      const id = f.name.replace(/\W/g,'_');
+      const psEl = document.getElementById('ps-'+id);
+      if (psEl) { psEl.textContent = 'Adding'; psEl.style.color = 'var(--amber, #c47d0e)'; }
+      const ab = await f.arrayBuffer();
+      let img;
+      try {
+        img = f.type === 'image/png' ? await pdfDoc.embedPng(ab) : await pdfDoc.embedJpg(ab);
+      } catch(e) {
+        try { img = await pdfDoc.embedPng(ab); } catch(e2) { img = await pdfDoc.embedJpg(ab); }
       }
-    }, 100);
-  };
-  processNext(0);
+      const page = size === 'fit' ? pdfDoc.addPage([img.width, img.height]) : pdfDoc.addPage([pw, ph]);
+      const { width, height } = page.getSize();
+      const scale = Math.min(width / img.width, height / img.height);
+      const imgW = img.width * scale, imgH = img.height * scale;
+      page.drawImage(img, { x: (width - imgW) / 2, y: (height - imgH) / 2, width: imgW, height: imgH });
+      if (psEl) { psEl.textContent = 'Done'; psEl.style.color = 'var(--accent)'; }
+    }
+
+    const bytes = await pdfDoc.save({ useObjectStreams: true });
+    const blob = new Blob([bytes], {type:'application/pdf'});
+    finishProcessing(btn, [{ name: 'images_combined.pdf', url: URL.createObjectURL(blob), size: blob.size, count: files.length }]);
+  } catch(err) {
+    showToast('Failed to convert: ' + err.message, 'error');
+    btn.disabled = false; btn.textContent = '📸 Convert to PDF';
+  }
 }
 
 function finishProcessing(btn, outputFiles) {
@@ -430,21 +445,20 @@ function finishProcessing(btn, outputFiles) {
   const filesDiv = document.getElementById('output-files');
   filesDiv.innerHTML = '';
   outputFiles.forEach(f => {
-    const origStr = f.originalSize > 1024*1024 ? (f.originalSize/1024/1024).toFixed(1)+' MB' : (f.originalSize/1024).toFixed(0)+' KB';
-    const newStr = f.newSize > 1024*1024 ? (f.newSize/1024/1024).toFixed(1)+' MB' : (f.newSize/1024).toFixed(0)+' KB';
-    const savings = Math.round((1 - f.newSize/f.originalSize)*100);
+    const sizeStr = f.size > 1024*1024 ? (f.size/1024/1024).toFixed(1)+' MB' : (f.size/1024).toFixed(0)+' KB';
     const div = document.createElement('div');
     div.className = 'output-file';
-    div.innerHTML = `<span style="font-size:20px">📄</span><div style="flex:1"><div style="font-size:14px;font-weight:500">${f.name}</div><div style="font-size:12px;color:var(--ink3)">${origStr} → ${newStr} <span style="color:var(--accent);font-weight:600">(${savings}% smaller)</span></div></div><button class="btn btn-primary btn-sm" onclick="showToast('Downloading ${f.name}…','success')">⬇ Download</button>`;
+    div.innerHTML = `<span style="font-size:20px">📄</span><div style="flex:1"><div style="font-size:14px;font-weight:500">${f.name}</div><div style="font-size:12px;color:var(--ink3)">${f.count} image(s) combined (${sizeStr})</div></div><button class="btn btn-primary btn-sm">⬇ Download</button>`;
+    div.querySelector('button').addEventListener('click', () => { const a = document.createElement('a'); a.href = f.url; a.download = f.name; a.click(); });
     filesDiv.appendChild(div);
   });
   area.classList.add('show');
   area.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  showToast(`${outputFiles.length} file(s) compressed successfully!`, 'success');
+  if (outputFiles.length) showToast('PDF created successfully!', 'success');
 }
 
 function clearAll() { files = []; document.getElementById('queue').innerHTML=''; document.getElementById('output-area').classList.remove('show'); document.getElementById('options-row').style.display='none'; document.getElementById('action-row').style.display='none'; }
-function downloadAll() { showToast('Downloading all files as ZIP…', 'success'); }
+function downloadAll() { const btn = document.getElementById('output-files').querySelector('button'); if (btn) btn.click(); }
 function compressMore() { clearAll(); window.scrollTo({top:0,behavior:'smooth'}); }
 
 function toggleFaq(btn) {

@@ -429,9 +429,8 @@
   </div>
 
   <script src="sw.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
   <script>
-    const API_KEY = 'alsaadi.legend@gmail.com_7FtrjwweCnnIMe5Kxo8hkWeFREJzYGaHjQK4C7a3OkR2XaK7daD3DVgozSoKAtyj';
-
     // State
     let files = []; // [{file, status: 'waiting'|'processing'|'done'|'error', downloadUrl, originalSize, compressedSize}]
     let selectedQuality = 'ebook';
@@ -576,40 +575,29 @@
       renderQueue();
 
       try {
-        // Upload
-        const formData = new FormData();
-        formData.append('file', item.file);
+        const { PDFDocument } = PDFLib;
+        const ab = await item.file.arrayBuffer();
+        const pdfDoc = await PDFDocument.load(ab, { ignoreEncryption: true, updateMetadata: false });
 
-        const uploadRes = await fetch('https://api.pdf.co/v1/file/upload', {
-          method: 'POST',
-          headers: { 'x-api-key': API_KEY },
-          body: formData
-        });
-        const uploadData = await uploadRes.json();
-        if (uploadData.error) throw new Error(uploadData.message || 'Upload failed');
+        // Strip metadata to shave a little extra size
+        pdfDoc.setTitle('');
+        pdfDoc.setAuthor('');
+        pdfDoc.setSubject('');
+        pdfDoc.setKeywords([]);
+        pdfDoc.setProducer('');
+        pdfDoc.setCreator('');
 
-        // Compress
-        const compressRes = await fetch('https://api.pdf.co/v1/pdf/optimize', {
-          method: 'POST',
-          headers: { 'x-api-key': API_KEY, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            url: uploadData.url,
-            grayscale: false,
-            name: item.file.name.replace('.pdf', '_compressed.pdf')
-          })
-        });
-        const compressData = await compressRes.json();
-        if (compressData.error) throw new Error(compressData.message || 'Compression failed');
+        const bytes = await pdfDoc.save({ useObjectStreams: true, addDefaultPage: false });
+        const blob = new Blob([bytes], { type: 'application/pdf' });
 
-        item.downloadUrl = compressData.url;
-
-        // Get compressed size
-        try {
-          const headRes = await fetch(item.downloadUrl, { method: 'HEAD' });
-          item.compressedSize = parseInt(headRes.headers.get('content-length') || 0);
-        } catch { item.compressedSize = 0; }
-
+        item.downloadUrl = URL.createObjectURL(blob);
+        item.compressedSize = blob.size;
         item.status = 'done';
+
+        if (blob.size >= item.originalSize) {
+          // Structural compression couldn't shrink this file further
+          item.compressedSize = item.originalSize;
+        }
       } catch (err) {
         item.status = 'error';
         item.errorMsg = err.message;

@@ -312,64 +312,56 @@ function toBase64(file) {
 
 async function processFiles() {
   if (!files.length) return;
+  const CONVERTER_URL = 'https://fiveiles-converter.onrender.com';
   const btn = document.getElementById('process-btn');
   btn.disabled = true; btn.textContent = '⏳ Converting…';
   const area = document.getElementById('output-area');
   const filesDiv = document.getElementById('output-files');
   filesDiv.innerHTML = '';
   let anySuccess = false;
-  const quality = document.getElementById('compress-slider').value;
 
   for (const f of files) {
     const id = f.name.replace(/\W/g,'_');
     const pfEl = document.getElementById('pf-'+id);
     const psEl = document.getElementById('ps-'+id);
     if (psEl) { psEl.textContent = 'Uploading…'; psEl.style.color = 'var(--amber,#c47d0e)'; }
-    if (pfEl) pfEl.style.width = '20%';
+    if (pfEl) pfEl.style.width = '30%';
 
     try {
-      const fileBase64 = await toBase64(f);
-      if (pfEl) pfEl.style.width = '40%';
-
-      const uploadRes = await fetch('/.netlify/functions/pdfco-upload', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename: f.name, fileBase64 })
-      });
-      const uploadData = await uploadRes.json();
-      if (uploadData.error) throw new Error(uploadData.error);
-      if (pfEl) pfEl.style.width = '60%';
+      const formData = new FormData();
+      formData.append('file', f);
       if (psEl) psEl.textContent = 'Converting…';
+      if (pfEl) pfEl.style.width = '60%';
 
-      const convertRes = await fetch('/.netlify/functions/pdf-to-jpg', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: uploadData.url, quality: parseInt(quality) })
-      });
-      const jpgUrls = await convertRes.json();
-      if (!Array.isArray(jpgUrls)) throw new Error('Conversion failed');
+      const res = await fetch(`${CONVERTER_URL}/pdf-to-jpg`, { method: 'POST', body: formData });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Conversion failed');
+      }
+      const isZip = res.headers.get('Content-Type')?.includes('zip');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const outName = f.name.replace(/\.pdf$/i, '') + (isZip ? '_pages.zip' : '.jpg');
 
       if (pfEl) pfEl.style.width = '100%';
       if (psEl) { psEl.textContent = 'Done'; psEl.style.color = 'var(--accent)'; }
 
-      jpgUrls.forEach((url, i) => {
-        const div = document.createElement('div');
-        div.className = 'output-file';
-        const btn = document.createElement('button');
-        btn.className = 'btn btn-primary btn-sm';
-        btn.textContent = '⬇ Download';
-        btn.addEventListener('click', () => forceDownload(url, `${f.name.replace('.pdf','')}_page${i+1}.jpg`));
-        const info = document.createElement('div');
-        info.style.flex = '1';
-        info.innerHTML = `<div style="font-size:14px;font-weight:500">${f.name.replace('.pdf','')} - page ${i+1}.jpg</div>`;
-        const icon = document.createElement('span');
-        icon.style.fontSize = '20px';
-        icon.textContent = '🖼️';
-        div.appendChild(icon);
-        div.appendChild(info);
-        div.appendChild(btn);
-        filesDiv.appendChild(div);
-      });
+      const div = document.createElement('div');
+      div.className = 'output-file';
+      const btn2 = document.createElement('button');
+      btn2.className = 'btn btn-primary btn-sm';
+      btn2.textContent = '⬇ Download';
+      btn2.addEventListener('click', () => { const a = document.createElement('a'); a.href = url; a.download = outName; a.click(); });
+      const info = document.createElement('div');
+      info.style.flex = '1';
+      info.innerHTML = `<div style="font-size:14px;font-weight:500">${outName}</div>${isZip ? '<div style="font-size:12px;color:var(--ink3)">Multiple pages — downloaded as ZIP</div>' : ''}`;
+      const icon = document.createElement('span');
+      icon.style.fontSize = '20px';
+      icon.textContent = '🖼️';
+      div.appendChild(icon);
+      div.appendChild(info);
+      div.appendChild(btn2);
+      filesDiv.appendChild(div);
       anySuccess = true;
 
     } catch(err) {
@@ -383,24 +375,6 @@ async function processFiles() {
     area.classList.add('show');
     area.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     showToast('Conversion complete!', 'success');
-  }
-}
-
-async function forceDownload(url, filename) {
-  try {
-    const res = await fetch('/.netlify/functions/download-proxy', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url })
-    });
-    const blob = await res.blob();
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(a.href);
-  } catch(e) {
-    window.open(url, '_blank');
   }
 }
 
