@@ -1,1 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirm Password Reset — 5iles</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body {
+      background: #0d0d0d;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .card {
+      background: #1a1a1a;
+      padding: 32px;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+      text-align: center;
+    }
+    h1 {
+      font-size: 20px;
+      margin-bottom: 12px;
+    }
+    p {
+      font-size: 14px;
+      color: #aaa;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      background: linear-gradient(135deg, #8b5cf6, #ec4899);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+    #msg {
+      margin-top: 16px;
+      font-size: 13px;
+      min-height: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Reset your password</h1>
+    <p>
+      For your security, this link doesn't activate automatically.
+      Click the button below to continue — this confirms it's really you,
+      not an automated scanner that may have opened this page from your inbox.
+    </p>
+    <button id="confirmBtn" onclick="confirmReset()">Continue to reset password</button>
+    <div id="msg"></div>
+  </div>
 
+  <script>
+    const _supabase = supabase.createClient(
+      'https://rwmagyyayscaqvjrft.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ3bWFneXlheXNjYXF2anJmdCIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzQ2MDUxMTMxLCJleHAiOjIwNjE2MjcxMzF9.gQclQDMDMVGTFbSY924X7cSfAOUBOBMvRJ-T4VTZQdo'
+    );
+
+    function getParam(name) {
+      return new URLSearchParams(window.location.search).get(name);
+    }
+
+    async function confirmReset() {
+      const btn = document.getElementById('confirmBtn');
+      const msg = document.getElementById('msg');
+      const token_hash = getParam('token_hash');
+      const type = getParam('type') || 'recovery';
+
+      if (!token_hash) {
+        msg.style.color = '#ff4d4d';
+        msg.textContent = '✗ This link is missing required information. Please request a new reset email.';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Verifying...';
+
+      // This is a JS-initiated call triggered only by a real click — automated
+      // link scanners that merely fetch this page's URL never trigger this,
+      // so the token stays valid until an actual person clicks the button.
+      const { error } = await _supabase.auth.verifyOtp({ token_hash, type });
+
+      if (error) {
+        msg.style.color = '#ff4d4d';
+        msg.textContent = '✗ This reset link has expired or already been used. Please request a new one.';
+        btn.disabled = false;
+        btn.textContent = 'Continue to reset password';
+        return;
+      }
+
+      msg.style.color = '#4ade80';
+      msg.textContent = '✅ Confirmed! Redirecting...';
+      window.location.href = '/reset-password.html';
+    }
+  </script>
+</body>
+</html>
