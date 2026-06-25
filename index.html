@@ -755,15 +755,15 @@ const TOOLS = [
   {id:'unlock-pdf',icon:'🔓',name:'Unlock PDF',desc:'Remove password from PDF documents',cat:'security',accept:'.pdf',type:'unlock-pdf'},
   {id:'ocr-pdf',icon:'🔍',name:'OCR PDF',desc:'Make scanned PDFs searchable',cat:'pdf',accept:'.pdf,.jpg,.jpeg,.png',badge:'AI',type:'ocr-pdf'},
   {id:'watermark',icon:'💧',name:'Add Watermark',desc:'Stamp text or image watermarks on PDF',cat:'pdf',accept:'.pdf',type:'watermark-pdf'},
-{id:'pptx-to-pdf',icon:'📊',name:'PPT → PDF',desc:'Convert PowerPoint presentations to PDF',cat:'convert',accept:'.pptx,.ppt',type:'external',url:'pptx-to-pdf.html'},
-{id:'xlsx-to-pdf',icon:'📈',name:'Excel → PDF',desc:'Convert Excel spreadsheets to PDF',cat:'convert',accept:'.xlsx,.xls',type:'external',url:'xlsx-to-pdf.html'},
+{id:'pptx-to-pdf',icon:'📊',name:'PPT → PDF',desc:'Convert PowerPoint presentations to PDF',cat:'convert',accept:'.pptx,.ppt',type:'pptx-to-pdf'},
+{id:'xlsx-to-pdf',icon:'📈',name:'Excel → PDF',desc:'Convert Excel spreadsheets to PDF',cat:'convert',accept:'.xlsx,.xls',type:'xlsx-to-pdf'},
 {id:'pdf-to-pptx',icon:'📑',name:'PDF → PPT',desc:'Convert PDF files to PowerPoint presentations',cat:'convert',accept:'.pdf',type:'external',url:'pdf-to-pptx.html'},
-  {id:'mp4-to-mp3',icon:'🎵',name:'MP4 → MP3',desc:'Extract audio from video files instantly',cat:'convert',accept:'.mp4,.mov,.avi,.mkv,.webm',type:'external',url:'mp4-to-mp3.html'},
+  {id:'mp4-to-mp3',icon:'🎵',name:'MP4 → MP3',desc:'Extract audio from video files instantly',cat:'convert',accept:'.mp4,.mov,.avi,.mkv,.webm',type:'mp4-to-mp3'},
   {id:'trim-video',icon:'✂️',name:'Trim Video',desc:'Cut your video to the perfect length in your browser',cat:'convert',accept:'video/*',type:'external',url:'trim-video.html'},
   {id:'video-to-gif',icon:'🎞️',name:'Video to GIF',desc:'Convert video clips to animated GIFs in your browser',cat:'convert',accept:'video/*',type:'external',url:'video-to-gif.html'},
-  {id:'audio-converter',icon:'🎧',name:'Audio Converter',desc:'Convert between MP3, WAV, OGG, FLAC and AAC',cat:'convert',accept:'.mp3,.wav,.ogg,.flac,.aac',type:'external',url:'audio-converter.html'},
-  {id:'extract-audio',icon:'🎤',name:'Extract Audio',desc:'Extract audio from any video as MP3, WAV, OGG or AAC',cat:'convert',accept:'.mp4,.mov,.avi,.mkv,.webm',type:'external',url:'extract-audio.html'},
-  {id:'compress-video',icon:'🗜️',name:'Compress Video',desc:'Reduce video file size without losing quality',cat:'compress',accept:'.mp4,.mov,.avi,.mkv,.webm',type:'external',url:'compress-video.html'},
+  {id:'audio-converter',icon:'🎧',name:'Audio Converter',desc:'Convert audio files to MP3',cat:'convert',accept:'.mp3,.wav,.ogg,.flac,.aac',type:'audio-converter'},
+  {id:'extract-audio',icon:'🎤',name:'Extract Audio',desc:'Extract audio from any video as MP3',cat:'convert',accept:'.mp4,.mov,.avi,.mkv,.webm',type:'extract-audio'},
+  {id:'compress-video',icon:'🗜️',name:'Compress Video',desc:'Reduce video file size without losing quality',cat:'compress',accept:'.mp4,.mov,.avi,.mkv,.webm',type:'compress-video'},
   {id:'unit-converter',icon:'📐',name:'Unit Converter',desc:'Convert length, weight, area, volume, temperature and speed',cat:'convert',type:'external',url:'unit-converter.html'},
 {id:'currency-converter',icon:'💱',name:'Currency Converter',desc:'Convert between 150+ world currencies with live rates',cat:'convert',type:'external',url:'currency-converter.html'},
   {id:'json-formatter',icon:'{ }',name:'JSON Formatter',desc:'Format, validate and minify JSON instantly',cat:'convert',type:'external',url:'json-formatter.html'},
@@ -812,10 +812,15 @@ function openTool(id) {
   if(!tool) return;
   currentTool = tool;
   uploadedFiles = [];
-if(tool.type === 'external') {
-  window.location.href = tool.url;
-  return;
-}
+  // NOTE: 6 tools (pptx-to-pdf, xlsx-to-pdf, mp4-to-mp3, audio-converter,
+  // extract-audio, compress-video) have been migrated to run fully inside the
+  // app. The remaining tools below still use external pages temporarily —
+  // these are next in line to be migrated the same way, tool by tool, so
+  // nothing is rushed or broken in the process.
+  if(tool.type === 'external') {
+    window.location.href = tool.url;
+    return;
+  }
   if(tool.type === 'coming') {
     closeWorkspace();
     showToast('🚧 Coming soon! This tool is under development.', 'error');
@@ -825,7 +830,15 @@ if(tool.type === 'external') {
   document.getElementById('workspaceTitle').textContent = tool.icon + ' ' + tool.name;
   document.getElementById('fileInput').accept = tool.accept;
   document.getElementById('fileInput').multiple = tool.multiple || (tool.type === 'merge-pdf');
-  document.getElementById('dropSub').textContent = tool.accept ? 'Accepts: ' + tool.accept.replace(/\./g,'').toUpperCase() : '';
+  const DOC_BACKEND_TYPES = ['pdf-to-word', 'pdf-to-excel', 'pptx-to-pdf', 'xlsx-to-pdf'];
+  const MEDIA_BACKEND_TYPES = ['mp4-to-mp3', 'audio-converter', 'extract-audio', 'compress-video'];
+  let dropSubText = tool.accept ? 'Accepts: ' + tool.accept.replace(/\./g,'').toUpperCase() : '';
+  if (DOC_BACKEND_TYPES.includes(tool.type)) {
+    dropSubText += ' · Free: up to 10MB per file · Pro: up to 50MB per file';
+  } else if (MEDIA_BACKEND_TYPES.includes(tool.type)) {
+    dropSubText += ' · Free: up to 25MB per file · Pro: up to 100MB per file';
+  }
+  document.getElementById('dropSub').textContent = dropSubText;
   document.getElementById('fileList').innerHTML = '';
   document.getElementById('resultBox').classList.remove('active');
   document.getElementById('progressBar').classList.remove('active');
@@ -1373,6 +1386,38 @@ if(currentTool.type !== 'qr-code' && currentTool.type !== 'word-counter' && curr
   const fill = document.getElementById('progressFill');
   const resultBox = document.getElementById('resultBox');
   const resultFiles = document.getElementById('resultFiles');
+// File size limit check (plan-aware)
+// Backend conversions run on a shared container with limited memory, so size
+// limits protect reliability for everyone. Pro gets a higher ceiling as a
+// genuine benefit, up to the safe technical maximum the backend supports.
+// Documents (LibreOffice) get a tighter cap than media (ffmpeg) since
+// LibreOffice loads the full file into memory while ffmpeg streams it.
+const DOC_BACKEND_TYPES = ['pdf-to-word', 'pdf-to-excel', 'pptx-to-pdf', 'xlsx-to-pdf'];
+const MEDIA_BACKEND_TYPES = ['mp4-to-mp3', 'audio-converter', 'extract-audio', 'compress-video'];
+const isDocBackendTool = DOC_BACKEND_TYPES.includes(currentTool.type);
+const isMediaBackendTool = MEDIA_BACKEND_TYPES.includes(currentTool.type);
+if ((isDocBackendTool || isMediaBackendTool) && uploadedFiles.length) {
+  let isPro = false;
+  if (currentUser) {
+    try {
+      const { data: profileData } = await _supabase.from('profiles').select('plan').eq('id', currentUser.id).single();
+      isPro = profileData?.plan === 'pro';
+    } catch (e) {}
+  }
+  const limitMB = isDocBackendTool ? (isPro ? 50 : 10) : (isPro ? 100 : 25);
+  const limitBytes = limitMB * 1024 * 1024;
+  const oversized = uploadedFiles.find(f => f.size > limitBytes);
+  if (oversized) {
+    const proLimitMB = isDocBackendTool ? 50 : 100;
+    const upgradeNote = isPro ? '' : ` Upgrade to Pro for files up to ${proLimitMB}MB.`;
+    showToast(`⚠️ "${oversized.name}" (${formatSize(oversized.size)}) exceeds the ${limitMB}MB limit for your plan.${upgradeNote}`, 'error');
+    btn.disabled = false;
+    btn.innerHTML = '<span>⚡</span> <span>Process files</span>';
+    if (!isPro) setTimeout(() => openModal('upgrade'), 1200);
+    return;
+  }
+}
+
 // Usage limit check
 // TEMP: usage limits disabled while actively testing/fixing backend tools.
 // Flip this back to true once testing is complete to re-enable daily limits.
@@ -1455,6 +1500,18 @@ if (USAGE_LIMIT_ENABLED && !currentUser) {
       results = await ocrPDF();
     } else if(currentTool.type === 'word-to-pdf') {
       results = await wordToPDF();
+    } else if(currentTool.type === 'pptx-to-pdf') {
+      results = await pptxToPDF();
+    } else if(currentTool.type === 'xlsx-to-pdf') {
+      results = await xlsxToPDF();
+    } else if(currentTool.type === 'mp4-to-mp3') {
+      results = await mp4ToMp3();
+    } else if(currentTool.type === 'audio-converter') {
+      results = await audioConverter();
+    } else if(currentTool.type === 'extract-audio') {
+      results = await extractAudioFn();
+    } else if(currentTool.type === 'compress-video') {
+      results = await compressVideoFn();
     } else if(currentTool.type === 'crop-image') {
       results = await cropImage();
       } else if(currentTool.type === 'base64') {
@@ -1581,6 +1638,191 @@ async function pdfToWord() {
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
     results.push({ name: file.name.replace('.pdf', '.docx'), url, info: `Converted to Word successfully (${formatSize(blob.size)})` });
+  }
+  return results;
+}
+
+async function pptxToPDF() {
+  const CONVERTER_URL = 'https://fiveiles-converter.onrender.com';
+  const results = [];
+  for(const file of uploadedFiles) {
+    const formData = new FormData();
+    formData.append('file', file);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 180000);
+    let res;
+    try {
+      res = await fetch(`${CONVERTER_URL}/convert`, { method: 'POST', body: formData, signal: controller.signal });
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        throw new Error('Conversion is taking longer than expected (3+ min). Try a smaller or simpler presentation.');
+      }
+      throw err;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || 'Conversion failed');
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    results.push({ name: file.name.replace(/\.(pptx|ppt)$/i, '.pdf'), url, info: `Converted to PDF successfully (${formatSize(blob.size)})` });
+  }
+  return results;
+}
+
+async function xlsxToPDF() {
+  const CONVERTER_URL = 'https://fiveiles-converter.onrender.com';
+  const results = [];
+  for(const file of uploadedFiles) {
+    const formData = new FormData();
+    formData.append('file', file);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 180000);
+    let res;
+    try {
+      res = await fetch(`${CONVERTER_URL}/convert`, { method: 'POST', body: formData, signal: controller.signal });
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        throw new Error('Conversion is taking longer than expected (3+ min). Try a smaller or simpler spreadsheet.');
+      }
+      throw err;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || 'Conversion failed');
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    results.push({ name: file.name.replace(/\.(xlsx|xls)$/i, '.pdf'), url, info: `Converted to PDF successfully (${formatSize(blob.size)})` });
+  }
+  return results;
+}
+
+async function mp4ToMp3() {
+  const CONVERTER_URL = 'https://fiveiles-converter.onrender.com';
+  const results = [];
+  for(const file of uploadedFiles) {
+    const formData = new FormData();
+    formData.append('file', file);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 120000); // matches server-side limit
+    let res;
+    try {
+      res = await fetch(`${CONVERTER_URL}/video-to-mp3`, { method: 'POST', body: formData, signal: controller.signal });
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        throw new Error('Conversion is taking longer than expected (2+ min). Try a shorter or smaller video.');
+      }
+      throw err;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || 'Conversion failed');
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    results.push({ name: file.name.replace(/\.(mp4|mov|avi|mkv|webm|wmv|flv|m4v)$/i, '.mp3'), url, info: `Extracted MP3 audio (${formatSize(blob.size)})` });
+  }
+  return results;
+}
+
+async function audioConverter() {
+  // Output format defaults to MP3 (matches the standalone page's default selection).
+  // A format picker (WAV/OGG/FLAC/AAC) is a planned fast-follow UI addition.
+  const CONVERTER_URL = 'https://fiveiles-converter.onrender.com';
+  const results = [];
+  for(const file of uploadedFiles) {
+    const formData = new FormData();
+    formData.append('file', file);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 120000);
+    let res;
+    try {
+      res = await fetch(`${CONVERTER_URL}/convert-audio?format=mp3`, { method: 'POST', body: formData, signal: controller.signal });
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        throw new Error('Conversion is taking longer than expected (2+ min). Try a smaller audio file.');
+      }
+      throw err;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || 'Conversion failed');
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    results.push({ name: file.name.replace(/\.[^.]+$/, '.mp3'), url, info: `Converted to MP3 (${formatSize(blob.size)})` });
+  }
+  return results;
+}
+
+async function extractAudioFn() {
+  // Output format defaults to MP3 (matches the standalone page's default selection).
+  const CONVERTER_URL = 'https://fiveiles-converter.onrender.com';
+  const results = [];
+  for(const file of uploadedFiles) {
+    const formData = new FormData();
+    formData.append('file', file);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 120000);
+    let res;
+    try {
+      res = await fetch(`${CONVERTER_URL}/extract-audio?format=mp3`, { method: 'POST', body: formData, signal: controller.signal });
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        throw new Error('Extraction is taking longer than expected (2+ min). Try a shorter or smaller video.');
+      }
+      throw err;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || 'Extraction failed');
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    results.push({ name: file.name.replace(/\.[^.]+$/, '.mp3'), url, info: `Extracted MP3 audio (${formatSize(blob.size)})` });
+  }
+  return results;
+}
+
+async function compressVideoFn() {
+  // Compression level defaults to "medium" (matches the standalone page's default selection).
+  // A quality picker (High/Medium/Low) is a planned fast-follow UI addition.
+  const CONVERTER_URL = 'https://fiveiles-converter.onrender.com';
+  const results = [];
+  for(const file of uploadedFiles) {
+    const formData = new FormData();
+    formData.append('file', file);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 min, matches server-side limit
+    let res;
+    try {
+      res = await fetch(`${CONVERTER_URL}/compress-video?quality=medium`, { method: 'POST', body: formData, signal: controller.signal });
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        throw new Error('Compression is taking longer than expected (5+ min). Try a shorter or smaller video.');
+      }
+      throw err;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || 'Compression failed');
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    results.push({ name: file.name.replace(/\.[^.]+$/, '_compressed.mp4'), url, info: `Compressed video (${formatSize(blob.size)})` });
   }
   return results;
 }
@@ -3097,6 +3339,65 @@ async function loadRealStats() {
   }
 }
 loadRealStats();
+
+// ── PWA install support ─────────────────────────────────────────────────────
+// Requires: valid manifest.json (PNG icons) + a registered service worker.
+// Both are now in place, so the browser's installability checks should pass
+// and this prompt will actually fire (it previously never appeared because
+// no service worker was registered).
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
+
+let deferredInstallPrompt;
+const pwaBanner = document.createElement('div');
+pwaBanner.id = 'pwa-banner';
+pwaBanner.style.cssText = `
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--surface); border: 1px solid var(--accent);
+  border-radius: 16px; padding: 16px 20px; display: none; align-items: center;
+  gap: 14px; z-index: 999; box-shadow: 0 8px 32px rgba(108,99,255,0.3);
+  max-width: 380px; width: 90%;
+`;
+pwaBanner.innerHTML = `
+  <div style="font-size:2rem;">📱</div>
+  <div style="flex:1;">
+    <div style="font-weight:700;font-size:0.9rem;">Install 5iles App</div>
+    <div style="font-size:0.75rem;color:var(--text2);">Add to your home screen for quick access</div>
+  </div>
+  <button id="pwa-install-btn" style="background:linear-gradient(135deg,#6c63ff,#8b7fff);color:#fff;border:none;padding:8px 16px;border-radius:10px;font-weight:700;cursor:pointer;font-size:0.85rem;">Install</button>
+  <button id="pwa-dismiss-btn" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:1.2rem;padding:4px;">✕</button>
+`;
+document.body.appendChild(pwaBanner);
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  if (!localStorage.getItem('pwa_install_dismissed')) {
+    pwaBanner.style.display = 'flex';
+  }
+});
+
+document.getElementById('pwa-install-btn').addEventListener('click', async () => {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  const { outcome } = await deferredInstallPrompt.userChoice;
+  if (outcome === 'accepted') {
+    showToast('🎉 5iles installed successfully!', 'success');
+  }
+  deferredInstallPrompt = null;
+  pwaBanner.style.display = 'none';
+});
+
+document.getElementById('pwa-dismiss-btn').addEventListener('click', () => {
+  pwaBanner.style.display = 'none';
+  localStorage.setItem('pwa_install_dismissed', '1');
+});
+
+window.addEventListener('appinstalled', () => {
+  pwaBanner.style.display = 'none';
+  showToast('🎉 5iles app installed!', 'success');
+});
 </body>
   <!-- Dashboard Modal -->
 <div id="dashboardModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;">
