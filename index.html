@@ -1558,7 +1558,19 @@ async function pdfToWord() {
   for(const file of uploadedFiles) {
     const formData = new FormData();
     formData.append('file', file);
-    const res = await fetch(`${CONVERTER_URL}/pdf-to-word`, { method: 'POST', body: formData });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 180000); // 3 min, matches server-side limit
+    let res;
+    try {
+      res = await fetch(`${CONVERTER_URL}/pdf-to-word`, { method: 'POST', body: formData, signal: controller.signal });
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        throw new Error('Conversion is taking longer than expected (3+ min). This usually happens with large or complex PDFs — try a smaller file or split it first.');
+      }
+      throw err;
+    } finally {
+      clearTimeout(timeoutId);
+    }
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
       throw new Error(errData.error || 'Conversion failed');
@@ -1731,7 +1743,19 @@ async function pdfToExcel() {
   for(const file of uploadedFiles) {
     const formData = new FormData();
     formData.append('file', file);
-    const res = await fetch(`${CONVERTER_URL}/pdf-to-excel`, { method: 'POST', body: formData });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 180000); // 3 min, matches server-side limit
+    let res;
+    try {
+      res = await fetch(`${CONVERTER_URL}/pdf-to-excel`, { method: 'POST', body: formData, signal: controller.signal });
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        throw new Error('Conversion is taking longer than expected (3+ min). This usually happens with large or complex PDFs — try a smaller file or split it first.');
+      }
+      throw err;
+    } finally {
+      clearTimeout(timeoutId);
+    }
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
       throw new Error(errData.error || 'Conversion failed');

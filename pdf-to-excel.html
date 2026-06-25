@@ -410,7 +410,14 @@ async function processFiles() {
     try {
       const formData = new FormData();
       formData.append('file', f);
-      const res = await fetch(`${CONVERTER_URL}/pdf-to-excel`, { method: 'POST', body: formData });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 180000); // 3 min, matches server-side limit
+      let res;
+      try {
+        res = await fetch(`${CONVERTER_URL}/pdf-to-excel`, { method: 'POST', body: formData, signal: controller.signal });
+      } finally {
+        clearTimeout(timeoutId);
+      }
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
         throw new Error(errData.error || 'Conversion failed');
@@ -420,7 +427,10 @@ async function processFiles() {
       if (psEl) { psEl.textContent = 'Done'; psEl.style.color = 'var(--accent)'; }
     } catch(err) {
       if (psEl) { psEl.textContent = 'Failed'; psEl.style.color = '#b02e4a'; }
-      showToast('Failed to convert ' + f.name + ': ' + err.message, 'error');
+      const msg = err.name === 'AbortError'
+        ? 'Conversion is taking longer than expected (3+ min). Try a smaller or simpler PDF.'
+        : err.message;
+      showToast('Failed to convert ' + f.name + ': ' + msg, 'error');
     }
   }
   finishProcessing(btn, outputFiles);
