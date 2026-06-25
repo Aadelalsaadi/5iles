@@ -1,52 +1,28 @@
-// sw.js — 5iles Service Worker
-// HTML pages are NEVER cached — always fetched fresh from network
- 
-const CACHE_NAME = 'files-v4';
-const STATIC_ASSETS = [
-  '/styles.css',
-  '/manifest.json'
-];
- 
-// Install — cache only static assets
-self.addEventListener('install', event => {
+// 5iles service worker
+// Purpose: satisfies PWA installability requirements (a registered, controlling
+// service worker is required by Chrome/Edge/Android before "Install App" can
+// be offered). Kept deliberately minimal — no offline caching of tool pages,
+// since file conversion tools require a live network connection to the
+// backend anyway, so aggressive caching would not improve the experience and
+// risks serving stale app code after updates.
+
+const CACHE_NAME = '5iles-shell-v1';
+
+self.addEventListener('install', (event) => {
   self.skipWaiting();
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS))
-  );
 });
- 
-// Activate — delete all old caches
-self.addEventListener('activate', event => {
+
+self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    ).then(() => self.clients.claim())
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))
+    )
   );
+  self.clients.claim();
 });
- 
-// Fetch — HTML always from network, static assets from cache
-self.addEventListener('fetch', event => {
-  const url = new URL(event.request.url);
- 
-  // Always fetch HTML fresh — never serve from cache
-  if (event.request.destination === 'document' || url.pathname.endsWith('.html') || url.pathname === '/') {
-    event.respondWith(
-      fetch(event.request).catch(() => caches.match(event.request))
-    );
-    return;
-  }
- 
-  // For static assets: cache-first
-  event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
-      return fetch(event.request).then(response => {
-        if (response && response.status === 200 && response.type === 'basic') {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-        }
-        return response;
-      });
-    })
-  );
+
+// Pass-through fetch handler — required for installability, but intentionally
+// does not intercept or cache conversion requests, file uploads, or API calls.
+self.addEventListener('fetch', (event) => {
+  event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
 });
