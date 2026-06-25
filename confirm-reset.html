@@ -97,14 +97,19 @@
       btn.disabled = true;
       btn.textContent = 'Verifying...';
 
+      // Clear any stale/leftover session first, in case an earlier test
+      // session in this browser is interfering with this verification.
+      try { await _supabase.auth.signOut(); } catch (e) {}
+
       // This is a JS-initiated call triggered only by a real click — automated
       // link scanners that merely fetch this page's URL never trigger this,
       // so the token stays valid until an actual person clicks the button.
       const { error } = await _supabase.auth.verifyOtp({ token_hash, type });
 
       if (error) {
+        console.error('verifyOtp error:', error);
         msg.style.color = '#ff4d4d';
-        msg.textContent = '✗ This reset link has expired or already been used. Please request a new one.';
+        msg.textContent = '✗ ' + error.message + (error.status ? ' (status ' + error.status + ')' : '');
         btn.disabled = false;
         btn.textContent = 'Continue to reset password';
         return;
@@ -117,3 +122,4 @@
   </script>
 </body>
 </html>
+
