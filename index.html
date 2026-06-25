@@ -1374,11 +1374,14 @@ if(currentTool.type !== 'qr-code' && currentTool.type !== 'word-counter' && curr
   const resultBox = document.getElementById('resultBox');
   const resultFiles = document.getElementById('resultFiles');
 // Usage limit check
+// TEMP: usage limits disabled while actively testing/fixing backend tools.
+// Flip this back to true once testing is complete to re-enable daily limits.
+const USAGE_LIMIT_ENABLED = false;
 const today = new Date().toDateString();
 const usageKey = 'usage_' + today;
 const usageCount = parseInt(localStorage.getItem(usageKey) || 0);
 
-if (!currentUser && usageCount >= 10) {
+if (USAGE_LIMIT_ENABLED && !currentUser && usageCount >= 10) {
   showToast('⚠️ Free limit reached! Sign up free to get 10 tasks/day.', 'error');
   btn.disabled = false;
   btn.innerHTML = '<span>⚡</span> <span>Process files</span>';
@@ -1386,7 +1389,7 @@ if (!currentUser && usageCount >= 10) {
   return;
 }
 
-if (currentUser && !currentUser.user_metadata?.plan) {
+if (USAGE_LIMIT_ENABLED && currentUser && !currentUser.user_metadata?.plan) {
   const userUsageKey = 'usage_user_' + currentUser.id + '_' + today;
   const userUsageCount = parseInt(localStorage.getItem(userUsageKey) || 0);
   const { data: profileData } = await _supabase.from('profiles').select('plan').eq('id', currentUser.id).single();
@@ -1401,7 +1404,7 @@ const limit = profileData?.plan === 'pro' ? Infinity : 10;
   localStorage.setItem(userUsageKey, userUsageCount + 1);
 }
 
-if (!currentUser) {
+if (USAGE_LIMIT_ENABLED && !currentUser) {
   localStorage.setItem(usageKey, usageCount + 1);
   if (usageCount === 0) {
     setTimeout(() => showToast('💡 Sign up free for 10 tasks/day!', 'success'), 2000);
