@@ -342,12 +342,8 @@ async function initAuth() {
       showToast('👋 Welcome back, ' + (currentUser.user_metadata?.name || currentUser.email) + '!', 'success');
       // Handle pending subscription redirect
       if(typeof pendingSubscriptionPlan !== 'undefined' && pendingSubscriptionPlan) {
-        const plan = pendingSubscriptionPlan;
         pendingSubscriptionPlan = null;
-        setTimeout(() => {
-          showToast('🔀 Redirecting to payment...', 'success');
-          setTimeout(() => window.open(PAYPAL_URLS[plan], '_blank'), 1000);
-        }, 600);
+        setTimeout(() => { openModal('upgrade'); }, 600);
       }
     } else if (event === 'SIGNED_OUT') {
       currentUser = null;
@@ -627,7 +623,7 @@ window.addEventListener('load', initAuth);
     <div class="feature-card"><div class="feature-icon">⚡</div><div class="feature-title">Lightning fast processing</div><div class="feature-desc">Our optimised pipeline handles files in seconds. No waiting, no queues — just results.</div></div>
     <div class="feature-card"><div class="feature-icon">🔒</div><div class="feature-title">Bank-grade security</div><div class="feature-desc">All files encrypted in transit and at rest with AES-256. Auto-deleted after 2 hours.</div></div>
     <div class="feature-card"><div class="feature-icon">🤖</div><div class="feature-title">AI-powered tools</div><div class="feature-desc">Background removal, image enhancement, document summarisation and OCR — all powered by AI.</div></div>
-    <div class="feature-card"><div class="feature-icon">☁️</div><div class="feature-title">Cloud integration</div><div class="feature-desc">Connect Google Drive, Dropbox and OneDrive. Process files directly from the cloud.</div></div>
+    <div class="feature-card"><div class="feature-icon">🧰</div><div class="feature-title">Every format you need</div><div class="feature-desc">PDF, Word, Excel, PowerPoint, images, audio, and video — plus developer utilities and calculators, all in one place.</div></div>
     <div class="feature-card"><div class="feature-icon">📱</div><div class="feature-title">Works everywhere</div><div class="feature-desc">Full-featured on any device — desktop, tablet or mobile. No app installation needed.</div></div>
     <div class="feature-card"><div class="feature-icon">🎤</div><div class="feature-title">Voice to Text</div><div class="feature-desc">Dictate text in 15+ languages. Perfect for hands-free document creation and form filling.</div></div>
   </div>
@@ -637,53 +633,34 @@ window.addEventListener('load', initAuth);
 <section class="section" id="pricing">
   <div class="section-title">
     <h2>Start free, scale as you grow</h2>
-    <p>Every plan includes core tools. Upgrade for unlimited files, AI features and team collaboration.</p>
+    <p>Every plan includes all 56+ tools. Upgrade to remove daily limits on conversions.</p>
   </div>
   <div class="pricing-grid">
     <div class="price-card">
       <div class="price-name">Free</div>
-      <div class="price-desc">Perfect for occasional use</div>
+      <div class="price-desc">Perfect for everyday use</div>
       <div class="price-amount">$0<span>/mo</span></div>
       <ul class="price-features">
-        <li>20 tasks per day</li>
-        <li>Files up to 50 MB</li>
-        <li>All core PDF tools</li>
-        <li>Basic image tools</li>
-        <li>Voice to text</li>
-        <li class="disabled">Batch processing</li>
-        <li class="disabled">AI tools</li>
+        <li>All 56+ tools, unlimited use</li>
+        <li>15 document conversions/day</li>
+        <li>Files up to 10MB (documents)</li>
+        <li>Files up to 25MB (audio/video)</li>
+        <li>No ads, no watermarks</li>
       </ul>
       <button class="btn btn-ghost" style="width:100%;padding:12px;" onclick="openModal('signup')">Get started free</button>
     </div>
     <div class="price-card featured">
       <div class="price-name">Pro</div>
-      <div class="price-desc">For power users and professionals</div>
+      <div class="price-desc">For frequent use, no daily caps</div>
       <div class="price-amount">$5<span>/mo</span></div>
       <ul class="price-features">
-        <li>Unlimited tasks</li>
-        <li>Files up to 1 GB</li>
-        <li>All PDF & image tools</li>
-        <li>Batch processing</li>
-        <li>All AI-powered tools</li>
-        <li>Cloud storage integration</li>
+        <li>All 56+ tools, unlimited use</li>
+        <li>Unlimited document conversions</li>
+        <li>Files up to 50MB (documents)</li>
+        <li>Files up to 100MB (audio/video)</li>
         <li>Priority email support</li>
       </ul>
-      <button onclick="startSubscription('pro')" class="btn btn-primary" style="width:100%;padding:12px;">Start Pro — $5/mo →</button>
-    </div>
-    <div class="price-card">
-      <div class="price-name">Team</div>
-      <div class="price-desc">For teams and organisations</div>
-      <div class="price-amount">$12<span>/per user/mo</span></div>
-      <ul class="price-features">
-        <li>Everything in Pro</li>
-        <li>5+ team users</li>
-        <li>Shared workspace</li>
-        <li>Admin dashboard</li>
-        <li>eSignature requests</li>
-        <li>API access</li>
-        <li>Dedicated support</li>
-      </ul>
-      <button onclick="startSubscription('team')" class="btn btn-ghost" style="width:100%;padding:12px;margin-top:8px;">Start Team — $12/user/mo →</button>
+      <button onclick="openUpgradeFlow()" class="btn btn-primary" style="width:100%;padding:12px;">Start Pro — $5/mo →</button>
     </div>
   </div>
 </section>
@@ -3075,12 +3052,12 @@ function clearVoiceText() {
 
 // ===================== FAQ =====================
 const FAQS = [
-  {q:'Is 5iles really free to use?', a:'Yes — the Free plan is genuinely free with no credit card required. You get 20 file processing tasks per day and access to all core tools.'},
+  {q:'Is 5iles really free to use?', a:'Yes — the Free plan is genuinely free with no credit card required. You get unlimited use of every tool, with 15 document conversions per day for PDF/Word/Excel and audio/video tools.'},
   {q:'Are my uploaded files secure?', a:'Absolutely. All files are processed in your browser when possible. For server-side processing, files are encrypted with AES-256 and auto-deleted after 2 hours.'},
   {q:'What file formats are supported?', a:'PDF, Word (DOC/DOCX), Excel (XLS/XLSX), JPG, PNG, WebP, AVIF, TIFF, GIF, and more. New formats are regularly added.'},
   {q:'Does voice to text work offline?', a:'No, voice recognition requires an internet connection as it uses your browser\'s built-in speech recognition service. It works best in Google Chrome or Microsoft Edge.'},
   {q:'Can I cancel my subscription anytime?', a:'Yes, all plans are cancel-anytime with no lock-in contracts. Annual plan refunds are prorated if cancelled within the first 30 days.'},
-  {q:'Is there an API for developers?', a:'Yes — the Team plan includes full REST API access. Custom enterprise plans with higher rate limits are available upon request.'},
+  {q:'Is there an API for developers?', a:'Not yet — this is on our roadmap. For now, all tools are available through the web app.'},
 ];
 
 document.getElementById('faqList').innerHTML = FAQS.map((f,i) => `
@@ -3131,22 +3108,20 @@ const MODALS = {
         <span style="font-size:1.5rem;font-weight:900;">$5<span style="font-size:0.9rem;font-weight:400;color:var(--text2)">/mo</span></span>
       </div>
       <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;">
-        <li style="font-size:0.875rem;color:var(--text2);">✓ Unlimited tasks</li>
-        <li style="font-size:0.875rem;color:var(--text2);">✓ Files up to 1GB</li>
-        <li style="font-size:0.875rem;color:var(--text2);">✓ All AI-powered tools</li>
-        <li style="font-size:0.875rem;color:var(--text2);">✓ Batch processing</li>
-        <li style="font-size:0.875rem;color:var(--text2);">✓ Priority support</li>
+        <li style="font-size:0.875rem;color:var(--text2);">✓ Unlimited document conversions</li>
+        <li style="font-size:0.875rem;color:var(--text2);">✓ Files up to 50MB (documents)</li>
+        <li style="font-size:0.875rem;color:var(--text2);">✓ Files up to 100MB (audio/video)</li>
+        <li style="font-size:0.875rem;color:var(--text2);">✓ Priority email support</li>
       </ul>
     </div>
-    <a href="https://www.paypal.com/ncp/payment/94Y2Y49X9PKHL" target="_blank" style="display:block;width:100%;padding:14px;background:#0070ba;color:#fff;text-align:center;border-radius:12px;font-weight:700;font-size:1rem;text-decoration:none;transition:all 0.2s;" onmouseover="this.style.background='#005ea6'" onmouseout="this.style.background='#0070ba'">
-      💳 Pay with PayPal → $5/mo
-    </a>
+    <div id="paypal-pro-button-container"></div>
     <p style="font-size:0.75rem;color:var(--text3);text-align:center;margin-top:10px;">🔒 Secured by PayPal · Accepts cards, Apple Pay &amp; PayPal · Cancel anytime</p>`
 };
 
 function openModal(type) {
   document.getElementById('modalContent').innerHTML = MODALS[type] || '';
   document.getElementById('modalOverlay').classList.add('active');
+  if (type === 'upgrade') { renderPayPalProButton(); }
 }
 function closeModal(e) { if(e.target === document.getElementById('modalOverlay')) closeModalDirect(); }
 function closeModalDirect() { document.getElementById('modalOverlay').classList.remove('active'); }
@@ -3164,17 +3139,13 @@ function showToast(msg, type='success') {
 // ===================== INIT =====================
 renderTools();
 
-const PAYPAL_URLS = {
-  pro: 'https://www.paypal.com/ncp/payment/94Y2Y49X9PKHL',
-  team: 'https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=P-41N09220EC076120XNHY6LVI'
-};
-
 let pendingSubscriptionPlan = null;
 
-function startSubscription(plan) {
-  if(currentUser) {
-    window.open(PAYPAL_URLS[plan], '_blank');
+function openUpgradeFlow() {
+  if (currentUser) {
+    openModal('upgrade');
   } else {
+    pendingSubscriptionPlan = 'pro';
     openModal('signup-for-plan');
   }
 }
@@ -3201,25 +3172,11 @@ function openDashboard() {
   const plan = currentUser?.user_metadata?.plan || 'Free';
   const email = currentUser?.email || '';
   const name = currentUser?.user_metadata?.name || email.split('@')[0];
-  const dc=document.getElementById('dashboardContent'); if(dc) dc.innerHTML = `<div style="display:flex;flex-direction:column;gap:16px;"><div style="background:var(--surface2);border-radius:10px;padding:16px;"><div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Account</div><div style="font-weight:600;">${name}</div><div style="font-size:0.85rem;color:var(--text2);">${email}</div></div><div style="background:var(--surface2);border-radius:10px;padding:16px;"><div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Plan</div><div style="font-weight:600;color:var(--accent);">${plan==='Free'?'🆓 Free':plan==='pro'?'⭐ Pro':'👑 Team'}</div></div><div style="background:var(--surface2);border-radius:10px;padding:16px;"><div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Usage today</div><div style="font-weight:600;">${plan==='Free'?usageCount+' / 20 files':'Unlimited ✓'}</div></div>${plan==='Free'?'<button class="btn btn-primary" onclick="closeDashboard()" style="width:100%;">⚡ Upgrade to Pro</button>':''}</div>`;
+  const dc=document.getElementById('dashboardContent'); if(dc) dc.innerHTML = `<div style="display:flex;flex-direction:column;gap:16px;"><div style="background:var(--surface2);border-radius:10px;padding:16px;"><div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Account</div><div style="font-weight:600;">${name}</div><div style="font-size:0.85rem;color:var(--text2);">${email}</div></div><div style="background:var(--surface2);border-radius:10px;padding:16px;"><div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Plan</div><div style="font-weight:600;color:var(--accent);">${plan==='Free'?'🆓 Free':'⭐ Pro'}</div></div><div style="background:var(--surface2);border-radius:10px;padding:16px;"><div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Usage today</div><div style="font-weight:600;">${plan==='Free'?usageCount+' / 15 conversions':'Unlimited ✓'}</div></div>${plan==='Free'?'<button class="btn btn-primary" onclick="closeDashboard()" style="width:100%;">⚡ Upgrade to Pro</button>':''}</div>`;
 }
 function closeDashboard() {
   document.getElementById('dashboardModal').style.display = 'none';
 }
-</script>
-
-<script>
-  if(document.getElementById('paypal-button-container-P-41N09220EC076120XMY6LVI')) {
-    paypal.Buttons({
-      style: { shape: 'pill', color: 'blue', layout: 'vertical', label: 'subscribe' },
-      createSubscription: function(data, actions) {
-        return actions.subscription.create({ plan_id: 'P-41N09220EC076120XNHY6LVI' });
-      },
-      onApprove: function(data, actions) {
-        document.getElementById('paypal-button-container-P-41N09220EC076120XNHY6LVI').innerHTML = '<div style="background:rgba(67,233,123,0.1);border:1px solid rgba(67,233,123,0.3);border-radius:12px;padding:16px;text-align:center;color:#43e97b;font-weight:700;">✅ Subscription activated! Welcome to 5iles Team!</div>';
-      }
-    }).render('#paypal-button-container-P-41N09220EC076120XNHY6LVI');
-  }
 </script>
 
 <!-- Cookie Consent Banner -->
@@ -3305,29 +3262,40 @@ window.addEventListener('load', function() {
   var s = document.createElement('script');
   s.src = 'https://www.paypal.com/sdk/js?client-id=AaBmVFOe5m8DBhSlr7EX2VZQ7czwo9rS525DFpxJ7LNmr4IFsr8UnX9LcYGprNDDZxOwuScG8D6XEmbJ&vault=true&intent=subscription';
   s.setAttribute('data-sdk-integration-source', 'button-factory');
-  s.onload = function() {
-    if(document.getElementById('paypal-button-container-P-41N09220EC076120XNHY6LVI')) {
-      paypal.Buttons({
-        style: { shape: 'pill', color: 'blue', layout: 'vertical', label: 'subscribe' },
-        createSubscription: function(data, actions) {
-          return actions.subscription.create({ plan_id: 'P-41N09220EC076120XNHY6LVI' });
-        },
-        onApprove: async function(data, actions) {
-  if (currentUser) {
-    await _supabase
-      .from('profiles')
-      .update({ plan: 'pro' })
-      .eq('id', currentUser.id);
-    currentUser.user_metadata = { ...currentUser.user_metadata, plan: 'pro' };
-  }
-  document.getElementById('paypal-button-container-P-41N09220EC07612BXMHY6LVI').innerHTML = '<div style="background:rgba(67,233,123,0.3);border:1px solid rgba(67,233,123,0.3);border-radius:12px;padding:16px;text-align:center;color:#43e97b;font-weight:700;">✅ Subscription activated! Welcome to 5iles Team!</div>';
-}
-      }).render('#paypal-button-container-P-41N09220EC076120XNHY6LVI');
-    }
-  };
   document.body.appendChild(s);
 });
-  
+
+// Renders the real Pro subscription button. Called when the upgrade modal
+// opens (not on page load), since the container div only exists once the
+// modal's HTML has actually been injected into the page.
+function renderPayPalProButton(attemptsLeft) {
+  attemptsLeft = attemptsLeft === undefined ? 20 : attemptsLeft;
+  const container = document.getElementById('paypal-pro-button-container');
+  if (!container) return; // modal isn't open anymore, nothing to do
+  if (typeof paypal === 'undefined') {
+    // SDK script may still be loading — retry briefly rather than failing silently.
+    if (attemptsLeft > 0) { setTimeout(() => renderPayPalProButton(attemptsLeft - 1), 250); }
+    else { container.innerHTML = '<div style="color:var(--text2);font-size:0.85rem;text-align:center;">Payment options failed to load. Please refresh and try again.</div>'; }
+    return;
+  }
+  container.innerHTML = '';
+  paypal.Buttons({
+    style: { shape: 'pill', color: 'blue', layout: 'vertical', label: 'subscribe' },
+    createSubscription: function(data, actions) {
+      return actions.subscription.create({ plan_id: 'P-41N09220EC076120XNHY6LVI' });
+    },
+    onApprove: async function(data, actions) {
+      if (currentUser) {
+        await _supabase.from('profiles').update({ plan: 'pro' }).eq('id', currentUser.id);
+        currentUser.user_metadata = { ...currentUser.user_metadata, plan: 'pro' };
+      }
+      const c = document.getElementById('paypal-pro-button-container');
+      if (c) c.innerHTML = '<div style="background:rgba(67,233,123,0.1);border:1px solid rgba(67,233,123,0.3);border-radius:12px;padding:16px;text-align:center;color:#43e97b;font-weight:700;">✅ Subscription activated! Welcome to 5iles Pro!</div>';
+    }
+  }).render('#paypal-pro-button-container');
+}
+</script>
+
 
 async function loadRealStats() {
   const { count } = await _supabase
@@ -3408,3 +3376,4 @@ window.addEventListener('appinstalled', () => {
   </div>
 </div>
 </html>
+
