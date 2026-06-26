@@ -353,21 +353,32 @@ async function initAuth() {
   });
 }
 
-function updateNavForUser(user) {
+async function updateNavForUser(user) {
   const name = user.user_metadata?.name || user.email.split('@')[0];
   const navBtns = document.querySelector('.nav-btns');
-  if(navBtns) {
-    navBtns.innerHTML = `
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div style="background:linear-gradient(135deg,var(--accent),var(--accent2));width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:0.9rem;">
-          ${name.charAt(0).toUpperCase()}
-        </div>
-        <span style="font-size:0.875rem;color:var(--text2);">${name}</span>
-        <button class="btn btn-ghost" onclick="openDashboard()" style="padding:6px 14px;font-size:0.8rem;">Dashboard</button>
-<button class="btn btn-ghost" onclick="signOut()" style="padding:6px 14px;font-size:0.8rem;">Sign out</button>
+  if(!navBtns) return;
+
+  let plan = 'free';
+  try {
+    const { data: profileData } = await _supabase.from('profiles').select('plan').eq('id', user.id).single();
+    if (profileData?.plan === 'pro') plan = 'pro';
+  } catch (e) {}
+
+  const planBadge = plan === 'pro'
+    ? `<span style="background:rgba(67,233,123,0.15);border:1px solid rgba(67,233,123,0.4);color:#43e97b;font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:100px;">⭐ PRO</span>`
+    : `<span style="background:rgba(144,144,176,0.15);border:1px solid rgba(144,144,176,0.3);color:var(--text2);font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:100px;">FREE</span>`;
+
+  navBtns.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="background:linear-gradient(135deg,var(--accent),var(--accent2));width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:0.9rem;">
+        ${name.charAt(0).toUpperCase()}
       </div>
-    `;
-  }
+      <span style="font-size:0.875rem;color:var(--text2);">${name}</span>
+      ${planBadge}
+      <button class="btn btn-ghost" onclick="openDashboard()" style="padding:6px 14px;font-size:0.8rem;">Dashboard</button>
+<button class="btn btn-ghost" onclick="signOut()" style="padding:6px 14px;font-size:0.8rem;">Sign out</button>
+    </div>
+  `;
 }
 
 function updateNavForSignedOut() {
@@ -3288,6 +3299,7 @@ function renderPayPalProButton(attemptsLeft) {
       if (currentUser) {
         await _supabase.from('profiles').update({ plan: 'pro' }).eq('id', currentUser.id);
         currentUser.user_metadata = { ...currentUser.user_metadata, plan: 'pro' };
+        updateNavForUser(currentUser);
       }
       const c = document.getElementById('paypal-pro-button-container');
       if (c) c.innerHTML = '<div style="background:rgba(67,233,123,0.1);border:1px solid rgba(67,233,123,0.3);border-radius:12px;padding:16px;text-align:center;color:#43e97b;font-weight:700;">✅ Subscription activated! Welcome to 5iles Pro!</div>';
