@@ -1561,20 +1561,37 @@ resultFiles.innerHTML = results.map(r => `
 
 // ===================== COMPRESS PDF =====================
 async function compressPDF() {
-  const { PDFDocument } = PDFLib;
+  const CONVERTER_URL = 'https://fiveiles-converter.onrender.com';
+  const level = parseInt(document.getElementById('qualitySlider')?.value || 60, 10);
   const results = [];
   for(const file of uploadedFiles) {
-    const ab = await file.arrayBuffer();
-    const pdfDoc = await PDFDocument.load(ab, { ignoreEncryption: true, updateMetadata: false });
-    pdfDoc.setTitle(''); pdfDoc.setAuthor(''); pdfDoc.setSubject('');
-    pdfDoc.setKeywords([]); pdfDoc.setProducer(''); pdfDoc.setCreator('');
-    const bytes = await pdfDoc.save({ useObjectStreams: true, addDefaultPage: false });
-    const blob = new Blob([bytes], {type:'application/pdf'});
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('level', level);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 180000); // 3 min, matches server-side limit
+    let res;
+    try {
+      res = await fetch(`${CONVERTER_URL}/compress-pdf`, { method: 'POST', body: formData, signal: controller.signal });
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        throw new Error('Compression is taking longer than expected (3+ min). Try a smaller or simpler PDF.');
+      }
+      throw err;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || 'Compression failed');
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
     const savings = ((1 - blob.size/file.size)*100).toFixed(1);
     const info = savings > 0
       ? `↓ ${savings}% smaller (${formatSize(file.size)} → ${formatSize(blob.size)})`
       : `Optimised (${formatSize(blob.size)})`;
-    results.push({ name: file.name.replace('.pdf','_compressed.pdf'), url: URL.createObjectURL(blob), info });
+    results.push({ name: file.name.replace('.pdf','_compressed.pdf'), url, info });
   }
   return results;
 }
