@@ -2195,16 +2195,35 @@ async function protectPDF() {
   return results;
 }
 
-// ===================== UNLOCK PDF =====================
+// ==================== UNLOCK PDF ====================
 async function unlockPDF() {
-  const { PDFDocument } = PDFLib;
+  const CONVERTER_URL = 'https://fiveiles-converter.onrender.com';
+  const password = document.getElementById('unlockPassword')?.value || '';
   const results = [];
   for(const file of uploadedFiles) {
-    const ab = await file.arrayBuffer();
-    const pdfDoc = await PDFDocument.load(ab, { ignoreEncryption: true });
-    const bytes = await pdfDoc.save({ useObjectStreams: true });
-    const blob = new Blob([bytes], {type:'application/pdf'});
-    results.push({ name: file.name.replace('.pdf', '_unlocked.pdf'), url: URL.createObjectURL(blob), info: `Restrictions removed (${formatSize(blob.size)})` });
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('password', password);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
+    let res;
+    try {
+      res = await fetch(`${CONVERTER_URL}/unlock-pdf`, { method: 'POST', body: formData, signal: controller.signal });
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        throw new Error('Unlocking is taking longer than expected. Try again.');
+      }
+      throw err;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || 'Unable to unlock this PDF.');
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    results.push({ name: file.name.replace(/\.pdf$/i, '_unlocked.pdf'), url, info: `Unlocked (${formatSize(blob.size)})` });
   }
   return results;
 }
