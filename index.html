@@ -3338,12 +3338,12 @@ function renderPayPalProButton(attemptsLeft) {
       const c = document.getElementById('paypal-pro-button-container');
       if (c) c.innerHTML = '<div style="background:rgba(67,233,123,0.1);border:1px solid rgba(67,233,123,0.3);border-radius:12px;padding:16px;text-align:center;color:#43e97b;font-weight:700;">✅ Subscription activated! Welcome to 5iles Pro!</div>';
     }
-  }).render('#paypal-pro-button-container');
-}
-</script>
+ }).render('#paypal-pro-button-container');
+    }
+  </script>
 
-
-async function loadRealStats() {
+  <script>
+  async function loadRealStats() {
   const { count } = await _supabase
     .from('file_history')
     .select('*', { count: 'exact', head: true });
@@ -3410,8 +3410,10 @@ document.getElementById('pwa-dismiss-btn').addEventListener('click', () => {
 
 window.addEventListener('appinstalled', () => {
   pwaBanner.style.display = 'none';
-  showToast('🎉 5iles app installed!', 'success');
+ showToast('🎉 5iles app installed!', 'success');
+  });
 });
+</script>
 </body>
   <!-- Dashboard Modal -->
 <div id="dashboardModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;">
