@@ -1014,9 +1014,29 @@ function openTool(id) {
         <p style="color:var(--text3);font-size:0.78rem;margin-top:8px;">ℹ️ Enter the PDF's password to remove it. If the file isn't password-protected, you can leave this blank.</p>
       </div>`;
     } else if(tool.type === 'fix-grammar') {
-      opts.innerHTML = `
-        <p style="color:var(--text2);font-size:0.85rem;margin-top:8px;">✍️ Your document's grammar, spelling, and punctuation will be corrected. Paragraph-level formatting is preserved; mixed formatting within a single sentence (e.g. one bold word) may be simplified.</p>`;
-    } else if(tool.type === 'ocr-pdf') {
+        opts.innerHTML = `
+          <p style="color:var(--text2);font-size:0.85rem;margin-top:8px;">✍️ Your document's grammar, spelling, and punctuation will be corrected. Paragraph-level formatting is preserved; mixed formatting within a single sentence (e.g. one bold word) may be simplified.</p>`;
+      } else if(tool.type === 'translate-document') {
+        opts.innerHTML = `
+          <div class="option-group">
+            <div class="option-label">Translate to</div>
+            <select class="option-select" id="translateLang">
+              <option value="Spanish">Spanish</option>
+              <option value="French">French</option>
+              <option value="German">German</option>
+              <option value="Arabic">Arabic</option>
+              <option value="Portuguese">Portuguese</option>
+              <option value="Italian">Italian</option>
+              <option value="Chinese (Simplified)">Chinese (Simplified)</option>
+              <option value="Japanese">Japanese</option>
+              <option value="Korean">Korean</option>
+              <option value="Russian">Russian</option>
+              <option value="Hindi">Hindi</option>
+              <option value="Turkish">Turkish</option>
+            </select>
+          </div>
+          <p style="color:var(--text2);font-size:0.85rem;margin-top:8px;">🌐 Your document will be translated paragraph by paragraph. Paragraph-level formatting is preserved; mixed formatting within a single sentence (e.g. one bold word) may be simplified.</p>`;
+      } else if(tool.type === 'ocr-pdf') {
     opts.innerHTML = `
       <div class="option-group">
         <div class="option-label">Language</div>
