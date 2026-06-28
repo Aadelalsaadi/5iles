@@ -1506,9 +1506,11 @@ if (USAGE_LIMIT_ENABLED && !currentUser) {
    } else if(currentTool.type === 'unlock-pdf') {
       results = await unlockPDF();
     } else if(currentTool.type === 'fix-grammar') {
-      results = await fixGrammar();
-    } else if(currentTool.type === 'watermark-pdf') {
-      results = await watermarkPDF();
+          results = await fixGrammar();
+        } else if(currentTool.type === 'translate-document') {
+          results = await translateDocument();
+        } else if(currentTool.type === 'watermark-pdf') {
+          results = await watermarkPDF();
     } else if(currentTool.type === 'ocr-pdf') {
       results = await ocrPDF();
     } else if(currentTool.type === 'word-to-pdf') {
