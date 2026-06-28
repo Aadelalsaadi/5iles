@@ -2288,6 +2288,39 @@ async function unlockPDF() {
     return results;
   }
 
+// ==================== TRANSLATE DOCUMENT ====================
+      async function translateDocument() {
+        const CONVERTER_URL = 'https://fiveiles-converter.onrender.com';
+        const targetLanguage = document.getElementById('translateLang').value;
+        const results = [];
+        for(const file of uploadedFiles) {
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('targetLanguage', targetLanguage);
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 90000);
+          let res;
+          try {
+            res = await fetch(`${CONVERTER_URL}/translate-document`, { method: 'POST', body: formData, signal: controller.signal });
+          } catch (err) {
+            if (err.name === 'AbortError') {
+              throw new Error('Translation is taking longer than expected. Try a shorter document.');
+            }
+            throw err;
+          } finally {
+            clearTimeout(timeoutId);
+          }
+          if (!res.ok) {
+            const errData = await res.json().catch(() => ({}));
+            throw new Error(errData.error || 'Unable to translate this document.');
+          }
+          const blob = await res.blob();
+          const url = URL.createObjectURL(blob);
+          results.push({ name: file.name.replace(/\.docx$/i, '_translated.docx'), url, info: `Translated to ${targetLanguage} (${formatSize(blob.size)})` });
+        }
+        return results;
+      }
+  
 // ===================== WATERMARK PDF =====================
 async function watermarkPDF() {
   const { PDFDocument, rgb, StandardFonts, degrees } = PDFLib;
