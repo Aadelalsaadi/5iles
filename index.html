@@ -2229,10 +2229,41 @@ async function unlockPDF() {
     }
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
-    results.push({ name: file.name.replace(/\.pdf$/i, '_unlocked.pdf'), url, info: `Unlocked (${formatSize(blob.size)})` });
+   results.push({ name: file.name.replace(/\.pdf$/i, '_unlocked.pdf'), url, info: `Unlocked (${formatSize(blob.size)})` });
+    }
+    return results;
   }
-  return results;
-}
+
+  // ==================== FIX GRAMMAR ====================
+  async function fixGrammar() {
+    const CONVERTER_URL = 'https://fiveiles-converter.onrender.com';
+    const results = [];
+    for(const file of uploadedFiles) {
+      const formData = new FormData();
+      formData.append('file', file);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 90000);
+      let res;
+      try {
+        res = await fetch(`${CONVERTER_URL}/fix-grammar`, { method: 'POST', body: formData, signal: controller.signal });
+      } catch (err) {
+        if (err.name === 'AbortError') {
+          throw new Error('Correction is taking longer than expected. Try a shorter document.');
+        }
+        throw err;
+      } finally {
+        clearTimeout(timeoutId);
+      }
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || 'Unable to correct this document.');
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      results.push({ name: file.name.replace(/\.docx$/i, '_corrected.docx'), url, info: `Grammar corrected (${formatSize(blob.size)})` });
+    }
+    return results;
+  }
 
 // ===================== WATERMARK PDF =====================
 async function watermarkPDF() {
