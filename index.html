@@ -3312,6 +3312,112 @@ function tzRemoveZone(zoneId) {
   tzActiveZones = tzActiveZones.filter(z => z !== zoneId);
   tzConvert();
 }
+const UC_UNITS = {
+  length: { name: 'Length', icon: '📏', base: 'm', units: {
+    mm: { name: 'Millimeter', factor: 0.001 }, cm: { name: 'Centimeter', factor: 0.01 }, m: { name: 'Meter', factor: 1 }, km: { name: 'Kilometer', factor: 1000 },
+    in: { name: 'Inch', factor: 0.0254 }, ft: { name: 'Foot', factor: 0.3048 }, yd: { name: 'Yard', factor: 0.9144 }, mi: { name: 'Mile', factor: 1609.34 }, nmi: { name: 'Nautical Mile', factor: 1852 }
+  }},
+  weight: { name: 'Weight', icon: '⚖️', base: 'kg', units: {
+    mg: { name: 'Milligram', factor: 0.000001 }, g: { name: 'Gram', factor: 0.001 }, kg: { name: 'Kilogram', factor: 1 }, t: { name: 'Metric Ton', factor: 1000 },
+    oz: { name: 'Ounce', factor: 0.0283495 }, lb: { name: 'Pound', factor: 0.453592 }, st: { name: 'Stone', factor: 6.35029 }
+  }},
+  area: { name: 'Area', icon: '🗺️', base: 'm2', units: {
+    mm2: { name: 'Sq Millimeter', factor: 0.000001 }, cm2: { name: 'Sq Centimeter', factor: 0.0001 }, m2: { name: 'Sq Meter', factor: 1 }, ha: { name: 'Hectare', factor: 10000 },
+    km2: { name: 'Sq Kilometer', factor: 1000000 }, in2: { name: 'Sq Inch', factor: 0.00064516 }, ft2: { name: 'Sq Foot', factor: 0.092903 }, yd2: { name: 'Sq Yard', factor: 0.836127 },
+    acre: { name: 'Acre', factor: 4046.86 }, mi2: { name: 'Sq Mile', factor: 2589988 }
+  }},
+  volume: { name: 'Volume', icon: '🧪', base: 'l', units: {
+    ml: { name: 'Milliliter', factor: 0.001 }, l: { name: 'Liter', factor: 1 }, m3: { name: 'Cubic Meter', factor: 1000 }, tsp: { name: 'Teaspoon (US)', factor: 0.00492892 },
+    tbsp: { name: 'Tablespoon (US)', factor: 0.0147868 }, floz: { name: 'Fluid Ounce (US)', factor: 0.0295735 }, cup: { name: 'Cup (US)', factor: 0.236588 },
+    pt: { name: 'Pint (US)', factor: 0.473176 }, qt: { name: 'Quart (US)', factor: 0.946353 }, gal: { name: 'Gallon (US)', factor: 3.78541 }
+  }},
+  temperature: { name: 'Temperature', icon: '🌡️', base: 'c', special: true, units: { c: { name: 'Celsius (°C)' }, f: { name: 'Fahrenheit (°F)' }, k: { name: 'Kelvin (K)' } } },
+  speed: { name: 'Speed', icon: '🚀', base: 'mps', units: {
+    mps: { name: 'Meters/sec', factor: 1 }, kmh: { name: 'Km/hour', factor: 0.277778 }, mph: { name: 'Miles/hour', factor: 0.44704 }, knot: { name: 'Knot', factor: 0.514444 }, fps: { name: 'Feet/sec', factor: 0.3048 }
+  }}
+};
+let ucCurrentCategory = 'length';
+function ucInit() {
+  ucCurrentCategory = 'length';
+  const tabsEl = document.getElementById('ucCategoryTabs');
+  tabsEl.innerHTML = '';
+  Object.keys(UC_UNITS).forEach(key => {
+    const tab = document.createElement('div');
+    tab.style.cssText = 'padding:8px 12px;border-radius:8px;cursor:pointer;font-size:0.8rem;font-weight:600;border:1px solid var(--border);' + (key === ucCurrentCategory ? 'background:var(--accent);color:#fff;' : 'background:var(--surface2);color:var(--text2);');
+    tab.textContent = UC_UNITS[key].icon + ' ' + UC_UNITS[key].name;
+    tab.onclick = () => ucSwitchCategory(key, tab);
+    tabsEl.appendChild(tab);
+  });
+  document.getElementById('ucFromValue').value = '1';
+  document.getElementById('ucFromValue').removeEventListener('input', ucConvert);
+  document.getElementById('ucFromValue').addEventListener('input', ucConvert);
+  document.getElementById('ucFromUnit').removeEventListener('change', ucConvert);
+  document.getElementById('ucFromUnit').addEventListener('change', ucConvert);
+  document.getElementById('ucToUnit').removeEventListener('change', ucConvert);
+  document.getElementById('ucToUnit').addEventListener('change', ucConvert);
+  ucBuildUnitSelectors();
+  ucConvert();
+}
+function ucSwitchCategory(key, tabEl) {
+  ucCurrentCategory = key;
+  document.querySelectorAll('#ucCategoryTabs > div').forEach(t => { t.style.background='var(--surface2)'; t.style.color='var(--text2)'; });
+  tabEl.style.background='var(--accent)'; tabEl.style.color='#fff';
+  ucBuildUnitSelectors();
+  ucConvert();
+}
+function ucBuildUnitSelectors() {
+  const cat = UC_UNITS[ucCurrentCategory];
+  const unitKeys = Object.keys(cat.units);
+  const fromUnit = document.getElementById('ucFromUnit');
+  const toUnit = document.getElementById('ucToUnit');
+  fromUnit.innerHTML = unitKeys.map(k => `<option value="${k}">${cat.units[k].name}</option>`).join('');
+  toUnit.innerHTML = unitKeys.map(k => `<option value="${k}">${cat.units[k].name}</option>`).join('');
+  fromUnit.value = unitKeys[0];
+  toUnit.value = unitKeys[1] || unitKeys[0];
+}
+function ucConvertTemperature(value, from, to) {
+  let celsius;
+  if (from === 'c') celsius = value;
+  else if (from === 'f') celsius = (value - 32) * 5/9;
+  else if (from === 'k') celsius = value - 273.15;
+  if (to === 'c') return celsius;
+  if (to === 'f') return celsius * 9/5 + 32;
+  if (to === 'k') return celsius + 273.15;
+}
+function ucConvert() {
+  const cat = UC_UNITS[ucCurrentCategory];
+  const val = parseFloat(document.getElementById('ucFromValue').value) || 0;
+  const from = document.getElementById('ucFromUnit').value;
+  const to = document.getElementById('ucToUnit').value;
+  let result;
+  if (cat.special) { result = ucConvertTemperature(val, from, to); }
+  else { const baseValue = val * cat.units[from].factor; result = baseValue / cat.units[to].factor; }
+  document.getElementById('ucToValue').value = ucFormatNumber(result);
+  ucUpdateQuickResults(val, from);
+}
+function ucFormatNumber(num) {
+  if (Math.abs(num) >= 1e9 || (Math.abs(num) < 0.0001 && num !== 0)) { return num.toExponential(4); }
+  return parseFloat(num.toFixed(6)).toString();
+}
+function ucUpdateQuickResults(val, from) {
+  const cat = UC_UNITS[ucCurrentCategory];
+  const unitKeys = Object.keys(cat.units).filter(k => k !== from).slice(0, 4);
+  document.getElementById('ucQuickResultsList').innerHTML = unitKeys.map(k => {
+    let result;
+    if (cat.special) { result = ucConvertTemperature(val, from, k); }
+    else { const baseValue = val * cat.units[from].factor; result = baseValue / cat.units[k].factor; }
+    return `<div style="display:flex;justify-content:space-between;font-size:0.85rem;"><span style="color:var(--text2);">${cat.units[k].name}</span><span style="color:var(--text);font-weight:600;">${ucFormatNumber(result)}</span></div>`;
+  }).join('');
+}
+function ucSwapUnits() {
+  const fromUnit = document.getElementById('ucFromUnit');
+  const toUnit = document.getElementById('ucToUnit');
+  const tempUnit = fromUnit.value;
+  fromUnit.value = toUnit.value;
+  toUnit.value = tempUnit;
+  document.getElementById('ucFromValue').value = document.getElementById('ucToValue').value;
+  ucConvert();
+}
 function setBmiUnit(unit) {
   document.getElementById('bmiMetricInputs').style.display = unit === 'metric' ? 'flex' : 'none';
   document.getElementById('bmiImperialInputs').style.display = unit === 'imperial' ? 'flex' : 'none';
