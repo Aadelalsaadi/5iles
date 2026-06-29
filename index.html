@@ -2817,6 +2817,54 @@ function calculatePercentage() {
   resultValue.textContent = formatted + (result.suffix || '');
   resultLabel.textContent = result.label;
 }
+const ccLabels = {
+  upper: 'UPPERCASE', lower: 'lowercase', title: 'Title Case', sentence: 'Sentence case',
+  camel: 'camelCase', pascal: 'PascalCase', snake: 'snake_case', kebab: 'kebab-case',
+  constant: 'CONSTANT_CASE', alternating: 'aLtErNaTiNg', inverse: 'InVeRsE CaSe', dot: 'dot.case'
+};
+function ccGetWords(str) {
+  return str.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[_\-\.]+/g, ' ').trim().split(/\s+/).filter(w => w.length > 0);
+}
+function ccConvert(type) {
+  const text = document.getElementById('ccInputText').value;
+  if (!text.trim()) { ccUpdateStats(); return; }
+  let result = '';
+  const words = ccGetWords(text);
+  switch(type) {
+    case 'upper': result = text.toUpperCase(); break;
+    case 'lower': result = text.toLowerCase(); break;
+    case 'title': result = words.map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' '); break;
+    case 'sentence': result = text.toLowerCase().replace(/(^\s*\w|[.!?]\s*\w)/g, c => c.toUpperCase()); break;
+    case 'camel': result = words.map((w, i) => i === 0 ? w.toLowerCase() : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(''); break;
+    case 'pascal': result = words.map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(''); break;
+    case 'snake': result = words.map(w => w.toLowerCase()).join('_'); break;
+    case 'kebab': result = words.map(w => w.toLowerCase()).join('-'); break;
+    case 'constant': result = words.map(w => w.toUpperCase()).join('_'); break;
+    case 'dot': result = words.map(w => w.toLowerCase()).join('.'); break;
+    case 'alternating': result = text.split('').map((c, i) => i % 2 === 0 ? c.toLowerCase() : c.toUpperCase()).join(''); break;
+    case 'inverse': result = text.split('').map(c => c === c.toUpperCase() ? c.toLowerCase() : c.toUpperCase()).join(''); break;
+  }
+  document.getElementById('ccResultLabel').textContent = ccLabels[type];
+  document.getElementById('ccResultText').textContent = result;
+  document.getElementById('ccResultBox').style.display = 'block';
+  ccUpdateStats();
+}
+function ccUpdateStats() {
+  const text = document.getElementById('ccInputText').value;
+  const chars = text.length;
+  const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+  document.getElementById('ccInputStats').textContent = `${chars.toLocaleString()} characters · ${words.toLocaleString()} words`;
+}
+function ccCopyResult() {
+  const text = document.getElementById('ccResultText').textContent;
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.cc-copy-btn');
+    const original = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+  });
+}
 function setBmiUnit(unit) {
   document.getElementById('bmiMetricInputs').style.display = unit === 'metric' ? 'flex' : 'none';
   document.getElementById('bmiImperialInputs').style.display = unit === 'imperial' ? 'flex' : 'none';
