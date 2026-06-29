@@ -1593,7 +1593,7 @@ function formatSize(bytes) {
 // ===================== PROCESSING =====================
 async function processFiles() {
   if(!currentTool) return;
-if(currentTool.type !== 'qr-code' && currentTool.type !== 'word-counter' && currentTool.type !== 'password-gen' && currentTool.type !== 'lorem-ipsum' && currentTool.type !== 'base64' && currentTool.type !== 'bmi-calculator' && currentTool.type !== 'percentage-calculator' && currentTool.type !== 'case-converter' && currentTool.type !== 'hash-generator' && currentTool.type !== 'url-encoder' && currentTool.type !== 'json-formatter' && currentTool.type !== 'timezone-converter' && !uploadedFiles.length) return;
+if(currentTool.type !== 'qr-code' && currentTool.type !== 'word-counter' && currentTool.type !== 'password-gen' && currentTool.type !== 'lorem-ipsum' && currentTool.type !== 'base64' && currentTool.type !== 'bmi-calculator' && currentTool.type !== 'percentage-calculator' && currentTool.type !== 'case-converter' && currentTool.type !== 'hash-generator' && currentTool.type !== 'url-encoder' && currentTool.type !== 'json-formatter' && currentTool.type !== 'timezone-converter' && currentTool.type !== 'unit-converter' && !uploadedFiles.length) return;
   const btn = document.getElementById('processBtn');
   const bar = document.getElementById('progressBar');
   const fill = document.getElementById('progressFill');
