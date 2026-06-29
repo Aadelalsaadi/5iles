@@ -1186,6 +1186,26 @@ function openTool(id) {
       </div>`;
     document.getElementById('processBtn').disabled = false;
     document.getElementById('processBtn').style.display = 'none';
+    } else if(tool.type === 'percentage-calculator') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+          <button type="button" class="pct-tab active" data-mode="basic" onclick="setPctMode('basic',this)" style="padding:8px 14px;background:var(--accent);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:0.8rem;font-weight:600;cursor:pointer;">What is X% of Y?</button>
+          <button type="button" class="pct-tab" data-mode="isWhat" onclick="setPctMode('isWhat',this)" style="padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:0.8rem;font-weight:600;cursor:pointer;">X is what % of Y?</button>
+          <button type="button" class="pct-tab" data-mode="change" onclick="setPctMode('change',this)" style="padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:0.8rem;font-weight:600;cursor:pointer;">% change X to Y</button>
+          <button type="button" class="pct-tab" data-mode="increase" onclick="setPctMode('increase',this)" style="padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:0.8rem;font-weight:600;cursor:pointer;">Increase X by Y%</button>
+          <button type="button" class="pct-tab" data-mode="decrease" onclick="setPctMode('decrease',this)" style="padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:0.8rem;font-weight:600;cursor:pointer;">Decrease X by Y%</button>
+        </div>
+        <div id="pctCalcRow" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--surface2);padding:14px;border-radius:10px;margin-bottom:16px;color:var(--text);font-size:0.95rem;"></div>
+        <div style="background:var(--surface2);border-radius:14px;padding:20px;text-align:center;">
+          <div id="pctResultValue" style="font-size:2.4rem;font-weight:800;color:#4ade80;">—</div>
+          <div id="pctResultLabel" style="font-size:0.9rem;color:var(--text2);margin-top:6px;">Enter values above</div>
+        </div>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
+    document.getElementById('processBtn').style.display = 'none';
+    setPctMode('basic', document.querySelector('.pct-tab'));
     } else if(tool.type === 'word-counter') {
     document.getElementById('dropZone').style.display = 'none';
     opts.innerHTML = `
