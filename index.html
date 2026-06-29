@@ -3193,6 +3193,99 @@ function jfCopyOutput() {
     setTimeout(() => { btn.textContent = original; }, 1500);
   });
 }
+const TZ_TIMEZONES = [
+  { id: 'UTC', label: 'UTC' },
+  { id: 'America/Los_Angeles', label: 'Los Angeles (PT)' },
+  { id: 'America/Denver', label: 'Denver (MT)' },
+  { id: 'America/Chicago', label: 'Chicago (CT)' },
+  { id: 'America/New_York', label: 'New York (ET)' },
+  { id: 'America/Sao_Paulo', label: 'São Paulo' },
+  { id: 'Europe/London', label: 'London (GMT/BST)' },
+  { id: 'Europe/Paris', label: 'Paris (CET)' },
+  { id: 'Europe/Berlin', label: 'Berlin (CET)' },
+  { id: 'Europe/Moscow', label: 'Moscow' },
+  { id: 'Africa/Cairo', label: 'Cairo' },
+  { id: 'Asia/Qatar', label: 'Doha (Qatar)' },
+  { id: 'Asia/Dubai', label: 'Dubai (UAE)' },
+  { id: 'Asia/Karachi', label: 'Karachi' },
+  { id: 'Asia/Kolkata', label: 'Mumbai/Delhi (IST)' },
+  { id: 'Asia/Dhaka', label: 'Dhaka' },
+  { id: 'Asia/Bangkok', label: 'Bangkok' },
+  { id: 'Asia/Singapore', label: 'Singapore' },
+  { id: 'Asia/Hong_Kong', label: 'Hong Kong' },
+  { id: 'Asia/Shanghai', label: 'Shanghai/Beijing' },
+  { id: 'Asia/Tokyo', label: 'Tokyo' },
+  { id: 'Asia/Seoul', label: 'Seoul' },
+  { id: 'Australia/Sydney', label: 'Sydney' },
+  { id: 'Pacific/Auckland', label: 'Auckland' }
+];
+let tzActiveZones = ['UTC', 'Asia/Qatar', 'Europe/London', 'America/New_York'];
+function tzBuildZoneOptions(selectEl, selected) {
+  selectEl.innerHTML = TZ_TIMEZONES.map(tz => `<option value="${tz.id}" ${tz.id === selected ? 'selected' : ''}>${tz.label}</option>`).join('');
+}
+function tzInit() {
+  tzActiveZones = ['UTC', 'Asia/Qatar', 'Europe/London', 'America/New_York'];
+  tzBuildZoneOptions(document.getElementById('tzSourceZone'), 'Asia/Qatar');
+  tzBuildZoneOptions(document.getElementById('tzAddZoneSelect'), 'America/Los_Angeles');
+  document.getElementById('tzDateInput').addEventListener('change', tzConvert);
+  document.getElementById('tzTimeInput').addEventListener('change', tzConvert);
+  document.getElementById('tzSourceZone').addEventListener('change', tzConvert);
+  tzSetNow();
+}
+function tzSetNow() {
+  const now = new Date();
+  document.getElementById('tzDateInput').value = now.toISOString().split('T')[0];
+  document.getElementById('tzTimeInput').value = now.toTimeString().slice(0, 5);
+  tzConvert();
+}
+function tzGetZoneLabel(id) {
+  const tz = TZ_TIMEZONES.find(t => t.id === id);
+  return tz ? tz.label : id;
+}
+function tzConvert() {
+  const dateVal = document.getElementById('tzDateInput').value;
+  const timeVal = document.getElementById('tzTimeInput').value;
+  if (!dateVal || !timeVal) return;
+  const srcZone = document.getElementById('tzSourceZone').value;
+  const [year, month, day] = dateVal.split('-').map(Number);
+  const [hour, minute] = timeVal.split(':').map(Number);
+  const naiveDate = new Date(Date.UTC(year, month - 1, day, hour, minute));
+  const offsetMinutes = tzGetTimezoneOffsetMinutes(srcZone, naiveDate);
+  const utcDate = new Date(naiveDate.getTime() - offsetMinutes * 60000);
+  document.getElementById('tzResultsGrid').innerHTML = tzActiveZones.map(zoneId => {
+    const formatted = tzFormatInZone(utcDate, zoneId);
+    const isSource = zoneId === srcZone;
+    return `
+      <div style="display:flex;justify-content:space-between;align-items:center;background:var(--surface2);padding:12px 16px;border-radius:10px;">
+        <div style="font-size:0.85rem;color:var(--text2);">${tzGetZoneLabel(zoneId)} ${isSource ? '(source)' : ''}</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="font-weight:600;color:#4ade80;font-size:0.9rem;">${formatted}</div>
+          ${tzActiveZones.length > 1 ? `<button type="button" onclick="tzRemoveZone('${zoneId}')" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:1rem;">✕</button>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+function tzGetTimezoneOffsetMinutes(timeZone, date) {
+  const utcDate = new Date(date.toLocaleString('en-US', { timeZone: 'UTC' }));
+  const tzDate = new Date(date.toLocaleString('en-US', { timeZone }));
+  return (tzDate.getTime() - utcDate.getTime()) / 60000;
+}
+function tzFormatInZone(utcDate, timeZone) {
+  const options = { timeZone, weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true };
+  return new Intl.DateTimeFormat('en-US', options).format(utcDate);
+}
+function tzAddZone() {
+  const zone = document.getElementById('tzAddZoneSelect').value;
+  if (!tzActiveZones.includes(zone)) {
+    tzActiveZones.push(zone);
+    tzConvert();
+  }
+}
+function tzRemoveZone(zoneId) {
+  tzActiveZones = tzActiveZones.filter(z => z !== zoneId);
+  tzConvert();
+}
 function setBmiUnit(unit) {
   document.getElementById('bmiMetricInputs').style.display = unit === 'metric' ? 'flex' : 'none';
   document.getElementById('bmiImperialInputs').style.display = unit === 'imperial' ? 'flex' : 'none';
