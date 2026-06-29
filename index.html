@@ -3449,6 +3449,107 @@ function ucSwapUnits() {
   document.getElementById('ucFromValue').value = document.getElementById('ucToValue').value;
   ucConvert();
 }
+const CC2_CURRENCY_NAMES = {
+  USD: 'US Dollar', EUR: 'Euro', GBP: 'British Pound', JPY: 'Japanese Yen',
+  AUD: 'Australian Dollar', CAD: 'Canadian Dollar', CHF: 'Swiss Franc', CNY: 'Chinese Yuan',
+  HKD: 'Hong Kong Dollar', NZD: 'New Zealand Dollar', SEK: 'Swedish Krona', KRW: 'South Korean Won',
+  SGD: 'Singapore Dollar', NOK: 'Norwegian Krone', MXN: 'Mexican Peso', INR: 'Indian Rupee',
+  RUB: 'Russian Ruble', ZAR: 'South African Rand', TRY: 'Turkish Lira', BRL: 'Brazilian Real',
+  TWD: 'Taiwan Dollar', DKK: 'Danish Krone', PLN: 'Polish Zloty', THB: 'Thai Baht',
+  IDR: 'Indonesian Rupiah', HUF: 'Hungarian Forint', CZK: 'Czech Koruna', ILS: 'Israeli Shekel',
+  CLP: 'Chilean Peso', PHP: 'Philippine Peso', AED: 'UAE Dirham', SAR: 'Saudi Riyal',
+  QAR: 'Qatari Riyal', MYR: 'Malaysian Ringgit', RON: 'Romanian Leu', VND: 'Vietnamese Dong',
+  EGP: 'Egyptian Pound', KWD: 'Kuwaiti Dinar', BHD: 'Bahraini Dinar', OMR: 'Omani Rial',
+  JOD: 'Jordanian Dinar', PKR: 'Pakistani Rupee', BDT: 'Bangladeshi Taka', NGN: 'Nigerian Naira',
+  UAH: 'Ukrainian Hryvnia', COP: 'Colombian Peso', PEN: 'Peruvian Sol', ARS: 'Argentine Peso'
+};
+let cc2Rates = {};
+let cc2LastUpdate = '';
+function cc2Init() {
+  cc2Rates = {};
+  cc2LastUpdate = '';
+  document.getElementById('cc2LoadingMsg').style.display = 'block';
+  document.getElementById('cc2ConverterContent').style.display = 'none';
+  document.getElementById('cc2ErrorMsg').style.display = 'none';
+  document.getElementById('cc2FromValue').removeEventListener('input', cc2Convert);
+  document.getElementById('cc2FromValue').addEventListener('input', cc2Convert);
+  cc2LoadRates();
+}
+async function cc2LoadRates() {
+  try {
+    const response = await fetch('https://api.frankfurter.dev/v2/rates?base=USD');
+    const data = await response.json();
+    if (!Array.isArray(data) || data.length === 0) throw new Error('API error');
+    cc2Rates = {};
+    data.forEach(item => { cc2Rates[item.quote] = item.rate; });
+    cc2Rates.USD = 1;
+    cc2LastUpdate = data[0].date;
+    cc2BuildCurrencySelectors();
+    document.getElementById('cc2LoadingMsg').style.display = 'none';
+    document.getElementById('cc2ConverterContent').style.display = 'block';
+    cc2Convert();
+  } catch (err) {
+    document.getElementById('cc2LoadingMsg').style.display = 'none';
+    const errEl = document.getElementById('cc2ErrorMsg');
+    errEl.textContent = 'Unable to load exchange rates. Please try again later.';
+    errEl.style.display = 'block';
+  }
+}
+function cc2BuildCurrencySelectors() {
+  const availableCurrencies = Object.keys(cc2Rates).filter(c => CC2_CURRENCY_NAMES[c] || cc2Rates[c]);
+  const sortedCurrencies = availableCurrencies.sort((a, b) => {
+    const aHasName = CC2_CURRENCY_NAMES[a] ? 0 : 1;
+    const bHasName = CC2_CURRENCY_NAMES[b] ? 0 : 1;
+    if (aHasName !== bHasName) return aHasName - bHasName;
+    return a.localeCompare(b);
+  });
+  const options = sortedCurrencies.map(c => `<option value="${c}">${c} - ${CC2_CURRENCY_NAMES[c] || c}</option>`).join('');
+  const fromCurrency = document.getElementById('cc2FromCurrency');
+  const toCurrency = document.getElementById('cc2ToCurrency');
+  fromCurrency.innerHTML = options;
+  toCurrency.innerHTML = options;
+  fromCurrency.value = 'USD';
+  toCurrency.value = 'EUR';
+  fromCurrency.removeEventListener('change', cc2Convert);
+  fromCurrency.addEventListener('change', cc2Convert);
+  toCurrency.removeEventListener('change', cc2Convert);
+  toCurrency.addEventListener('change', cc2Convert);
+}
+function cc2Convert() {
+  const val = parseFloat(document.getElementById('cc2FromValue').value) || 0;
+  const from = document.getElementById('cc2FromCurrency').value;
+  const to = document.getElementById('cc2ToCurrency').value;
+  if (!cc2Rates[from] || !cc2Rates[to]) return;
+  const usdValue = val / cc2Rates[from];
+  const result = usdValue * cc2Rates[to];
+  document.getElementById('cc2ToValue').value = cc2FormatNumber(result);
+  const rate = cc2Rates[to] / cc2Rates[from];
+  document.getElementById('cc2RateInfo').innerHTML = `1 ${from} = <strong>${cc2FormatNumber(rate)}</strong> ${to}`;
+  document.getElementById('cc2LastUpdated').textContent = cc2LastUpdate ? `Last updated: ${cc2LastUpdate}` : '';
+  cc2UpdateQuickResults(val, from);
+}
+function cc2FormatNumber(num) {
+  if (Math.abs(num) >= 1e9) return num.toExponential(4);
+  return parseFloat(num.toFixed(4)).toLocaleString('en-US', { maximumFractionDigits: 4 });
+}
+function cc2UpdateQuickResults(val, from) {
+  const popularCurrencies = ['USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD'].filter(c => c !== from);
+  document.getElementById('cc2QuickResultsList').innerHTML = popularCurrencies.slice(0, 5).map(c => {
+    if (!cc2Rates[c]) return '';
+    const usdValue = val / cc2Rates[from];
+    const result = usdValue * cc2Rates[c];
+    return `<div style="display:flex;justify-content:space-between;font-size:0.85rem;"><span style="color:var(--text2);">${c}</span><span style="color:var(--text);font-weight:600;">${cc2FormatNumber(result)}</span></div>`;
+  }).join('');
+}
+function cc2SwapCurrencies() {
+  const fromCurrency = document.getElementById('cc2FromCurrency');
+  const toCurrency = document.getElementById('cc2ToCurrency');
+  const tempCurrency = fromCurrency.value;
+  fromCurrency.value = toCurrency.value;
+  toCurrency.value = tempCurrency;
+  document.getElementById('cc2FromValue').value = document.getElementById('cc2ToValue').value;
+  cc2Convert();
+}
 function setBmiUnit(unit) {
   document.getElementById('bmiMetricInputs').style.display = unit === 'metric' ? 'flex' : 'none';
   document.getElementById('bmiImperialInputs').style.display = unit === 'imperial' ? 'flex' : 'none';
