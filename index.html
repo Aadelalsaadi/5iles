@@ -1159,6 +1159,33 @@ function openTool(id) {
         </div>
       </div>`;
     document.getElementById('processBtn').disabled = false;
+   } else if(tool.type === 'bmi-calculator') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+          <button type="button" id="bmiUnitMetric" onclick="setBmiUnit('metric')" style="flex:1;padding:10px;background:var(--accent);border:1px solid var(--border);border-radius:10px;color:#fff;font-size:0.85rem;font-weight:600;cursor:pointer;">Metric</button>
+          <button type="button" id="bmiUnitImperial" onclick="setBmiUnit('imperial')" style="flex:1;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text2);font-size:0.85rem;font-weight:600;cursor:pointer;">Imperial</button>
+        </div>
+        <div id="bmiMetricInputs" style="display:flex;gap:10px;margin-bottom:12px;">
+          <div style="flex:1;"><div class="option-label">Weight (kg)</div><input type="number" id="weightKg" placeholder="70" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+          <div style="flex:1;"><div class="option-label">Height (cm)</div><input type="number" id="heightCm" placeholder="175" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+        </div>
+        <div id="bmiImperialInputs" style="display:none;gap:10px;margin-bottom:12px;">
+          <div style="flex:1;"><div class="option-label">Weight (lb)</div><input type="number" id="weightLb" placeholder="154" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+          <div style="flex:0.5;"><div class="option-label">Height (ft)</div><input type="number" id="heightFt" placeholder="5" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+          <div style="flex:0.5;"><div class="option-label">Height (in)</div><input type="number" id="heightIn" placeholder="9" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+        </div>
+        <button type="button" onclick="calculateBMI()" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;margin-bottom:16px;">Calculate BMI</button>
+        <div id="bmiResultBox" style="display:none;background:var(--surface2);border-radius:14px;padding:20px;text-align:center;">
+          <div id="bmiValue" style="font-size:2.4rem;font-weight:800;"></div>
+          <div id="bmiCategory" style="font-size:1.05rem;font-weight:600;margin-bottom:10px;"></div>
+          <div style="position:relative;height:8px;background:var(--border);border-radius:4px;margin:14px 0;"><div id="bmiMarker" style="position:absolute;top:-4px;width:4px;height:16px;background:#fff;border-radius:2px;box-shadow:0 0 6px rgba(0,0,0,0.4);"></div></div>
+          <div id="bmiDesc" style="font-size:0.85rem;color:var(--text2);text-align:left;"></div>
+        </div>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
+    document.getElementById('processBtn').style.display = 'none';
     } else if(tool.type === 'word-counter') {
     document.getElementById('dropZone').style.display = 'none';
     opts.innerHTML = `
