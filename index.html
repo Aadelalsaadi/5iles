@@ -1356,6 +1356,37 @@ function openTool(id) {
     document.getElementById('processBtn').disabled = false;
     document.getElementById('processBtn').style.display = 'none';
     ucInit();
+    } else if(tool.type === 'currency-converter') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div id="cc2LoadingMsg" style="text-align:center;color:var(--text2);padding:20px;">Loading exchange rates...</div>
+        <div id="cc2ErrorMsg" style="display:none;color:#f87171;text-align:center;padding:12px;background:rgba(248,113,113,0.1);border-radius:8px;margin-bottom:12px;"></div>
+        <div id="cc2ConverterContent" style="display:none;">
+          <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;">
+            <div style="flex:1;">
+              <div class="option-label">From</div>
+              <input type="number" id="cc2FromValue" value="1" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;margin-bottom:8px;">
+              <select id="cc2FromCurrency" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.85rem;"></select>
+            </div>
+            <button type="button" onclick="cc2SwapCurrencies()" style="margin-top:18px;width:36px;height:36px;border-radius:50%;background:var(--accent);border:none;color:#fff;cursor:pointer;font-size:1rem;flex-shrink:0;">⇄</button>
+            <div style="flex:1;">
+              <div class="option-label">To</div>
+              <input type="text" id="cc2ToValue" readonly style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;font-weight:700;margin-bottom:8px;">
+              <select id="cc2ToCurrency" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.85rem;"></select>
+            </div>
+          </div>
+          <div id="cc2RateInfo" style="text-align:center;font-size:0.9rem;color:var(--accent);margin-bottom:4px;"></div>
+          <div id="cc2LastUpdated" style="text-align:center;font-size:0.75rem;color:var(--text2);margin-bottom:16px;"></div>
+          <div style="background:var(--surface2);border-radius:12px;padding:14px;">
+            <div style="font-size:0.8rem;color:var(--text2);margin-bottom:8px;">Quick conversions:</div>
+            <div id="cc2QuickResultsList" style="display:flex;flex-direction:column;gap:6px;"></div>
+          </div>
+        </div>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
+    document.getElementById('processBtn').style.display = 'none';
+    cc2Init();
     } else if(tool.type === 'word-counter') {
     document.getElementById('dropZone').style.display = 'none';
     opts.innerHTML = `
