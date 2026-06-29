@@ -1264,6 +1264,25 @@ function openTool(id) {
       </div>`;
     document.getElementById('processBtn').disabled = false;
     document.getElementById('processBtn').style.display = 'none';
+    } else if(tool.type === 'url-encoder') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+          <button type="button" class="ue-tab active" onclick="ueSetMode('encode',this)" style="flex:1;padding:10px;background:var(--accent);border:1px solid var(--border);border-radius:10px;color:#fff;font-size:0.85rem;font-weight:600;cursor:pointer;">Encode</button>
+          <button type="button" class="ue-tab" onclick="ueSetMode('decode',this)" style="flex:1;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text2);font-size:0.85rem;font-weight:600;cursor:pointer;">Decode</button>
+        </div>
+        <textarea id="ueInputText" placeholder="Type or paste text/URL here..." style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;min-height:120px;resize:vertical;font-family:inherit;" oninput="ueProcess()"></textarea>
+        <div id="ueResultBox" style="display:none;background:var(--surface2);border-radius:14px;padding:18px;margin-top:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <span id="ueResultLabel" style="font-weight:600;color:var(--accent);"></span>
+            <button type="button" onclick="ueCopyResult()" class="ue-copy-btn" style="padding:6px 12px;background:var(--accent);border:none;border-radius:6px;color:#fff;font-size:0.8rem;cursor:pointer;">Copy</button>
+          </div>
+          <div id="ueResultText" style="font-size:0.85rem;color:var(--text);white-space:pre-wrap;word-break:break-all;font-family:monospace;"></div>
+        </div>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
+    document.getElementById('processBtn').style.display = 'none';
     } else if(tool.type === 'word-counter') {
     document.getElementById('dropZone').style.display = 'none';
     opts.innerHTML = `
