@@ -1237,6 +1237,33 @@ function openTool(id) {
       </div>`;
     document.getElementById('processBtn').disabled = false;
     document.getElementById('processBtn').style.display = 'none';
+    } else if(tool.type === 'hash-generator') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div class="option-label" style="margin-bottom:8px;">Paste or type your text</div>
+        <textarea id="hgInputText" placeholder="Type or paste your text here..." style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;min-height:120px;resize:vertical;font-family:inherit;" oninput="hgUpdateHashes()"></textarea>
+        <div style="margin-top:16px;display:flex;flex-direction:column;gap:12px;">
+          <div style="background:var(--surface2);border-radius:10px;padding:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span style="font-weight:600;color:var(--accent);">MD5</span><button type="button" onclick="hgCopyHash('md5')" style="padding:5px 10px;background:var(--accent);border:none;border-radius:6px;color:#fff;font-size:0.75rem;cursor:pointer;">Copy</button></div>
+            <div id="hgMd5" style="font-size:0.85rem;color:var(--text2);word-break:break-all;font-family:monospace;">Result will appear here...</div>
+          </div>
+          <div style="background:var(--surface2);border-radius:10px;padding:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span style="font-weight:600;color:var(--accent);">SHA-1</span><button type="button" onclick="hgCopyHash('sha1')" style="padding:5px 10px;background:var(--accent);border:none;border-radius:6px;color:#fff;font-size:0.75rem;cursor:pointer;">Copy</button></div>
+            <div id="hgSha1" style="font-size:0.85rem;color:var(--text2);word-break:break-all;font-family:monospace;">Result will appear here...</div>
+          </div>
+          <div style="background:var(--surface2);border-radius:10px;padding:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span style="font-weight:600;color:var(--accent);">SHA-256</span><button type="button" onclick="hgCopyHash('sha256')" style="padding:5px 10px;background:var(--accent);border:none;border-radius:6px;color:#fff;font-size:0.75rem;cursor:pointer;">Copy</button></div>
+            <div id="hgSha256" style="font-size:0.85rem;color:var(--text2);word-break:break-all;font-family:monospace;">Result will appear here...</div>
+          </div>
+          <div style="background:var(--surface2);border-radius:10px;padding:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span style="font-weight:600;color:var(--accent);">SHA-512</span><button type="button" onclick="hgCopyHash('sha512')" style="padding:5px 10px;background:var(--accent);border:none;border-radius:6px;color:#fff;font-size:0.75rem;cursor:pointer;">Copy</button></div>
+            <div id="hgSha512" style="font-size:0.85rem;color:var(--text2);word-break:break-all;font-family:monospace;">Result will appear here...</div>
+          </div>
+        </div>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
+    document.getElementById('processBtn').style.display = 'none';
     } else if(tool.type === 'word-counter') {
     document.getElementById('dropZone').style.display = 'none';
     opts.innerHTML = `
