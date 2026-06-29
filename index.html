@@ -2735,6 +2735,50 @@ async function generatePasswords() {
   return [{ name: 'passwords.txt', url: URL.createObjectURL(blob), info: `${count} password${count>1?'s':''} generated (${length} characters each)` }];
 }
 // ===================== WORD COUNTER =====================
+function setBmiUnit(unit) {
+  document.getElementById('bmiMetricInputs').style.display = unit === 'metric' ? 'flex' : 'none';
+  document.getElementById('bmiImperialInputs').style.display = unit === 'imperial' ? 'flex' : 'none';
+  document.getElementById('bmiUnitMetric').style.background = unit === 'metric' ? 'var(--accent)' : 'var(--surface2)';
+  document.getElementById('bmiUnitMetric').style.color = unit === 'metric' ? '#fff' : 'var(--text2)';
+  document.getElementById('bmiUnitImperial').style.background = unit === 'imperial' ? 'var(--accent)' : 'var(--surface2)';
+  document.getElementById('bmiUnitImperial').style.color = unit === 'imperial' ? '#fff' : 'var(--text2)';
+  window.bmiUnit = unit;
+}
+function calculateBMI() {
+  const unit = window.bmiUnit || 'metric';
+  let bmi;
+  if (unit === 'metric') {
+    const weight = parseFloat(document.getElementById('weightKg').value);
+    const height = parseFloat(document.getElementById('heightCm').value);
+    if (!weight || !height) return;
+    bmi = weight / Math.pow(height / 100, 2);
+  } else {
+    const weight = parseFloat(document.getElementById('weightLb').value);
+    const ft = parseFloat(document.getElementById('heightFt').value) || 0;
+    const inch = parseFloat(document.getElementById('heightIn').value) || 0;
+    const totalInches = ft * 12 + inch;
+    if (!weight || !totalInches) return;
+    bmi = (weight / Math.pow(totalInches, 2)) * 703;
+  }
+  const bmiValue = document.getElementById('bmiValue');
+  const bmiCategory = document.getElementById('bmiCategory');
+  const bmiMarker = document.getElementById('bmiMarker');
+  const bmiDesc = document.getElementById('bmiDesc');
+  const resultBox = document.getElementById('bmiResultBox');
+  bmiValue.textContent = bmi.toFixed(1);
+  let category, color, desc;
+  if (bmi < 18.5) { category = 'Underweight'; color = '#3b82f6'; desc = 'A BMI below 18.5 is considered underweight. Consider speaking with a healthcare provider about healthy weight gain strategies.'; }
+  else if (bmi < 25) { category = 'Normal weight'; color = '#4ade80'; desc = 'A BMI between 18.5 and 24.9 is considered a healthy weight range for most adults.'; }
+  else if (bmi < 30) { category = 'Overweight'; color = '#fbbf24'; desc = 'A BMI between 25 and 29.9 is considered overweight. Small lifestyle changes can help move toward a healthier range.'; }
+  else { category = 'Obese'; color = '#f87171'; desc = 'A BMI of 30 or above is considered obese. Consider speaking with a healthcare provider for personalized guidance.'; }
+  bmiValue.style.color = color;
+  bmiCategory.textContent = category;
+  bmiCategory.style.color = color;
+  bmiDesc.textContent = desc;
+  const clampedBmi = Math.max(15, Math.min(40, bmi));
+  bmiMarker.style.left = (((clampedBmi - 15) / (40 - 15)) * 100) + '%';
+  resultBox.style.display = 'block';
+}
 async function countWords() {
   const text = document.getElementById('wcText')?.value || '';
   if(!text.trim()) throw new Error('Please enter some text first.');
