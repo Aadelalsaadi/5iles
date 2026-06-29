@@ -836,6 +836,7 @@ function openTool(id) {
   document.getElementById('progressBar').classList.remove('active');
   document.getElementById('progressFill').style.width = '0%';
   document.getElementById('processBtn').disabled = true;
+  document.getElementById('processBtn').style.display = '';
 
   // Build options
   const opts = document.getElementById('optionsRow');
