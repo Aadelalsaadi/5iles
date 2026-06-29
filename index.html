@@ -3038,6 +3038,48 @@ function hgCopyHash(id) {
     setTimeout(() => { btn.textContent = original; }, 1500);
   });
 }
+let ueCurrentMode = 'encode';
+function ueSetMode(mode, el) {
+  ueCurrentMode = mode;
+  document.querySelectorAll('.ue-tab').forEach(t => { t.classList.remove('active'); t.style.background='var(--surface2)'; t.style.color='var(--text2)'; });
+  el.classList.add('active'); el.style.background='var(--accent)'; el.style.color='#fff';
+  document.getElementById('ueResultBox').style.display = 'none';
+  ueProcess();
+}
+function ueProcess() {
+  const text = document.getElementById('ueInputText').value;
+  const resultBox = document.getElementById('ueResultBox');
+  const resultLabel = document.getElementById('ueResultLabel');
+  const resultText = document.getElementById('ueResultText');
+  if (!text.trim()) { resultBox.style.display = 'none'; return; }
+  try {
+    let result;
+    if (ueCurrentMode === 'encode') {
+      result = encodeURIComponent(text);
+      resultLabel.textContent = 'Encoded URL';
+    } else {
+      result = decodeURIComponent(text);
+      resultLabel.textContent = 'Decoded URL';
+    }
+    resultText.textContent = result;
+    resultText.style.color = 'var(--text)';
+    resultBox.style.display = 'block';
+  } catch (err) {
+    resultText.textContent = 'Error: ' + err.message + ' — make sure the input is a valid encoded string.';
+    resultText.style.color = '#f87171';
+    resultBox.style.display = 'block';
+  }
+}
+function ueCopyResult() {
+  const text = document.getElementById('ueResultText').textContent;
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.ue-copy-btn');
+    const original = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+  });
+}
 function setBmiUnit(unit) {
   document.getElementById('bmiMetricInputs').style.display = unit === 'metric' ? 'flex' : 'none';
   document.getElementById('bmiImperialInputs').style.display = unit === 'imperial' ? 'flex' : 'none';
