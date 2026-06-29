@@ -1283,6 +1283,33 @@ function openTool(id) {
       </div>`;
     document.getElementById('processBtn').disabled = false;
     document.getElementById('processBtn').style.display = 'none';
+    } else if(tool.type === 'json-formatter') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center;">
+          <button type="button" onclick="jfFormat()" style="padding:10px 16px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-size:0.85rem;font-weight:600;cursor:pointer;">✨ Format</button>
+          <button type="button" onclick="jfMinify()" style="padding:10px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;font-weight:600;cursor:pointer;">📦 Minify</button>
+          <button type="button" onclick="jfValidate()" style="padding:10px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;font-weight:600;cursor:pointer;">✓ Validate</button>
+          <button type="button" onclick="jfClearAll()" style="padding:10px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;font-weight:600;cursor:pointer;">🗑 Clear</button>
+          <select id="jfIndentSelect" style="margin-left:auto;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:8px;font-size:0.85rem;">
+            <option value="2">2 spaces</option>
+            <option value="4">4 spaces</option>
+            <option value="tab">Tab</option>
+          </select>
+        </div>
+        <div class="option-label" style="margin-bottom:6px;">Input</div>
+        <textarea id="jfInput" placeholder="Paste your JSON here..." style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.85rem;min-height:160px;resize:vertical;font-family:monospace;"></textarea>
+        <div id="jfStatusText" style="font-size:0.85rem;margin:8px 0;color:var(--text2);">Paste JSON and click Format or Validate</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <div class="option-label" style="margin-bottom:0;">Output</div>
+          <button type="button" onclick="jfCopyOutput()" class="jf-copy-btn" style="padding:5px 10px;background:var(--accent);border:none;border-radius:6px;color:#fff;font-size:0.75rem;cursor:pointer;">Copy</button>
+        </div>
+        <textarea id="jfOutput" readonly placeholder="Result will appear here..." style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.85rem;min-height:160px;resize:vertical;font-family:monospace;"></textarea>
+        <div id="jfCharCount" style="font-size:0.8rem;color:var(--text2);margin-top:6px;"></div>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
+    document.getElementById('processBtn').style.display = 'none';
     } else if(tool.type === 'word-counter') {
     document.getElementById('dropZone').style.display = 'none';
     opts.innerHTML = `
