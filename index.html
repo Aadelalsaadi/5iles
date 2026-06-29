@@ -1206,6 +1206,37 @@ function openTool(id) {
     document.getElementById('processBtn').disabled = false;
     document.getElementById('processBtn').style.display = 'none';
     setPctMode('basic', document.querySelector('.pct-tab'));
+    } else if(tool.type === 'case-converter') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div class="option-label" style="margin-bottom:8px;">Paste or type your text</div>
+        <textarea id="ccInputText" placeholder="Type or paste your text here..." style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;min-height:140px;resize:vertical;font-family:inherit;" oninput="ccUpdateStats()"></textarea>
+        <div id="ccInputStats" style="font-size:0.8rem;color:var(--text2);margin-top:6px;margin-bottom:16px;">0 characters · 0 words</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;">
+          <button type="button" onclick="ccConvert('upper')" style="padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.8rem;font-weight:600;cursor:pointer;">UPPERCASE</button>
+          <button type="button" onclick="ccConvert('lower')" style="padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.8rem;font-weight:600;cursor:pointer;">lowercase</button>
+          <button type="button" onclick="ccConvert('title')" style="padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.8rem;font-weight:600;cursor:pointer;">Title Case</button>
+          <button type="button" onclick="ccConvert('sentence')" style="padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.8rem;font-weight:600;cursor:pointer;">Sentence case</button>
+          <button type="button" onclick="ccConvert('camel')" style="padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.8rem;font-weight:600;cursor:pointer;">camelCase</button>
+          <button type="button" onclick="ccConvert('pascal')" style="padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.8rem;font-weight:600;cursor:pointer;">PascalCase</button>
+          <button type="button" onclick="ccConvert('snake')" style="padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.8rem;font-weight:600;cursor:pointer;">snake_case</button>
+          <button type="button" onclick="ccConvert('kebab')" style="padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.8rem;font-weight:600;cursor:pointer;">kebab-case</button>
+          <button type="button" onclick="ccConvert('constant')" style="padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.8rem;font-weight:600;cursor:pointer;">CONSTANT_CASE</button>
+          <button type="button" onclick="ccConvert('alternating')" style="padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.8rem;font-weight:600;cursor:pointer;">aLtErNaTiNg</button>
+          <button type="button" onclick="ccConvert('inverse')" style="padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.8rem;font-weight:600;cursor:pointer;">InVeRsE CaSe</button>
+          <button type="button" onclick="ccConvert('dot')" style="padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.8rem;font-weight:600;cursor:pointer;">dot.case</button>
+        </div>
+        <div id="ccResultBox" style="display:none;background:var(--surface2);border-radius:14px;padding:18px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <span id="ccResultLabel" style="font-weight:600;color:var(--accent);"></span>
+            <button type="button" onclick="ccCopyResult()" class="cc-copy-btn" style="padding:6px 12px;background:var(--accent);border:none;border-radius:6px;color:#fff;font-size:0.8rem;cursor:pointer;">Copy</button>
+          </div>
+          <div id="ccResultText" style="font-size:0.95rem;color:var(--text);white-space:pre-wrap;word-break:break-word;"></div>
+        </div>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
+    document.getElementById('processBtn').style.display = 'none';
     } else if(tool.type === 'word-counter') {
     document.getElementById('dropZone').style.display = 'none';
     opts.innerHTML = `
