@@ -2755,6 +2755,37 @@ async function generatePasswords() {
   return [{ name: 'passwords.txt', url: URL.createObjectURL(blob), info: `${count} password${count>1?'s':''} generated (${length} characters each)` }];
 }
 // ===================== WORD COUNTER =====================
+const pctModeConfig = {
+  basic: { template: () => `<span>What is</span><input type="number" id="pctVal1" placeholder="25" style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;width:90px;"><span>% of</span><input type="number" id="pctVal2" placeholder="200" style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;width:90px;"><span>?</span>`, calc:(v1,v2)=>({value:(v1/100)*v2,label:`${v1}% of ${v2} is`}) },
+  isWhat: { template: () => `<input type="number" id="pctVal1" placeholder="50" style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;width:90px;"><span>is what % of</span><input type="number" id="pctVal2" placeholder="200" style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;width:90px;"><span>?</span>`, calc:(v1,v2)=>({value:(v1/v2)*100,label:`${v1} is this % of ${v2}`,suffix:'%'}) },
+  change: { template: () => `<span>% change from</span><input type="number" id="pctVal1" placeholder="80" style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;width:90px;"><span>to</span><input type="number" id="pctVal2" placeholder="100" style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;width:90px;">`, calc:(v1,v2)=>({value:((v2-v1)/v1)*100,label:`Change from ${v1} to ${v2}`,suffix:'%',showSign:true}) },
+  increase: { template: () => `<span>Increase</span><input type="number" id="pctVal1" placeholder="200" style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;width:90px;"><span>by</span><input type="number" id="pctVal2" placeholder="15" style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;width:90px;"><span>%</span>`, calc:(v1,v2)=>({value:v1*(1+v2/100),label:`${v1} increased by ${v2}% is`}) },
+  decrease: { template: () => `<span>Decrease</span><input type="number" id="pctVal1" placeholder="200" style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;width:90px;"><span>by</span><input type="number" id="pctVal2" placeholder="15" style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;width:90px;"><span>%</span>`, calc:(v1,v2)=>({value:v1*(1-v2/100),label:`${v1} decreased by ${v2}% is`}) }
+};
+let pctCurrentMode = 'basic';
+function setPctMode(mode, el) {
+  pctCurrentMode = mode;
+  document.querySelectorAll('.pct-tab').forEach(t => { t.classList.remove('active'); t.style.background='var(--surface2)'; t.style.color='var(--text2)'; });
+  el.classList.add('active'); el.style.background='var(--accent)'; el.style.color='#fff';
+  document.getElementById('pctCalcRow').innerHTML = pctModeConfig[mode].template();
+  document.getElementById('pctVal1').addEventListener('input', calculatePercentage);
+  document.getElementById('pctVal2').addEventListener('input', calculatePercentage);
+  document.getElementById('pctResultValue').textContent = '—';
+  document.getElementById('pctResultLabel').textContent = 'Enter values above';
+}
+function calculatePercentage() {
+  const v1 = parseFloat(document.getElementById('pctVal1').value);
+  const v2 = parseFloat(document.getElementById('pctVal2').value);
+  const resultValue = document.getElementById('pctResultValue');
+  const resultLabel = document.getElementById('pctResultLabel');
+  if (isNaN(v1) || isNaN(v2)) { resultValue.textContent = '—'; resultLabel.textContent = 'Enter values above'; return; }
+  if (pctCurrentMode === 'isWhat' && v2 === 0) { resultValue.textContent = '—'; resultLabel.textContent = 'Cannot divide by zero'; return; }
+  const result = pctModeConfig[pctCurrentMode].calc(v1, v2);
+  let formatted = Math.abs(result.value) < 0.01 && result.value !== 0 ? result.value.toFixed(4) : result.value.toLocaleString('en-US', { maximumFractionDigits: 2 });
+  if (result.showSign && result.value > 0) formatted = '+' + formatted;
+  resultValue.textContent = formatted + (result.suffix || '');
+  resultLabel.textContent = result.label;
+}
 function setBmiUnit(unit) {
   document.getElementById('bmiMetricInputs').style.display = unit === 'metric' ? 'flex' : 'none';
   document.getElementById('bmiImperialInputs').style.display = unit === 'imperial' ? 'flex' : 'none';
