@@ -3107,6 +3107,72 @@ function ueCopyResult() {
     setTimeout(() => { btn.textContent = original; }, 1500);
   });
 }
+function jfGetIndent() {
+  const val = document.getElementById('jfIndentSelect').value;
+  return val === 'tab' ? '\t' : parseInt(val);
+}
+function jfFormat() {
+  const raw = document.getElementById('jfInput').value.trim();
+  if (!raw) { jfSetStatus('Please enter some JSON first.', false); return; }
+  try {
+    const parsed = JSON.parse(raw);
+    const formatted = JSON.stringify(parsed, null, jfGetIndent());
+    document.getElementById('jfOutput').value = formatted;
+    jfSetStatus('✓ Valid JSON — formatted successfully', true);
+    jfUpdateCharCount(formatted);
+  } catch (err) { jfShowError(err); }
+}
+function jfMinify() {
+  const raw = document.getElementById('jfInput').value.trim();
+  if (!raw) { jfSetStatus('Please enter some JSON first.', false); return; }
+  try {
+    const parsed = JSON.parse(raw);
+    const minified = JSON.stringify(parsed);
+    document.getElementById('jfOutput').value = minified;
+    jfSetStatus('✓ Valid JSON — minified successfully', true);
+    jfUpdateCharCount(minified);
+  } catch (err) { jfShowError(err); }
+}
+function jfValidate() {
+  const raw = document.getElementById('jfInput').value.trim();
+  if (!raw) { jfSetStatus('Please enter some JSON first.', false); return; }
+  try {
+    JSON.parse(raw);
+    document.getElementById('jfOutput').value = '✓ Valid JSON\n\nNo syntax errors found.';
+    jfSetStatus('✓ Valid JSON', true);
+    document.getElementById('jfCharCount').textContent = '';
+  } catch (err) { jfShowError(err); }
+}
+function jfShowError(err) {
+  document.getElementById('jfOutput').value = '✗ Invalid JSON\n\n' + err.message;
+  jfSetStatus('✗ ' + err.message, false);
+  document.getElementById('jfCharCount').textContent = '';
+}
+function jfSetStatus(text, isValid) {
+  const el = document.getElementById('jfStatusText');
+  el.textContent = text;
+  el.style.color = isValid ? '#4ade80' : '#f87171';
+}
+function jfUpdateCharCount(text) {
+  document.getElementById('jfCharCount').textContent = `${text.length.toLocaleString()} characters`;
+}
+function jfClearAll() {
+  document.getElementById('jfInput').value = '';
+  document.getElementById('jfOutput').value = '';
+  document.getElementById('jfStatusText').textContent = 'Paste JSON and click Format or Validate';
+  document.getElementById('jfStatusText').style.color = 'var(--text2)';
+  document.getElementById('jfCharCount').textContent = '';
+}
+function jfCopyOutput() {
+  const text = document.getElementById('jfOutput').value;
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.jf-copy-btn');
+    const original = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+  });
+}
 function setBmiUnit(unit) {
   document.getElementById('bmiMetricInputs').style.display = unit === 'metric' ? 'flex' : 'none';
   document.getElementById('bmiImperialInputs').style.display = unit === 'imperial' ? 'flex' : 'none';
