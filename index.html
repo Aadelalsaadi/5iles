@@ -1918,6 +1918,9 @@ function handleFiles(files) {
   if(currentTool && currentTool.type === 'trim-video') {
     tvLoadVideo(uploadedFiles[0]);
   }
+  if(currentTool && currentTool.type === 'video-to-gif') {
+    vtgLoadVideo(uploadedFiles[0]);
+  }
 }
 
 function renderFileList() {
