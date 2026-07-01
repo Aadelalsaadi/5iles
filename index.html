@@ -1581,6 +1581,50 @@ function openTool(id) {
       </div>`;
     document.getElementById('processBtn').disabled = false;
     document.getElementById('processBtn').style.display = 'none';
+    } else if(tool.type === 'image-to-text') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div id="ittUploadArea" onclick="document.getElementById('ittFileInput').click()" ondragover="event.preventDefault();this.style.borderColor='var(--accent)'" ondragleave="this.style.borderColor='var(--border)'" ondrop="event.preventDefault();this.style.borderColor='var(--border)';ittHandleFile(event.dataTransfer.files[0])" style="border:2px dashed var(--border);border-radius:12px;padding:32px;text-align:center;cursor:pointer;margin-bottom:16px;transition:border-color 0.2s;">
+          <div style="font-size:2rem;margin-bottom:8px;">🔍</div>
+          <div style="color:var(--text2);font-size:0.9rem;">Click or drag & drop an image here</div>
+          <div style="color:var(--text2);font-size:0.75rem;margin-top:4px;">PNG, JPG, GIF, WebP — max 10MB</div>
+        </div>
+        <input type="file" id="ittFileInput" accept="image/*" style="display:none" onchange="ittHandleFile(this.files[0])">
+        <div>
+          <div class="option-label" style="margin-bottom:6px;">Language</div>
+          <select id="ittLangSelect" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.85rem;margin-bottom:16px;">
+            <option value="eng">English</option>
+            <option value="ara">Arabic</option>
+            <option value="fra">French</option>
+            <option value="deu">German</option>
+            <option value="spa">Spanish</option>
+            <option value="ita">Italian</option>
+            <option value="por">Portuguese</option>
+            <option value="chi_sim">Chinese (Simplified)</option>
+            <option value="jpn">Japanese</option>
+            <option value="kor">Korean</option>
+            <option value="rus">Russian</option>
+          </select>
+        </div>
+        <div id="ittProgress" style="display:none;text-align:center;padding:20px;color:var(--text2);">
+          <div style="margin-bottom:8px;">🔍 Recognizing text...</div>
+          <div style="background:var(--border);border-radius:4px;height:6px;overflow:hidden;">
+            <div id="ittProgressBar" style="background:var(--accent);height:100%;width:0%;transition:width 0.3s;"></div>
+          </div>
+        </div>
+        <div id="ittResultBox" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-weight:600;color:var(--accent);">Extracted Text</span>
+            <button type="button" onclick="ittCopy()" class="itt-copy-btn" style="padding:6px 12px;background:var(--accent);border:none;border-radius:6px;color:#fff;font-size:0.8rem;cursor:pointer;">Copy</button>
+          </div>
+          <textarea id="ittResultText" readonly style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.9rem;min-height:200px;resize:vertical;font-family:inherit;"></textarea>
+          <div id="ittWordCount" style="font-size:0.8rem;color:var(--text2);margin-top:6px;"></div>
+        </div>
+        <div id="ittError" style="display:none;background:rgba(248,113,113,0.1);border:1px solid #f87171;border-radius:8px;padding:12px;color:#f87171;font-size:0.85rem;margin-top:12px;"></div>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
+    document.getElementById('processBtn').style.display = 'none';
     } else if(tool.type === 'word-counter') {
     document.getElementById('dropZone').style.display = 'none';
     opts.innerHTML = `
