@@ -1542,6 +1542,45 @@ function openTool(id) {
     document.getElementById('processBtn').disabled = false;
     document.getElementById('processBtn').style.display = 'none';
     ttsInit();
+    } else if(tool.type === 'html-to-pdf') {
+    document.getElementById('dropZone').style.display = 'none';
+    if (!window.html2canvas) {
+      const s1 = document.createElement('script'); s1.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'; document.head.appendChild(s1);
+      const s2 = document.createElement('script'); s2.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'; document.head.appendChild(s2);
+    }
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+          <div>
+            <div class="option-label" style="margin-bottom:6px;">Page size</div>
+            <select id="h2pPageSize" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.85rem;">
+              <option value="a4" selected>A4</option>
+              <option value="letter">Letter</option>
+              <option value="a3">A3</option>
+              <option value="legal">Legal</option>
+            </select>
+          </div>
+          <div>
+            <div class="option-label" style="margin-bottom:6px;">Orientation</div>
+            <select id="h2pOrientation" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.85rem;">
+              <option value="portrait" selected>Portrait</option>
+              <option value="landscape">Landscape</option>
+            </select>
+          </div>
+        </div>
+        <div class="option-label" style="margin-bottom:6px;">Paste HTML code</div>
+        <textarea id="h2pHtmlInput" placeholder="&lt;!DOCTYPE html&gt;&#10;&lt;html&gt;&#10;  &lt;body&gt;&#10;    &lt;h1&gt;Hello World&lt;/h1&gt;&#10;  &lt;/body&gt;&#10;&lt;/html&gt;" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.85rem;min-height:200px;resize:vertical;font-family:monospace;margin-bottom:12px;"></textarea>
+        <button type="button" onclick="h2pConvert()" id="h2pConvertBtn" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;margin-bottom:12px;">Convert to PDF</button>
+        <div id="h2pProgress" style="display:none;text-align:center;color:var(--text2);font-size:0.85rem;padding:12px;">⏳ Converting...</div>
+        <div id="h2pError" style="display:none;background:rgba(248,113,113,0.1);border:1px solid #f87171;border-radius:8px;padding:12px;color:#f87171;font-size:0.85rem;margin-bottom:12px;"></div>
+        <div id="h2pPreviewContainer" style="display:none;position:absolute;left:-9999px;top:-9999px;width:800px;background:#fff;"></div>
+        <div id="h2pResultBox" style="display:none;text-align:center;background:rgba(74,222,128,0.1);border:1px solid #4ade80;border-radius:8px;padding:16px;">
+          <div style="font-size:1rem;font-weight:600;color:#4ade80;margin-bottom:10px;">✅ PDF generated!</div>
+          <a id="h2pDownloadBtn" style="display:inline-block;padding:10px 24px;background:var(--accent);color:#fff;border-radius:8px;text-decoration:none;font-size:0.9rem;font-weight:600;">⬇ Download PDF</a>
+        </div>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
+    document.getElementById('processBtn').style.display = 'none';
     } else if(tool.type === 'word-counter') {
     document.getElementById('dropZone').style.display = 'none';
     opts.innerHTML = `
