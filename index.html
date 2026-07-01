@@ -3666,6 +3666,79 @@ function i2bDecode() {
   img.onload = () => { previewBox.style.display = 'block'; document.getElementById('i2bDecodeDownloadBtn').href = input; };
   img.src = input;
 }
+let mdCurrentView = 'preview';
+function mdEscapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+function mdParseMarkdown(md) {
+  const codeBlocks = [];
+  md = md.replace(/```([a-z]*)\n([\s\S]*?)```/g, (match, lang, code) => {
+    codeBlocks.push(`<pre><code>${mdEscapeHtml(code.trim())}</code></pre>`);
+    return `\u0000CODEBLOCK${codeBlocks.length - 1}\u0000`;
+  });
+  let html = mdEscapeHtml(md);
+  html = html.replace(/^###### (.*$)/gim, '<h6>$1</h6>');
+  html = html.replace(/^##### (.*$)/gim, '<h5>$1</h5>');
+  html = html.replace(/^#### (.*$)/gim, '<h4>$1</h4>');
+  html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+  html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+  html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+  html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  html = html.replace(/__(.+?)__/g, '<strong>$1</strong>');
+  html = html.replace(/_(.+?)_/g, '<em>$1</em>');
+  html = html.replace(/~~(.+?)~~/g, '<del>$1</del>');
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+  html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img alt="$1" src="$2" style="max-width:100%">');
+  html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+  html = html.replace(/^&gt; (.*$)/gim, '<blockquote style="border-left:3px solid var(--accent);margin:0;padding:0 12px;color:var(--text2)">$1</blockquote>');
+  html = html.replace(/^---+$/gim, '<hr>');
+  html = html.replace(/^[\*\-] (.+)$/gim, '<li>$1</li>');
+  html = html.replace(/(<li>.*<\/li>\n?)+/g, match => '<ul>' + match + '</ul>');
+  html = html.replace(/^\d+\. (.+)$/gim, '<li>$1</li>');
+  html = html.split('\n').map(line => {
+    const trimmed = line.trim();
+    if (!trimmed) return '';
+    if (/^<(h[1-6]|ul|ol|li|blockquote|hr|pre|table|tr|img)/.test(trimmed)) return trimmed;
+    return `<p>${trimmed}</p>`;
+  }).join('\n');
+  html = html.replace(/\u0000CODEBLOCK(\d+)\u0000/g, (match, i) => codeBlocks[parseInt(i)]);
+  return html;
+}
+function mdUpdatePreview() {
+  const md = document.getElementById('mdInput').value;
+  const html = mdParseMarkdown(md);
+  document.getElementById('mdPreviewBox').innerHTML = html;
+  document.getElementById('mdHtmlOutput').value = html;
+}
+function mdToggleView(view, el) {
+  mdCurrentView = view;
+  document.querySelectorAll('.md-view-btn').forEach(t => { t.style.background='var(--surface2)'; t.style.color='var(--text2)'; });
+  el.style.background='var(--accent)'; el.style.color='#fff';
+  document.getElementById('mdPreviewBox').style.display = view === 'preview' ? 'block' : 'none';
+  document.getElementById('mdHtmlOutput').style.display = view === 'html' ? 'block' : 'none';
+  document.getElementById('mdOutputLabel').textContent = view === 'preview' ? 'Preview' : 'HTML Output';
+}
+function mdCopyHtml() {
+  const html = mdParseMarkdown(document.getElementById('mdInput').value);
+  navigator.clipboard.writeText(html).then(() => {
+    const btn = document.querySelector('.md-copy-btn');
+    const original = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+  });
+}
+function mdDownloadHtml() {
+  const md = document.getElementById('mdInput').value;
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Exported</title></head><body>${mdParseMarkdown(md)}</body></html>`;
+  const a = document.createElement('a');
+  a.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
+  a.download = 'converted.html';
+  a.click();
+}
 function setBmiUnit(unit) {
   document.getElementById('bmiMetricInputs').style.display = unit === 'metric' ? 'flex' : 'none';
   document.getElementById('bmiImperialInputs').style.display = unit === 'imperial' ? 'flex' : 'none';
