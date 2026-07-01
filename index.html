@@ -4300,8 +4300,9 @@ async function removePdfPages() {
     }
   }
   const newBytes = await newDoc.save();
+  const blob = new Blob([newBytes], { type: 'application/pdf' });
   const baseName = file.name.replace(/\.pdf$/i, '');
-  return [{ name: baseName + '_removed.pdf', blob: new Blob([newBytes], { type: 'application/pdf' }) }];
+  return [{ name: baseName + '_removed.pdf', url: URL.createObjectURL(blob), info: (blob.size/1024).toFixed(1) + ' KB' }];
 }
 async function extractPdfPages() {
   const file = uploadedFiles[0];
@@ -4316,8 +4317,9 @@ async function extractPdfPages() {
   const pages = await newDoc.copyPages(srcDoc, toExtract.map(p => p - 1));
   pages.forEach(page => newDoc.addPage(page));
   const newBytes = await newDoc.save();
+  const blob = new Blob([newBytes], { type: 'application/pdf' });
   const baseName = file.name.replace(/\.pdf$/i, '');
-  return [{ name: baseName + '_extracted.pdf', blob: new Blob([newBytes], { type: 'application/pdf' }) }];
+  return [{ name: baseName + '_extracted.pdf', url: URL.createObjectURL(blob), info: (blob.size/1024).toFixed(1) + ' KB' }];
 }
 async function rearrangePdfPages() {
   const file = uploadedFiles[0];
@@ -4332,8 +4334,9 @@ async function rearrangePdfPages() {
   const pages = await newDoc.copyPages(srcDoc, order.map(p => p - 1));
   pages.forEach(page => newDoc.addPage(page));
   const newBytes = await newDoc.save();
+  const blob = new Blob([newBytes], { type: 'application/pdf' });
   const baseName = file.name.replace(/\.pdf$/i, '');
-  return [{ name: baseName + '_reordered.pdf', blob: new Blob([newBytes], { type: 'application/pdf' }) }];
+  return [{ name: baseName + '_reordered.pdf', url: URL.createObjectURL(blob), info: (blob.size/1024).toFixed(1) + ' KB' }];
 }
 function setBmiUnit(unit) {
   document.getElementById('bmiMetricInputs').style.display = unit === 'metric' ? 'flex' : 'none';
