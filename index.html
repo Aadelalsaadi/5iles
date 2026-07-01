@@ -1625,6 +1625,28 @@ function openTool(id) {
       </div>`;
     document.getElementById('processBtn').disabled = false;
     document.getElementById('processBtn').style.display = 'none';
+    } else if(tool.type === 'remove-pdf-pages') {
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div class="option-label" style="margin-bottom:8px;">Pages to remove (e.g. 1, 3-5, 7)</div>
+        <input type="text" id="rppPagesInput" placeholder="1, 3-5, 7" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;">
+        <div id="rppInfo" style="font-size:0.8rem;color:var(--text2);margin-top:8px;"></div>
+      </div>`;
+    } else if(tool.type === 'extract-pdf-pages') {
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div class="option-label" style="margin-bottom:8px;">Pages to extract (e.g. 1, 3-5, 7)</div>
+        <input type="text" id="eppPagesInput" placeholder="1, 3-5, 7" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;">
+        <div id="eppInfo" style="font-size:0.8rem;color:var(--text2);margin-top:8px;"></div>
+      </div>`;
+    } else if(tool.type === 'rearrange-pdf-pages') {
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div class="option-label" style="margin-bottom:8px;">New page order (e.g. 3, 1, 2, 4)</div>
+        <input type="text" id="rapPagesInput" placeholder="3, 1, 2, 4" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;">
+        <div id="rapInfo" style="font-size:0.8rem;color:var(--text2);margin-top:8px;"></div>
+        <div style="font-size:0.8rem;color:var(--text2);margin-top:6px;">Enter all page numbers in the order you want them to appear.</div>
+      </div>`;
     } else if(tool.type === 'word-counter') {
     document.getElementById('dropZone').style.display = 'none';
     opts.innerHTML = `
