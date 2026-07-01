@@ -3591,6 +3591,56 @@ function cc2SwapCurrencies() {
   document.getElementById('cc2FromValue').value = document.getElementById('cc2ToValue').value;
   cc2Convert();
 }
+function i2bSetMode(mode, el) {
+  document.querySelectorAll('.i2b-tab').forEach(t => { t.style.background='var(--surface2)'; t.style.color='var(--text2)'; });
+  el.style.background='var(--accent)'; el.style.color='#fff';
+  document.getElementById('i2bEncodePanel').style.display = mode === 'encode' ? 'block' : 'none';
+  document.getElementById('i2bDecodePanel').style.display = mode === 'decode' ? 'block' : 'none';
+}
+function i2bHandleFile(file) {
+  if (!file || !file.type.startsWith('image/')) { alert('Please select an image file.'); return; }
+  if (file.size > 10 * 1024 * 1024) { alert('File too large. Maximum size is 10MB.'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    const base64String = e.target.result;
+    document.getElementById('i2bPreviewImg').src = base64String;
+    document.getElementById('i2bPreviewBox').style.display = 'block';
+    document.getElementById('i2bFileInfo').textContent = `${file.name} • ${(file.size / 1024).toFixed(1)} KB • ${base64String.length.toLocaleString()} characters encoded`;
+    document.getElementById('i2bResultText').value = base64String;
+    document.getElementById('i2bResultBox').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+function i2bCopy() {
+  const text = document.getElementById('i2bResultText').value;
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.i2b-copy-btn');
+    const original = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+  });
+}
+function i2bDecode() {
+  let input = document.getElementById('i2bBase64Input').value.trim();
+  const errEl = document.getElementById('i2bDecodeError');
+  const previewBox = document.getElementById('i2bDecodePreviewBox');
+  errEl.style.display = 'none';
+  previewBox.style.display = 'none';
+  if (!input) { errEl.textContent = 'Please paste a Base64 string first.'; errEl.style.display = 'block'; return; }
+  if (!input.startsWith('data:')) {
+    const types = ['image/png','image/jpeg','image/gif','image/webp','image/svg+xml'];
+    let matched = false;
+    for (const type of types) {
+      try { atob(input); matched = true; input = `data:${type};base64,${input}`; break; } catch(e) {}
+    }
+    if (!matched) { input = `data:image/png;base64,${input}`; }
+  }
+  const img = document.getElementById('i2bDecodedImg');
+  img.onerror = () => { errEl.textContent = 'Invalid Base64 string or unsupported image format.'; errEl.style.display = 'block'; previewBox.style.display = 'none'; };
+  img.onload = () => { previewBox.style.display = 'block'; document.getElementById('i2bDecodeDownloadBtn').href = input; };
+  img.src = input;
+}
 function setBmiUnit(unit) {
   document.getElementById('bmiMetricInputs').style.display = unit === 'metric' ? 'flex' : 'none';
   document.getElementById('bmiImperialInputs').style.display = unit === 'imperial' ? 'flex' : 'none';
