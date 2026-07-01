@@ -1428,6 +1428,31 @@ function openTool(id) {
       </div>`;
     document.getElementById('processBtn').disabled = false;
     document.getElementById('processBtn').style.display = 'none';
+    } else if(tool.type === 'markdown-to-html') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div style="display:flex;gap:8px;margin-bottom:12px;">
+          <button type="button" onclick="mdToggleView('preview',this)" class="md-view-btn active" style="padding:8px 16px;background:var(--accent);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:0.85rem;font-weight:600;cursor:pointer;">👁 Preview</button>
+          <button type="button" onclick="mdToggleView('html',this)" class="md-view-btn" style="padding:8px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:0.85rem;font-weight:600;cursor:pointer;">&lt;/&gt; HTML</button>
+          <button type="button" onclick="mdCopyHtml()" style="margin-left:auto;padding:8px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;font-weight:600;cursor:pointer;" class="md-copy-btn">Copy HTML</button>
+          <button type="button" onclick="mdDownloadHtml()" style="padding:8px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;font-weight:600;cursor:pointer;">⬇ Download</button>
+        </div>
+        <div style="display:flex;gap:12px;">
+          <div style="flex:1;">
+            <div class="option-label" style="margin-bottom:6px;">Markdown</div>
+            <textarea id="mdInput" placeholder="# Hello World&#10;&#10;Type your **markdown** here..." style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.85rem;min-height:300px;resize:vertical;font-family:monospace;" oninput="mdUpdatePreview()"></textarea>
+          </div>
+          <div style="flex:1;">
+            <div class="option-label" style="margin-bottom:6px;" id="mdOutputLabel">Preview</div>
+            <div id="mdPreviewBox" style="background:var(--surface2);border:1px solid var(--border);padding:14px;border-radius:8px;min-height:300px;overflow-y:auto;color:var(--text);font-size:0.9rem;line-height:1.6;"></div>
+            <textarea id="mdHtmlOutput" style="display:none;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.8rem;min-height:300px;resize:vertical;font-family:monospace;"></textarea>
+          </div>
+        </div>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
+    document.getElementById('processBtn').style.display = 'none';
+    mdCurrentView = 'preview';
     } else if(tool.type === 'word-counter') {
     document.getElementById('dropZone').style.display = 'none';
     opts.innerHTML = `
