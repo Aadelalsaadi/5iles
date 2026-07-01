@@ -4427,6 +4427,56 @@ async function pdfToPptx() {
   const baseName = file.name.replace(/\.pdf$/i, '');
   return [{ name: baseName + '.pptx', url: URL.createObjectURL(pptxBlob), info: numPages + ' slides • ' + (pptxBlob.size / 1024).toFixed(1) + ' KB' }];
 }
+function tvLoadVideo(file) {
+  const player = document.getElementById('tvPlayer');
+  const timeRow = document.getElementById('tvTimeRow');
+  if (!player || !timeRow) return;
+  const url = URL.createObjectURL(file);
+  player.src = url;
+  player.style.display = 'block';
+  player.onloadedmetadata = () => {
+    const dur = player.duration;
+    document.getElementById('tvStartTime').value = '0';
+    document.getElementById('tvEndTime').value = dur.toFixed(1);
+    document.getElementById('tvDurationInfo').textContent = `Video duration: ${dur.toFixed(1)}s — adjust start/end times above`;
+    timeRow.style.display = 'block';
+  };
+}
+async function trimVideoFn2() {
+  const file = uploadedFiles[0];
+  const player = document.getElementById('tvPlayer');
+  const startTime = parseFloat(document.getElementById('tvStartTime')?.value || '0');
+  const endTime = parseFloat(document.getElementById('tvEndTime')?.value || '0');
+  if (!player || !player.src) throw new Error('Please upload a video first.');
+  if (isNaN(startTime) || isNaN(endTime)) throw new Error('Please enter valid start and end times.');
+  if (startTime >= endTime) throw new Error('Start time must be less than end time.');
+  if (endTime > player.duration) throw new Error(`End time cannot exceed video duration (${player.duration.toFixed(1)}s).`);
+  const stream = player.captureStream ? player.captureStream() : player.mozCaptureStream();
+  if (!stream) throw new Error('Video capture not supported in this browser. Please use Chrome.');
+  const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm';
+  const chunks = [];
+  const recorder = new MediaRecorder(stream, { mimeType });
+  recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+  return new Promise((resolve, reject) => {
+    recorder.onstop = () => {
+      const blob = new Blob(chunks, { type: mimeType });
+      const baseName = file.name.replace(/\.[^.]+$/, '');
+      resolve([{ name: baseName + '_trimmed.webm', url: URL.createObjectURL(blob), info: `${(endTime - startTime).toFixed(1)}s • ${(blob.size / 1024 / 1024).toFixed(1)} MB` }]);
+    };
+    recorder.onerror = e => reject(new Error('Recording error: ' + e.error));
+    player.currentTime = startTime;
+    player.play().then(() => {
+      recorder.start();
+      const checkTime = setInterval(() => {
+        if (player.currentTime >= endTime) {
+          clearInterval(checkTime);
+          player.pause();
+          recorder.stop();
+        }
+      }, 100);
+    }).catch(reject);
+  });
+}
 function setBmiUnit(unit) {
   document.getElementById('bmiMetricInputs').style.display = unit === 'metric' ? 'flex' : 'none';
   document.getElementById('bmiImperialInputs').style.display = unit === 'imperial' ? 'flex' : 'none';
