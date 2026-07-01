@@ -1511,6 +1511,36 @@ function openTool(id) {
     document.getElementById('processBtn').disabled = false;
     document.getElementById('processBtn').style.display = 'none';
     sttInit();
+    } else if(tool.type === 'text-to-speech') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div id="ttsErrorBox" style="display:none;background:rgba(248,113,113,0.1);border:1px solid #f87171;border-radius:8px;padding:12px;color:#f87171;font-size:0.85rem;margin-bottom:12px;"></div>
+        <div class="option-label" style="margin-bottom:8px;">Text to speak</div>
+        <textarea id="ttsTextInput" placeholder="Type or paste your text here..." style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;min-height:140px;resize:vertical;font-family:inherit;margin-bottom:8px;" oninput="ttsUpdateCharCount()"></textarea>
+        <div id="ttsCharCount" style="font-size:0.8rem;color:var(--text2);margin-bottom:16px;">0 characters</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+          <div>
+            <div class="option-label" style="margin-bottom:6px;">Voice</div>
+            <select id="ttsVoiceSelect" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.85rem;"></select>
+          </div>
+          <div>
+            <div class="option-label" style="margin-bottom:6px;">Speed: <span id="ttsRateValue">1.0x</span></div>
+            <input type="range" id="ttsRateSlider" min="0.5" max="2" step="0.1" value="1" style="width:100%;accent-color:var(--accent);" oninput="document.getElementById('ttsRateValue').textContent=parseFloat(this.value).toFixed(1)+'x'">
+            <div class="option-label" style="margin-bottom:6px;margin-top:10px;">Pitch: <span id="ttsPitchValue">1.0</span></div>
+            <input type="range" id="ttsPitchSlider" min="0.5" max="2" step="0.1" value="1" style="width:100%;accent-color:var(--accent);" oninput="document.getElementById('ttsPitchValue').textContent=parseFloat(this.value).toFixed(1)">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:12px;">
+          <button type="button" id="ttsPlayBtn" onclick="ttsPlay()" style="flex:2;padding:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:8px;color:#fff;font-size:0.9rem;font-weight:600;cursor:pointer;">▶ Play</button>
+          <button type="button" id="ttsPauseBtn" onclick="ttsPause()" disabled style="flex:1;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;font-weight:600;cursor:pointer;opacity:0.5;">⏸ Pause</button>
+          <button type="button" id="ttsStopBtn" onclick="ttsStop()" disabled style="flex:1;padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;font-weight:600;cursor:pointer;opacity:0.5;">⏹ Stop</button>
+        </div>
+        <div id="ttsStatusText" style="text-align:center;font-size:0.85rem;color:var(--text2);">Ready to speak</div>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
+    document.getElementById('processBtn').style.display = 'none';
+    ttsInit();
     } else if(tool.type === 'word-counter') {
     document.getElementById('dropZone').style.display = 'none';
     opts.innerHTML = `
