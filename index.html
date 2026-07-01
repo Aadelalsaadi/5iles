@@ -4362,6 +4362,47 @@ async function rearrangePdfPages() {
   const baseName = file.name.replace(/\.pdf$/i, '');
   return [{ name: baseName + '_reordered.pdf', url: URL.createObjectURL(blob), info: (blob.size/1024).toFixed(1) + ' KB' }];
 }
+async function pdfToPptx() {
+  const file = uploadedFiles[0];
+  const scale = parseFloat(document.getElementById('p2ptQuality')?.value || '1.5');
+  const slideSize = document.getElementById('p2ptSlideSize')?.value || 'widescreen';
+  if (!window.pdfjsLib) throw new Error('PDF.js not loaded. Please refresh and try again.');
+  const pptxgen = (typeof PptxGenJS !== 'undefined') ? PptxGenJS : null;
+  if (!pptxgen) {
+    await new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js';
+      s.onload = resolve; s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+  const PptxGenJSLib = typeof PptxGenJS !== 'undefined' ? PptxGenJS : window.PptxGenJS;
+  if (!PptxGenJSLib) throw new Error('PptxGenJS not loaded. Please try again.');
+  const arrayBuffer = await file.arrayBuffer();
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const numPages = pdf.numPages;
+  const pptx = new PptxGenJSLib();
+  if (slideSize === 'widescreen') { pptx.layout = 'LAYOUT_16x9'; }
+  else { pptx.layout = 'LAYOUT_4x3'; }
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  for (let i = 1; i <= numPages; i++) {
+    const page = await pdf.getPage(i);
+    const viewport = page.getViewport({ scale });
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    await page.render({ canvasContext: ctx, viewport }).promise;
+    const imgData = canvas.toDataURL('image/jpeg', 0.85);
+    const slide = pptx.addSlide();
+    const slideW = pptx.presLayout.width / 914400;
+    const slideH = pptx.presLayout.height / 914400;
+    slide.addImage({ data: imgData, x: 0, y: 0, w: slideW, h: slideH });
+  }
+  const pptxBlob = await pptx.write({ outputType: 'blob' });
+  const baseName = file.name.replace(/\.pdf$/i, '');
+  return [{ name: baseName + '.pptx', url: URL.createObjectURL(pptxBlob), info: numPages + ' slides • ' + (pptxBlob.size / 1024).toFixed(1) + ' KB' }];
+}
 function setBmiUnit(unit) {
   document.getElementById('bmiMetricInputs').style.display = unit === 'metric' ? 'flex' : 'none';
   document.getElementById('bmiImperialInputs').style.display = unit === 'imperial' ? 'flex' : 'none';
