@@ -2040,6 +2040,12 @@ if (USAGE_LIMIT_ENABLED && !currentUser) {
   results = await aiEnhance();
     } else if(currentTool.type === 'remove-bg') {
       results = await removeBg();
+    } else if(currentTool.type === 'remove-pdf-pages') {
+      results = await removePdfPages();
+    } else if(currentTool.type === 'extract-pdf-pages') {
+      results = await extractPdfPages();
+    } else if(currentTool.type === 'rearrange-pdf-pages') {
+      results = await rearrangePdfPages();
     }
 
     fill.style.width = '100%';
