@@ -4162,24 +4162,25 @@ async function h2pConvert() {
     const container = document.getElementById('h2pPreviewContainer');
     container.style.display = 'block';
     container.innerHTML = htmlContent;
-    const canvas = await html2canvas(container, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+    const canvas = await html2canvas(container, { scale: 3, useCORS: true, backgroundColor: '#ffffff', logging: false });
     container.style.display = 'none';
-    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    const imgData = canvas.toDataURL('image/png');
     const pageSize = document.getElementById('h2pPageSize').value;
     const orientation = document.getElementById('h2pOrientation').value;
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ orientation, unit: 'mm', format: pageSize });
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = pdf.internal.pageSize.getHeight();
-    const imgWidth = canvas.width;
-    const imgHeight = canvas.height;
-    const ratio = pdfWidth / imgWidth;
-    const scaledHeight = imgHeight * ratio;
-    let y = 0;
-    while (y < scaledHeight) {
-      if (y > 0) pdf.addPage();
-      pdf.addImage(imgData, 'JPEG', 0, -y * (pdfWidth / scaledHeight) * (imgHeight / imgWidth) * (1/ratio), pdfWidth, scaledHeight);
-      y += pdfHeight;
+    const scaledHeight = (canvas.height / canvas.width) * pdfWidth;
+    if (scaledHeight <= pdfHeight) {
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, scaledHeight);
+    } else {
+      let yOffset = 0;
+      while (yOffset < scaledHeight) {
+        if (yOffset > 0) pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, -yOffset, pdfWidth, scaledHeight);
+        yOffset += pdfHeight;
+      }
     }
     const pdfBlob = pdf.output('blob');
     const url = URL.createObjectURL(pdfBlob);
