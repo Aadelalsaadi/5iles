@@ -4103,6 +4103,52 @@ function ttsStop() {
   document.getElementById('ttsPauseBtn').disabled = true; document.getElementById('ttsPauseBtn').style.opacity = '0.5'; document.getElementById('ttsPauseBtn').textContent = '⏸ Pause';
   document.getElementById('ttsStopBtn').disabled = true; document.getElementById('ttsStopBtn').style.opacity = '0.5';
 }
+async function h2pConvert() {
+  const htmlContent = document.getElementById('h2pHtmlInput').value.trim();
+  const errEl = document.getElementById('h2pError');
+  const resultBox = document.getElementById('h2pResultBox');
+  errEl.style.display = 'none';
+  resultBox.style.display = 'none';
+  if (!htmlContent) { errEl.textContent = 'Please enter some HTML code.'; errEl.style.display = 'block'; return; }
+  if (!window.html2canvas || !window.jspdf) { errEl.textContent = 'Libraries still loading, please wait a moment and try again.'; errEl.style.display = 'block'; return; }
+  const btn = document.getElementById('h2pConvertBtn');
+  const progress = document.getElementById('h2pProgress');
+  btn.disabled = true; progress.style.display = 'block';
+  try {
+    const container = document.getElementById('h2pPreviewContainer');
+    container.style.display = 'block';
+    container.innerHTML = htmlContent;
+    const canvas = await html2canvas(container, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+    container.style.display = 'none';
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    const pageSize = document.getElementById('h2pPageSize').value;
+    const orientation = document.getElementById('h2pOrientation').value;
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation, unit: 'mm', format: pageSize });
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth = canvas.width;
+    const imgHeight = canvas.height;
+    const ratio = pdfWidth / imgWidth;
+    const scaledHeight = imgHeight * ratio;
+    let y = 0;
+    while (y < scaledHeight) {
+      if (y > 0) pdf.addPage();
+      pdf.addImage(imgData, 'JPEG', 0, -y * (pdfWidth / scaledHeight) * (imgHeight / imgWidth) * (1/ratio), pdfWidth, scaledHeight);
+      y += pdfHeight;
+    }
+    const pdfBlob = pdf.output('blob');
+    const url = URL.createObjectURL(pdfBlob);
+    const downloadBtn = document.getElementById('h2pDownloadBtn');
+    downloadBtn.href = url;
+    downloadBtn.download = 'converted.pdf';
+    resultBox.style.display = 'block';
+  } catch(err) {
+    errEl.textContent = 'Error: ' + err.message;
+    errEl.style.display = 'block';
+  }
+  btn.disabled = false; progress.style.display = 'none';
+}
 function setBmiUnit(unit) {
   document.getElementById('bmiMetricInputs').style.display = unit === 'metric' ? 'flex' : 'none';
   document.getElementById('bmiImperialInputs').style.display = unit === 'imperial' ? 'flex' : 'none';
