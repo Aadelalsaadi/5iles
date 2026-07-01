@@ -3870,6 +3870,93 @@ function cpCopyColor(hex, el) {
     setTimeout(() => { el.querySelector('div:last-child div:first-child').textContent = original; }, 1500);
   });
 }
+let sttRecognition = null;
+let sttIsListening = false;
+let sttFinalTranscript = '';
+function sttInit() {
+  sttRecognition = null;
+  sttIsListening = false;
+  sttFinalTranscript = '';
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    document.getElementById('sttErrorBox').textContent = 'Speech recognition is not supported in this browser. Please use Google Chrome or Microsoft Edge.';
+    document.getElementById('sttErrorBox').style.display = 'block';
+    document.getElementById('sttMicBtn').disabled = true;
+    document.getElementById('sttMicBtn').style.opacity = '0.5';
+    return;
+  }
+  sttRecognition = new SpeechRecognition();
+  sttRecognition.continuous = true;
+  sttRecognition.interimResults = true;
+  sttRecognition.lang = document.getElementById('sttLangSelect').value;
+  sttRecognition.onresult = (event) => {
+    let interimTranscript = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const transcript = event.results[i][0].transcript;
+      if (event.results[i].isFinal) { sttFinalTranscript += transcript + ' '; }
+      else { interimTranscript += transcript; }
+    }
+    document.getElementById('sttTranscriptBox').value = sttFinalTranscript + interimTranscript;
+  };
+  sttRecognition.onerror = (event) => {
+    if (event.error === 'not-allowed') {
+      document.getElementById('sttErrorBox').textContent = 'Microphone access denied. Please allow microphone permissions and try again.';
+      document.getElementById('sttErrorBox').style.display = 'block';
+    } else if (event.error !== 'no-speech') {
+      document.getElementById('sttErrorBox').textContent = 'Error: ' + event.error;
+      document.getElementById('sttErrorBox').style.display = 'block';
+    }
+    sttStopListening();
+  };
+  sttRecognition.onend = () => {
+    if (sttIsListening) { try { sttRecognition.start(); } catch(e) { sttStopListening(); } }
+  };
+}
+function sttToggleListening() {
+  if (!sttRecognition) return;
+  if (sttIsListening) { sttStopListening(); } else { sttStartListening(); }
+}
+function sttStartListening() {
+  document.getElementById('sttErrorBox').style.display = 'none';
+  sttRecognition.lang = document.getElementById('sttLangSelect').value;
+  sttFinalTranscript = document.getElementById('sttTranscriptBox').value ? document.getElementById('sttTranscriptBox').value + ' ' : '';
+  try {
+    sttRecognition.start();
+    sttIsListening = true;
+    document.getElementById('sttMicBtn').textContent = '⏹️';
+    document.getElementById('sttMicBtn').style.background = '#ef4444';
+    document.getElementById('sttStatus').textContent = 'Listening... speak now';
+    document.getElementById('sttStatus').style.color = '#4ade80';
+  } catch(e) {
+    document.getElementById('sttErrorBox').textContent = 'Could not start microphone: ' + e.message;
+    document.getElementById('sttErrorBox').style.display = 'block';
+  }
+}
+function sttStopListening() {
+  sttIsListening = false;
+  try { sttRecognition.stop(); } catch(e) {}
+  document.getElementById('sttMicBtn').textContent = '🎤';
+  document.getElementById('sttMicBtn').style.background = 'var(--accent)';
+  document.getElementById('sttStatus').textContent = 'Click the mic to start speaking';
+  document.getElementById('sttStatus').style.color = 'var(--text2)';
+}
+function sttCopy() {
+  const text = document.getElementById('sttTranscriptBox').value;
+  if (!text) return;
+  navigator.clipboard.writeText(text);
+}
+function sttDownload() {
+  const text = document.getElementById('sttTranscriptBox').value;
+  if (!text) return;
+  const a = document.createElement('a');
+  a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(text);
+  a.download = 'transcript.txt';
+  a.click();
+}
+function sttClear() {
+  document.getElementById('sttTranscriptBox').value = '';
+  sttFinalTranscript = '';
+}
 function setBmiUnit(unit) {
   document.getElementById('bmiMetricInputs').style.display = unit === 'metric' ? 'flex' : 'none';
   document.getElementById('bmiImperialInputs').style.display = unit === 'imperial' ? 'flex' : 'none';
