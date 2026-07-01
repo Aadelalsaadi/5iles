@@ -1668,6 +1668,28 @@ function openTool(id) {
         </div>
         <div style="margin-top:10px;font-size:0.8rem;color:var(--text2);">Each PDF page becomes a PowerPoint slide with a high-quality image.</div>
       </div>`;
+    } else if(tool.type === 'trim-video') {
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <video id="tvPlayer" controls style="width:100%;border-radius:8px;background:#000;margin-bottom:16px;display:none;max-height:300px;"></video>
+        <div id="tvTimeRow" style="display:none;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+            <div>
+              <div class="option-label" style="margin-bottom:6px;">Start time (seconds)</div>
+              <input type="number" id="tvStartTime" min="0" step="0.1" value="0" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;">
+            </div>
+            <div>
+              <div class="option-label" style="margin-bottom:6px;">End time (seconds)</div>
+              <input type="number" id="tvEndTime" min="0" step="0.1" value="0" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;">
+            </div>
+          </div>
+          <div id="tvDurationInfo" style="font-size:0.8rem;color:var(--text2);margin-bottom:12px;"></div>
+          <div style="font-size:0.8rem;color:var(--text2);background:rgba(108,99,255,0.1);border:1px solid var(--accent);border-radius:8px;padding:10px;margin-bottom:12px;">⚠️ Video trimming uses your browser's recording API. Result quality depends on your browser. For best results use Chrome.</div>
+        </div>
+      </div>`;
+    setTimeout(() => {
+      if (uploadedFiles.length > 0) tvLoadVideo(uploadedFiles[0]);
+    }, 100);
     } else if(tool.type === 'word-counter') {
     document.getElementById('dropZone').style.display = 'none';
     opts.innerHTML = `
