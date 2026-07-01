@@ -2067,6 +2067,8 @@ if (USAGE_LIMIT_ENABLED && !currentUser) {
       results = await extractPdfPages();
     } else if(currentTool.type === 'rearrange-pdf-pages') {
       results = await rearrangePdfPages();
+    } else if(currentTool.type === 'pdf-to-pptx') {
+      results = await pdfToPptx();
     }
 
     fill.style.width = '100%';
