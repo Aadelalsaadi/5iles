@@ -1453,6 +1453,28 @@ function openTool(id) {
     document.getElementById('processBtn').disabled = false;
     document.getElementById('processBtn').style.display = 'none';
     mdCurrentView = 'preview';
+    } else if(tool.type === 'color-palette-extractor') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <canvas id="cpHiddenCanvas" style="display:none;"></canvas>
+        <div id="cpUploadArea" onclick="document.getElementById('cpFileInput').click()" ondragover="event.preventDefault();this.style.borderColor='var(--accent)'" ondragleave="this.style.borderColor='var(--border)'" ondrop="event.preventDefault();this.style.borderColor='var(--border)';cpHandleFile(event.dataTransfer.files[0])" style="border:2px dashed var(--border);border-radius:12px;padding:32px;text-align:center;cursor:pointer;margin-bottom:16px;transition:border-color 0.2s;">
+          <div style="font-size:2rem;margin-bottom:8px;">🎨</div>
+          <div style="color:var(--text2);font-size:0.9rem;">Click or drag & drop an image here</div>
+          <div style="color:var(--text2);font-size:0.75rem;margin-top:4px;">PNG, JPG, GIF, WebP — max 10MB</div>
+        </div>
+        <input type="file" id="cpFileInput" accept="image/*" style="display:none" onchange="cpHandleFile(this.files[0])">
+        <div id="cpPreviewContainer" style="display:none;margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <div style="font-size:0.85rem;color:var(--text2);">Dominant Colors</div>
+            <button type="button" onclick="document.getElementById('cpUploadArea').style.display='block';document.getElementById('cpPreviewContainer').style.display='none';document.getElementById('cpPaletteGrid').innerHTML='';" style="padding:5px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text2);font-size:0.75rem;cursor:pointer;">✕ Remove</button>
+          </div>
+          <img id="cpPreviewImg" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid var(--border);display:block;margin-bottom:16px;">
+          <div id="cpPaletteGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;"></div>
+        </div>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
+    document.getElementById('processBtn').style.display = 'none';
     } else if(tool.type === 'word-counter') {
     document.getElementById('dropZone').style.display = 'none';
     opts.innerHTML = `
