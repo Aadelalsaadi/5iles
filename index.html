@@ -4193,6 +4193,49 @@ async function h2pConvert() {
   }
   btn.disabled = false; progress.style.display = 'none';
 }
+async function ittHandleFile(file) {
+  if (!file || !file.type.startsWith('image/')) { alert('Please select an image file.'); return; }
+  if (file.size > 10 * 1024 * 1024) { alert('File too large. Maximum size is 10MB.'); return; }
+  const errEl = document.getElementById('ittError');
+  const resultBox = document.getElementById('ittResultBox');
+  const progress = document.getElementById('ittProgress');
+  errEl.style.display = 'none';
+  resultBox.style.display = 'none';
+  progress.style.display = 'block';
+  document.getElementById('ittProgressBar').style.width = '0%';
+  document.getElementById('ittUploadArea').style.display = 'none';
+  try {
+    const lang = document.getElementById('ittLangSelect').value;
+    const result = await Tesseract.recognize(file, lang, {
+      logger: m => {
+        if (m.status === 'recognizing text') {
+          document.getElementById('ittProgressBar').style.width = (m.progress * 100).toFixed(0) + '%';
+        }
+      }
+    });
+    const text = result.data.text.trim();
+    progress.style.display = 'none';
+    document.getElementById('ittResultText').value = text;
+    const words = text ? text.split(/\s+/).filter(w => w.length > 0).length : 0;
+    document.getElementById('ittWordCount').textContent = `${text.length.toLocaleString()} characters · ${words.toLocaleString()} words`;
+    resultBox.style.display = 'block';
+  } catch (err) {
+    progress.style.display = 'none';
+    document.getElementById('ittUploadArea').style.display = 'block';
+    errEl.textContent = 'Error: ' + err.message;
+    errEl.style.display = 'block';
+  }
+}
+function ittCopy() {
+  const text = document.getElementById('ittResultText').value;
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.itt-copy-btn');
+    const original = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+  });
+}
 function setBmiUnit(unit) {
   document.getElementById('bmiMetricInputs').style.display = unit === 'metric' ? 'flex' : 'none';
   document.getElementById('bmiImperialInputs').style.display = unit === 'imperial' ? 'flex' : 'none';
