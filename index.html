@@ -1878,6 +1878,9 @@ function handleFiles(files) {
   if(currentTool && currentTool.type === 'crop-image') {
     initCropTool(uploadedFiles[0]);
   }
+  if(currentTool && currentTool.type === 'trim-video') {
+    tvLoadVideo(uploadedFiles[0]);
+  }
 }
 
 function renderFileList() {
