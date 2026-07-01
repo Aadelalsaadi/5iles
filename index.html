@@ -3987,6 +3987,82 @@ function sttClear() {
   document.getElementById('sttTranscriptBox').value = '';
   sttFinalTranscript = '';
 }
+let ttsVoices = [];
+let ttsUtterance = null;
+let ttsIsPaused = false;
+function ttsInit() {
+  ttsVoices = []; ttsUtterance = null; ttsIsPaused = false;
+  if (!('speechSynthesis' in window)) {
+    document.getElementById('ttsErrorBox').textContent = 'Text-to-speech is not supported in this browser.';
+    document.getElementById('ttsErrorBox').style.display = 'block';
+    document.getElementById('ttsPlayBtn').disabled = true;
+    return;
+  }
+  const loadVoices = () => {
+    ttsVoices = speechSynthesis.getVoices();
+    if (ttsVoices.length === 0) return;
+    document.getElementById('ttsVoiceSelect').innerHTML = ttsVoices.map((v, i) => `<option value="${i}">${v.name} (${v.lang})</option>`).join('');
+    const defaultIndex = ttsVoices.findIndex(v => v.lang.startsWith('en'));
+    if (defaultIndex >= 0) document.getElementById('ttsVoiceSelect').value = defaultIndex;
+  };
+  speechSynthesis.onvoiceschanged = loadVoices;
+  loadVoices();
+}
+function ttsUpdateCharCount() {
+  const len = document.getElementById('ttsTextInput').value.length;
+  document.getElementById('ttsCharCount').textContent = `${len.toLocaleString()} characters`;
+}
+function ttsPlay() {
+  const text = document.getElementById('ttsTextInput').value.trim();
+  if (!text) { document.getElementById('ttsErrorBox').textContent = 'Please enter some text first.'; document.getElementById('ttsErrorBox').style.display = 'block'; return; }
+  document.getElementById('ttsErrorBox').style.display = 'none';
+  speechSynthesis.cancel();
+  ttsUtterance = new SpeechSynthesisUtterance(text);
+  const selectedVoice = ttsVoices[document.getElementById('ttsVoiceSelect').value];
+  if (selectedVoice) ttsUtterance.voice = selectedVoice;
+  ttsUtterance.rate = parseFloat(document.getElementById('ttsRateSlider').value);
+  ttsUtterance.pitch = parseFloat(document.getElementById('ttsPitchSlider').value);
+  ttsUtterance.onstart = () => {
+    document.getElementById('ttsStatusText').textContent = '🔊 Speaking...';
+    document.getElementById('ttsPlayBtn').disabled = true;
+    document.getElementById('ttsPauseBtn').disabled = false; document.getElementById('ttsPauseBtn').style.opacity = '1';
+    document.getElementById('ttsStopBtn').disabled = false; document.getElementById('ttsStopBtn').style.opacity = '1';
+    ttsIsPaused = false;
+  };
+  ttsUtterance.onend = () => {
+    document.getElementById('ttsStatusText').textContent = 'Finished speaking';
+    document.getElementById('ttsPlayBtn').disabled = false;
+    document.getElementById('ttsPauseBtn').disabled = true; document.getElementById('ttsPauseBtn').style.opacity = '0.5';
+    document.getElementById('ttsStopBtn').disabled = true; document.getElementById('ttsStopBtn').style.opacity = '0.5';
+  };
+  ttsUtterance.onerror = (e) => {
+    document.getElementById('ttsStatusText').textContent = 'Error: ' + e.error;
+    document.getElementById('ttsPlayBtn').disabled = false;
+  };
+  speechSynthesis.speak(ttsUtterance);
+}
+function ttsPause() {
+  if (!speechSynthesis.speaking) return;
+  if (ttsIsPaused) {
+    speechSynthesis.resume();
+    ttsIsPaused = false;
+    document.getElementById('ttsPauseBtn').textContent = '⏸ Pause';
+    document.getElementById('ttsStatusText').textContent = '🔊 Speaking...';
+  } else {
+    speechSynthesis.pause();
+    ttsIsPaused = true;
+    document.getElementById('ttsPauseBtn').textContent = '▶ Resume';
+    document.getElementById('ttsStatusText').textContent = '⏸ Paused';
+  }
+}
+function ttsStop() {
+  speechSynthesis.cancel();
+  ttsIsPaused = false;
+  document.getElementById('ttsStatusText').textContent = 'Stopped';
+  document.getElementById('ttsPlayBtn').disabled = false;
+  document.getElementById('ttsPauseBtn').disabled = true; document.getElementById('ttsPauseBtn').style.opacity = '0.5'; document.getElementById('ttsPauseBtn').textContent = '⏸ Pause';
+  document.getElementById('ttsStopBtn').disabled = true; document.getElementById('ttsStopBtn').style.opacity = '0.5';
+}
 function setBmiUnit(unit) {
   document.getElementById('bmiMetricInputs').style.display = unit === 'metric' ? 'flex' : 'none';
   document.getElementById('bmiImperialInputs').style.display = unit === 'imperial' ? 'flex' : 'none';
