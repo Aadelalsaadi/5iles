@@ -2136,6 +2136,8 @@ if (USAGE_LIMIT_ENABLED && !currentUser) {
       results = await pdfToPptx();
     } else if(currentTool.type === 'trim-video') {
       results = await trimVideoFn2();
+    } else if(currentTool.type === 'video-to-gif') {
+      results = await videoToGifFn();
     }
 
     fill.style.width = '100%';
