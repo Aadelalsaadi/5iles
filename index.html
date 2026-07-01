@@ -1387,6 +1387,47 @@ function openTool(id) {
     document.getElementById('processBtn').disabled = false;
     document.getElementById('processBtn').style.display = 'none';
     cc2Init();
+    } else if(tool.type === 'image-to-base64') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+          <button type="button" class="i2b-tab active" onclick="i2bSetMode('encode',this)" style="flex:1;padding:10px;background:var(--accent);border:1px solid var(--border);border-radius:10px;color:#fff;font-size:0.85rem;font-weight:600;cursor:pointer;">Encode Image</button>
+          <button type="button" class="i2b-tab" onclick="i2bSetMode('decode',this)" style="flex:1;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text2);font-size:0.85rem;font-weight:600;cursor:pointer;">Decode Base64</button>
+        </div>
+        <div id="i2bEncodePanel">
+          <div id="i2bUploadArea" onclick="document.getElementById('i2bFileInput').click()" ondragover="event.preventDefault();this.style.borderColor='var(--accent)'" ondragleave="this.style.borderColor='var(--border)'" ondrop="event.preventDefault();this.style.borderColor='var(--border)';i2bHandleFile(event.dataTransfer.files[0])" style="border:2px dashed var(--border);border-radius:12px;padding:32px;text-align:center;cursor:pointer;margin-bottom:16px;transition:border-color 0.2s;">
+            <div style="font-size:2rem;margin-bottom:8px;">🖼️</div>
+            <div style="color:var(--text2);font-size:0.9rem;">Click or drag & drop an image here</div>
+            <div style="color:var(--text2);font-size:0.75rem;margin-top:4px;">PNG, JPG, GIF, WebP — max 10MB</div>
+          </div>
+          <input type="file" id="i2bFileInput" accept="image/*" style="display:none" onchange="i2bHandleFile(this.files[0])">
+          <div id="i2bPreviewBox" style="display:none;margin-bottom:16px;text-align:center;">
+            <img id="i2bPreviewImg" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid var(--border);">
+            <div id="i2bFileInfo" style="font-size:0.8rem;color:var(--text2);margin-top:8px;"></div>
+          </div>
+          <div id="i2bResultBox" style="display:none;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="font-weight:600;color:var(--accent);">Base64 String</span>
+              <button type="button" onclick="i2bCopy()" class="i2b-copy-btn" style="padding:6px 12px;background:var(--accent);border:none;border-radius:6px;color:#fff;font-size:0.8rem;cursor:pointer;">Copy</button>
+            </div>
+            <textarea id="i2bResultText" readonly style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.75rem;min-height:120px;resize:vertical;font-family:monospace;word-break:break-all;"></textarea>
+          </div>
+        </div>
+        <div id="i2bDecodePanel" style="display:none;">
+          <div class="option-label" style="margin-bottom:8px;">Paste Base64 string</div>
+          <textarea id="i2bBase64Input" placeholder="Paste your Base64 string here (with or without data:image/...;base64, prefix)..." style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.8rem;min-height:120px;resize:vertical;font-family:monospace;margin-bottom:12px;"></textarea>
+          <button type="button" onclick="i2bDecode()" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:10px;font-size:0.9rem;font-weight:600;cursor:pointer;margin-bottom:16px;">Decode</button>
+          <div id="i2bDecodeError" style="display:none;color:#f87171;font-size:0.85rem;margin-bottom:12px;"></div>
+          <div id="i2bDecodePreviewBox" style="display:none;text-align:center;">
+            <img id="i2bDecodedImg" style="max-width:100%;max-height:300px;border-radius:8px;border:1px solid var(--border);">
+            <br>
+            <a id="i2bDecodeDownloadBtn" download="decoded-image" style="display:inline-block;margin-top:12px;padding:10px 20px;background:var(--accent);color:#fff;border-radius:8px;text-decoration:none;font-size:0.85rem;font-weight:600;">⬇ Download Image</a>
+          </div>
+        </div>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
+    document.getElementById('processBtn').style.display = 'none';
     } else if(tool.type === 'word-counter') {
     document.getElementById('dropZone').style.display = 'none';
     opts.innerHTML = `
