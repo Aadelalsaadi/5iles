@@ -3761,6 +3761,79 @@ function mdDownloadHtml() {
   a.download = 'converted.html';
   a.click();
 }
+function cpHandleFile(file) {
+  if (!file || !file.type.startsWith('image/')) { alert('Please select an image file.'); return; }
+  if (file.size > 10 * 1024 * 1024) { alert('File too large. Maximum size is 10MB.'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      document.getElementById('cpPreviewImg').src = e.target.result;
+      document.getElementById('cpUploadArea').style.display = 'none';
+      document.getElementById('cpPreviewContainer').style.display = 'block';
+      cpExtractPalette(img);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function cpExtractPalette(img) {
+  const canvas = document.getElementById('cpHiddenCanvas');
+  const ctx = canvas.getContext('2d');
+  const maxDim = 150;
+  const scale = Math.min(maxDim / img.width, maxDim / img.height, 1);
+  const w = Math.round(img.width * scale);
+  const h = Math.round(img.height * scale);
+  canvas.width = w; canvas.height = h;
+  ctx.drawImage(img, 0, 0, w, h);
+  const imageData = ctx.getImageData(0, 0, w, h).data;
+  const colorCounts = {};
+  const bucketSize = 24;
+  for (let i = 0; i < imageData.length; i += 4) {
+    const r = imageData[i], g = imageData[i+1], b = imageData[i+2], a = imageData[i+3];
+    if (a < 125) continue;
+    const rq = Math.round(r/bucketSize)*bucketSize;
+    const gq = Math.round(g/bucketSize)*bucketSize;
+    const bq = Math.round(b/bucketSize)*bucketSize;
+    const key = `${rq},${gq},${bq}`;
+    if (!colorCounts[key]) colorCounts[key] = { count:0, r:0, g:0, b:0 };
+    colorCounts[key].count++;
+    colorCounts[key].r += r; colorCounts[key].g += g; colorCounts[key].b += b;
+  }
+  const totalPixels = Object.values(colorCounts).reduce((sum, c) => sum + c.count, 0);
+  const sorted = Object.values(colorCounts)
+    .map(c => ({ r:Math.round(c.r/c.count), g:Math.round(c.g/c.count), b:Math.round(c.b/c.count), count:c.count, percent:(c.count/totalPixels)*100 }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 8);
+  cpRenderPalette(sorted);
+}
+function cpRgbToHex(r, g, b) {
+  return '#' + [r,g,b].map(x => x.toString(16).padStart(2,'0')).join('').toUpperCase();
+}
+function cpGetContrastColor(r, g, b) {
+  return (r*299 + g*587 + b*114)/1000 > 150 ? '#000' : '#fff';
+}
+function cpRenderPalette(colors) {
+  document.getElementById('cpPaletteGrid').innerHTML = colors.map((c, i) => {
+    const hex = cpRgbToHex(c.r, c.g, c.b);
+    const contrast = cpGetContrastColor(c.r, c.g, c.b);
+    return `
+      <div style="border-radius:10px;overflow:hidden;cursor:pointer;border:1px solid var(--border);" onclick="cpCopyColor('${hex}', this)">
+        <div style="height:70px;background:${hex};"></div>
+        <div style="padding:8px;background:var(--surface2);text-align:center;">
+          <div style="font-size:0.8rem;font-weight:600;color:var(--text);font-family:monospace;">${hex}</div>
+          <div style="font-size:0.7rem;color:var(--text2);">${c.percent.toFixed(1)}%</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+function cpCopyColor(hex, el) {
+  navigator.clipboard.writeText(hex).then(() => {
+    const original = el.querySelector('div:last-child div:first-child').textContent;
+    el.querySelector('div:last-child div:first-child').textContent = '✓ Copied!';
+    setTimeout(() => { el.querySelector('div:last-child div:first-child').textContent = original; }, 1500);
+  });
+}
 function setBmiUnit(unit) {
   document.getElementById('bmiMetricInputs').style.display = unit === 'metric' ? 'flex' : 'none';
   document.getElementById('bmiImperialInputs').style.display = unit === 'imperial' ? 'flex' : 'none';
