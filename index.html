@@ -1646,6 +1646,28 @@ function openTool(id) {
         <div id="rapInfo" style="font-size:0.8rem;color:var(--text2);margin-top:8px;"></div>
         <div style="font-size:0.8rem;color:var(--text2);margin-top:6px;">Enter all page numbers in the order you want them to appear.</div>
       </div>`;
+    } else if(tool.type === 'pdf-to-pptx') {
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div>
+            <div class="option-label" style="margin-bottom:6px;">Slide size</div>
+            <select id="p2ptSlideSize" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.85rem;">
+              <option value="widescreen" selected>Widescreen (16:9)</option>
+              <option value="standard">Standard (4:3)</option>
+            </select>
+          </div>
+          <div>
+            <div class="option-label" style="margin-bottom:6px;">Image quality</div>
+            <select id="p2ptQuality" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.85rem;">
+              <option value="2">High (2x)</option>
+              <option value="1.5" selected>Medium (1.5x)</option>
+              <option value="1">Standard (1x)</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-top:10px;font-size:0.8rem;color:var(--text2);">Each PDF page becomes a PowerPoint slide with a high-quality image.</div>
+      </div>`;
     } else if(tool.type === 'word-counter') {
     document.getElementById('dropZone').style.display = 'none';
     opts.innerHTML = `
