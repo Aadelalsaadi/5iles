@@ -4265,6 +4265,77 @@ function ittCopy() {
     setTimeout(() => { btn.textContent = original; }, 1500);
   });
 }
+function pdfParsePageInput(input, totalPages) {
+  const pages = new Set();
+  const parts = input.split(',').map(s => s.trim()).filter(Boolean);
+  for (const part of parts) {
+    if (part.includes('-')) {
+      const [from, to] = part.split('-').map(Number);
+      if (!isNaN(from) && !isNaN(to)) {
+        for (let i = Math.min(from, to); i <= Math.max(from, to); i++) {
+          if (i >= 1 && i <= totalPages) pages.add(i);
+        }
+      }
+    } else {
+      const n = Number(part);
+      if (!isNaN(n) && n >= 1 && n <= totalPages) pages.add(n);
+    }
+  }
+  return Array.from(pages).sort((a, b) => a - b);
+}
+async function removePdfPages() {
+  const file = uploadedFiles[0];
+  const input = document.getElementById('rppPagesInput')?.value || '';
+  const { PDFDocument } = PDFLib;
+  const srcBytes = await file.arrayBuffer();
+  const srcDoc = await PDFDocument.load(srcBytes);
+  const totalPages = srcDoc.getPageCount();
+  const toRemove = new Set(pdfParsePageInput(input, totalPages));
+  if (toRemove.size === 0) throw new Error('No valid pages specified. Enter page numbers like: 1, 3-5, 7');
+  if (toRemove.size >= totalPages) throw new Error('Cannot remove all pages from a PDF.');
+  const newDoc = await PDFDocument.create();
+  for (let i = 0; i < totalPages; i++) {
+    if (!toRemove.has(i + 1)) {
+      const [page] = await newDoc.copyPages(srcDoc, [i]);
+      newDoc.addPage(page);
+    }
+  }
+  const newBytes = await newDoc.save();
+  const baseName = file.name.replace(/\.pdf$/i, '');
+  return [{ name: baseName + '_removed.pdf', blob: new Blob([newBytes], { type: 'application/pdf' }) }];
+}
+async function extractPdfPages() {
+  const file = uploadedFiles[0];
+  const input = document.getElementById('eppPagesInput')?.value || '';
+  const { PDFDocument } = PDFLib;
+  const srcBytes = await file.arrayBuffer();
+  const srcDoc = await PDFDocument.load(srcBytes);
+  const totalPages = srcDoc.getPageCount();
+  const toExtract = pdfParsePageInput(input, totalPages);
+  if (toExtract.length === 0) throw new Error('No valid pages specified. Enter page numbers like: 1, 3-5, 7');
+  const newDoc = await PDFDocument.create();
+  const pages = await newDoc.copyPages(srcDoc, toExtract.map(p => p - 1));
+  pages.forEach(page => newDoc.addPage(page));
+  const newBytes = await newDoc.save();
+  const baseName = file.name.replace(/\.pdf$/i, '');
+  return [{ name: baseName + '_extracted.pdf', blob: new Blob([newBytes], { type: 'application/pdf' }) }];
+}
+async function rearrangePdfPages() {
+  const file = uploadedFiles[0];
+  const input = document.getElementById('rapPagesInput')?.value || '';
+  const { PDFDocument } = PDFLib;
+  const srcBytes = await file.arrayBuffer();
+  const srcDoc = await PDFDocument.load(srcBytes);
+  const totalPages = srcDoc.getPageCount();
+  const order = input.split(',').map(s => Number(s.trim())).filter(n => !isNaN(n) && n >= 1 && n <= totalPages);
+  if (order.length === 0) throw new Error('No valid page order specified. Enter page numbers like: 3, 1, 2, 4');
+  const newDoc = await PDFDocument.create();
+  const pages = await newDoc.copyPages(srcDoc, order.map(p => p - 1));
+  pages.forEach(page => newDoc.addPage(page));
+  const newBytes = await newDoc.save();
+  const baseName = file.name.replace(/\.pdf$/i, '');
+  return [{ name: baseName + '_reordered.pdf', blob: new Blob([newBytes], { type: 'application/pdf' }) }];
+}
 function setBmiUnit(unit) {
   document.getElementById('bmiMetricInputs').style.display = unit === 'metric' ? 'flex' : 'none';
   document.getElementById('bmiImperialInputs').style.display = unit === 'imperial' ? 'flex' : 'none';
