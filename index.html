@@ -1317,6 +1317,39 @@ function openTool(id) {
       </div>`;
     document.getElementById('processBtn').disabled = false;
     document.getElementById('processBtn').style.display = 'none';
+    } else if(tool.type === 'discount-vat-calculator') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div style="margin-bottom:12px;"><div class="option-label">Original price</div><input type="number" id="dvPrice" placeholder="100" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+          <div><div class="option-label">Discount (%, optional)</div><input type="number" step="0.01" id="dvDiscount" placeholder="0" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+          <div><div class="option-label">VAT (%, optional)</div><input type="number" step="0.01" id="dvVat" placeholder="5" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+        </div>
+        <button type="button" onclick="calculateDiscountVat()" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;margin-bottom:16px;">Calculate</button>
+        <div id="dvResultBox" style="display:none;background:var(--surface2);border-radius:14px;padding:20px;">
+          <div style="text-align:center;margin-bottom:14px;">
+            <div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Final price</div>
+            <div id="dvFinalPrice" style="font-size:1.9rem;font-weight:800;"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;text-align:center;padding-top:14px;border-top:1px solid var(--border);">
+            <div>
+              <div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Price after discount</div>
+              <div id="dvAfterDiscount" style="font-size:1.1rem;font-weight:700;"></div>
+            </div>
+            <div>
+              <div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">You saved</div>
+              <div id="dvSaved" style="font-size:1.1rem;font-weight:700;"></div>
+            </div>
+            <div>
+              <div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">VAT added</div>
+              <div id="dvVatAmount" style="font-size:1.1rem;font-weight:700;"></div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
+    document.getElementById('processBtn').style.display = 'none';
     } else if(tool.type === 'case-converter') {
     } else if(tool.type === 'case-converter') {
     document.getElementById('dropZone').style.display = 'none';
