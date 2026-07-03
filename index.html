@@ -5279,6 +5279,52 @@ function calculateAge() {
   }
   document.getElementById('ageResultBox').style.display = 'block';
 }
+function calculateDateDuration() {
+  const startStr = document.getElementById('ddStart').value;
+  const endStr = document.getElementById('ddEnd').value;
+  if (!startStr || !endStr) {
+    showToast('⚠️ Please enter both a start and end date.', 'error');
+    return;
+  }
+  let start = new Date(startStr + 'T00:00:00');
+  let end = new Date(endStr + 'T00:00:00');
+  let swapped = false;
+  if (start > end) {
+    const tmp = start; start = end; end = tmp;
+    swapped = true;
+  }
+  let years = end.getFullYear() - start.getFullYear();
+  let months = end.getMonth() - start.getMonth();
+  let days = end.getDate() - start.getDate();
+  if (days < 0) {
+    months--;
+    days += new Date(end.getFullYear(), end.getMonth(), 0).getDate();
+  }
+  if (months < 0) {
+    years--;
+    months += 12;
+  }
+  const totalDays = Math.round((end - start) / (1000 * 60 * 60 * 24));
+  const totalWeeks = Math.floor(totalDays / 7);
+  let businessDays = 0;
+  const cursor = new Date(start);
+  for (let i = 0; i < totalDays; i++) {
+    const dow = cursor.getDay();
+    if (dow !== 0 && dow !== 6) businessDays++;
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  const weekendDays = totalDays - businessDays;
+  const parts = [];
+  if (years > 0) parts.push(years + (years === 1 ? ' year' : ' years'));
+  if (months > 0) parts.push(months + (months === 1 ? ' month' : ' months'));
+  parts.push(days + (days === 1 ? ' day' : ' days'));
+  document.getElementById('ddMain').textContent = parts.join(' ') + (swapped ? ' (dates were swapped)' : '');
+  document.getElementById('ddTotalDays').textContent = totalDays.toLocaleString();
+  document.getElementById('ddTotalWeeks').textContent = totalWeeks.toLocaleString();
+  document.getElementById('ddBusinessDays').textContent = businessDays.toLocaleString();
+  document.getElementById('ddWeekendDays').textContent = weekendDays.toLocaleString();
+  document.getElementById('ddResultBox').style.display = 'block';
+}
 async function countWords() {
   const text = document.getElementById('wcText')?.value || '';
   if(!text.trim()) throw new Error('Please enter some text first.');
