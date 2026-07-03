@@ -1440,6 +1440,37 @@ function openTool(id) {
       </div>`;
     document.getElementById('processBtn').disabled = false;
     document.getElementById('processBtn').style.display = 'none';
+    } else if(tool.type === 'ideal-weight-calculator') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div style="display:flex;gap:8px;margin-bottom:12px;">
+          <button type="button" id="iwSexMale" onclick="setIwSex('male')" style="flex:1;padding:10px;background:var(--accent);border:1px solid var(--border);border-radius:10px;color:#fff;font-size:0.85rem;font-weight:600;cursor:pointer;">Male</button>
+          <button type="button" id="iwSexFemale" onclick="setIwSex('female')" style="flex:1;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text2);font-size:0.85rem;font-weight:600;cursor:pointer;">Female</button>
+        </div>
+        <div style="margin-bottom:16px;"><div class="option-label">Height (cm)</div><input type="number" id="iwHeight" placeholder="175" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+        <input type="hidden" id="iwSex" value="male">
+        <button type="button" onclick="calculateIdealWeight()" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;margin-bottom:16px;">Calculate</button>
+        <div id="iwResultBox" style="display:none;background:var(--surface2);border-radius:14px;padding:20px;">
+          <div style="text-align:center;margin-bottom:14px;">
+            <div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Ideal weight (average)</div>
+            <div id="iwAverage" style="font-size:2rem;font-weight:800;"></div>
+          </div>
+          <div style="text-align:center;margin-bottom:14px;padding-top:14px;border-top:1px solid var(--border);">
+            <div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Healthy weight range (BMI 18.5–24.9)</div>
+            <div id="iwBmiRange" style="font-size:1.2rem;font-weight:700;"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:center;padding-top:14px;border-top:1px solid var(--border);font-size:0.85rem;">
+            <div><div style="color:var(--text2);margin-bottom:2px;">Robinson</div><div id="iwRobinson" style="font-weight:700;"></div></div>
+            <div><div style="color:var(--text2);margin-bottom:2px;">Miller</div><div id="iwMiller" style="font-weight:700;"></div></div>
+            <div><div style="color:var(--text2);margin-bottom:2px;">Devine</div><div id="iwDevine" style="font-weight:700;"></div></div>
+            <div><div style="color:var(--text2);margin-bottom:2px;">Hamwi</div><div id="iwHamwi" style="font-weight:700;"></div></div>
+          </div>
+          <div style="font-size:0.75rem;color:var(--text2);margin-top:14px;">💡 Based on four widely used medical formulas. Individual healthy weight varies with build and muscle mass.</div>
+        </div>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
+    document.getElementById('processBtn').style.display = 'none';
     } else if(tool.type === 'case-converter') {
     } else if(tool.type === 'case-converter') {
     document.getElementById('dropZone').style.display = 'none';
