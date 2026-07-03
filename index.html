@@ -5552,6 +5552,55 @@ function calculateStdDev() {
   document.getElementById('sdSampleVar').textContent = sampleVariance.toFixed(6);
   document.getElementById('sdResultBox').style.display = 'block';
 }
+function generateRandomNumbers() {
+  const min = parseInt(document.getElementById('rngMin').value);
+  const max = parseInt(document.getElementById('rngMax').value);
+  const count = parseInt(document.getElementById('rngCount').value) || 1;
+  const unique = document.getElementById('rngUnique').checked;
+  if (isNaN(min) || isNaN(max)) {
+    showToast('⚠️ Please enter valid minimum and maximum values.', 'error');
+    return;
+  }
+  if (min > max) {
+    showToast('⚠️ Minimum must be less than or equal to maximum.', 'error');
+    return;
+  }
+  if (count < 1) {
+    showToast('⚠️ Please request at least 1 number.', 'error');
+    return;
+  }
+  const rangeSize = max - min + 1;
+  if (unique && count > rangeSize) {
+    showToast('⚠️ Cannot generate ' + count + ' unique numbers from a range of only ' + rangeSize + '.', 'error');
+    return;
+  }
+  let results = [];
+  if (unique) {
+    const pool = [];
+    for (let i = min; i <= max; i++) pool.push(i);
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    results = pool.slice(0, count);
+  } else {
+    for (let i = 0; i < count; i++) {
+      results.push(min + Math.floor(Math.random() * rangeSize));
+    }
+  }
+  document.getElementById('rngNumbers').innerHTML = results.map(n =>
+    `<span style="background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;padding:8px 16px;border-radius:8px;font-weight:700;font-size:1.1rem;">${n}</span>`
+  ).join('');
+  const sortedRow = document.getElementById('rngSortedRow');
+  if (results.length > 1) {
+    const sorted = [...results].sort((a, b) => a - b);
+    document.getElementById('rngSorted').textContent = sorted.join(', ');
+    sortedRow.style.display = 'block';
+  } else {
+    sortedRow.style.display = 'none';
+  }
+  document.getElementById('rngResultBox').style.display = 'block';
+}
 async function countWords() {
   const text = document.getElementById('wcText')?.value || '';
   if(!text.trim()) throw new Error('Please enter some text first.');
