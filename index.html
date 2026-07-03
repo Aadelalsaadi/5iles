@@ -4800,6 +4800,33 @@ function calculateCompoundInterest() {
   document.getElementById('ciTotalContributions').textContent = totalContributions.toLocaleString(undefined, {maximumFractionDigits:2});
   document.getElementById('ciResultBox').style.display = 'block';
 }
+function calculateSavings() {
+  const goal = parseFloat(document.getElementById('svGoal').value);
+  const current = parseFloat(document.getElementById('svCurrent').value) || 0;
+  const rate = parseFloat(document.getElementById('svRate').value);
+  const years = parseFloat(document.getElementById('svYears').value);
+  if (!goal || goal <= 0 || !years || years <= 0 || isNaN(rate) || rate < 0) {
+    showToast('⚠️ Please enter a valid goal, rate and time period.', 'error');
+    return;
+  }
+  const n = Math.round(years * 12);
+  const r = (rate / 100) / 12;
+  const futureValueOfCurrent = current * Math.pow(1 + r, n);
+  let monthlyDeposit;
+  if (futureValueOfCurrent >= goal) {
+    monthlyDeposit = 0;
+  } else if (r === 0) {
+    monthlyDeposit = (goal - futureValueOfCurrent) / n;
+  } else {
+    monthlyDeposit = (goal - futureValueOfCurrent) * r / (Math.pow(1 + r, n) - 1);
+  }
+  const totalDeposited = current + (monthlyDeposit * n);
+  const interestEarned = goal - totalDeposited;
+  document.getElementById('svMonthlyDeposit').textContent = monthlyDeposit.toLocaleString(undefined, {maximumFractionDigits:2});
+  document.getElementById('svTotalDeposited').textContent = totalDeposited.toLocaleString(undefined, {maximumFractionDigits:2});
+  document.getElementById('svInterestEarned').textContent = Math.max(0, interestEarned).toLocaleString(undefined, {maximumFractionDigits:2});
+  document.getElementById('svResultBox').style.display = 'block';
+}
 async function countWords() {
   const text = document.getElementById('wcText')?.value || '';
   if(!text.trim()) throw new Error('Please enter some text first.');
