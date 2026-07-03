@@ -5203,6 +5203,56 @@ function calculateIdealWeight() {
   document.getElementById('iwHamwi').textContent = hamwi.toFixed(1) + ' kg';
   document.getElementById('iwResultBox').style.display = 'block';
 }
+function calculateAge() {
+  const dobStr = document.getElementById('ageDob').value;
+  const asOfStr = document.getElementById('ageAsOf').value;
+  if (!dobStr) {
+    showToast('⚠️ Please enter a date of birth.', 'error');
+    return;
+  }
+  const dob = new Date(dobStr + 'T00:00:00');
+  const asOf = asOfStr ? new Date(asOfStr + 'T00:00:00') : new Date();
+  if (dob > asOf) {
+    showToast('⚠️ Date of birth must be before the target date.', 'error');
+    return;
+  }
+  let years = asOf.getFullYear() - dob.getFullYear();
+  let months = asOf.getMonth() - dob.getMonth();
+  let days = asOf.getDate() - dob.getDate();
+  if (days < 0) {
+    months--;
+    days += new Date(asOf.getFullYear(), asOf.getMonth(), 0).getDate();
+  }
+  if (months < 0) {
+    years--;
+    months += 12;
+  }
+  const diffMs = asOf - dob;
+  const totalSeconds = Math.floor(diffMs / 1000);
+  const totalMinutes = Math.floor(totalSeconds / 60);
+  const totalHours = Math.floor(totalMinutes / 60);
+  const totalDays = Math.floor(totalHours / 24);
+  const totalWeeks = Math.floor(totalDays / 7);
+  const totalMonths = years * 12 + months;
+  document.getElementById('ageMain').textContent = years + ' years ' + months + ' months ' + days + ' days';
+  document.getElementById('ageMonths').textContent = totalMonths.toLocaleString();
+  document.getElementById('ageWeeks').textContent = totalWeeks.toLocaleString();
+  document.getElementById('ageDays').textContent = totalDays.toLocaleString();
+  document.getElementById('ageHours').textContent = totalHours.toLocaleString();
+  document.getElementById('ageMinutes').textContent = totalMinutes.toLocaleString();
+  document.getElementById('ageSeconds').textContent = totalSeconds.toLocaleString();
+  let nextBday = new Date(asOf.getFullYear(), dob.getMonth(), dob.getDate());
+  if (nextBday.getTime() === asOf.getTime()) {
+    document.getElementById('ageNextBday').textContent = '🎉 It\'s the birthday on this date!';
+  } else {
+    if (nextBday < asOf) {
+      nextBday = new Date(asOf.getFullYear() + 1, dob.getMonth(), dob.getDate());
+    }
+    const daysUntil = Math.ceil((nextBday - asOf) / (1000 * 60 * 60 * 24));
+    document.getElementById('ageNextBday').textContent = daysUntil.toLocaleString() + ' days until next birthday';
+  }
+  document.getElementById('ageResultBox').style.display = 'block';
+}
 async function countWords() {
   const text = document.getElementById('wcText')?.value || '';
   if(!text.trim()) throw new Error('Please enter some text first.');
