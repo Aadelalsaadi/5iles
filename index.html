@@ -5502,6 +5502,30 @@ function calculateTip() {
   }
   document.getElementById('tipResultBox').style.display = 'block';
 }
+function calculateStdDev() {
+  const raw = document.getElementById('sdInput').value;
+  const nums = raw.split(/[\s,]+/).map(s => s.trim()).filter(s => s.length > 0).map(Number).filter(n => !isNaN(n));
+  if (nums.length < 2) {
+    showToast('⚠️ Please enter at least 2 valid numbers.', 'error');
+    return;
+  }
+  const n = nums.length;
+  const sum = nums.reduce((a, b) => a + b, 0);
+  const mean = sum / n;
+  const sumSqDiff = nums.reduce((acc, x) => acc + Math.pow(x - mean, 2), 0);
+  const popVariance = sumSqDiff / n;
+  const popSD = Math.sqrt(popVariance);
+  const sampleVariance = sumSqDiff / (n - 1);
+  const sampleSD = Math.sqrt(sampleVariance);
+  document.getElementById('sdCount').textContent = n.toLocaleString();
+  document.getElementById('sdSum').textContent = sum.toLocaleString(undefined, {maximumFractionDigits:4});
+  document.getElementById('sdMean').textContent = mean.toLocaleString(undefined, {maximumFractionDigits:4});
+  document.getElementById('sdPopSD').textContent = popSD.toFixed(6);
+  document.getElementById('sdPopVar').textContent = popVariance.toFixed(6);
+  document.getElementById('sdSampleSD').textContent = sampleSD.toFixed(6);
+  document.getElementById('sdSampleVar').textContent = sampleVariance.toFixed(6);
+  document.getElementById('sdResultBox').style.display = 'block';
+}
 async function countWords() {
   const text = document.getElementById('wcText')?.value || '';
   if(!text.trim()) throw new Error('Please enter some text first.');
