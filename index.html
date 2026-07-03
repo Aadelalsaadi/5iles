@@ -1242,6 +1242,48 @@ function openTool(id) {
       </div>`;
     document.getElementById('processBtn').disabled = false;
     document.getElementById('processBtn').style.display = 'none';
+    } else if(tool.type === 'compound-interest-calculator') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+          <div><div class="option-label">Initial principal</div><input type="number" id="ciPrincipal" placeholder="10000" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+          <div><div class="option-label">Monthly contribution (optional)</div><input type="number" id="ciMonthly" placeholder="0" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+          <div><div class="option-label">Annual interest rate (%)</div><input type="number" step="0.01" id="ciRate" placeholder="6" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+          <div><div class="option-label">Time period (years)</div><input type="number" id="ciYears" placeholder="10" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+        </div>
+        <div style="margin-bottom:16px;">
+          <div class="option-label" style="margin-bottom:6px;">Compound frequency</div>
+          <select id="ciFrequency" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;">
+            <option value="1">Annually</option>
+            <option value="2">Semi-annually</option>
+            <option value="4">Quarterly</option>
+            <option value="12" selected>Monthly</option>
+            <option value="365">Daily</option>
+          </select>
+        </div>
+        <button type="button" onclick="calculateCompoundInterest()" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;margin-bottom:16px;">Calculate</button>
+        <div id="ciResultBox" style="display:none;background:var(--surface2);border-radius:14px;padding:20px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;text-align:center;margin-bottom:14px;">
+            <div>
+              <div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Final balance</div>
+              <div id="ciFinalBalance" style="font-size:1.6rem;font-weight:800;"></div>
+            </div>
+            <div>
+              <div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Total interest earned</div>
+              <div id="ciTotalInterest" style="font-size:1.6rem;font-weight:800;"></div>
+            </div>
+          </div>
+          <div style="text-align:center;padding-top:14px;border-top:1px solid var(--border);">
+            <div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Total contributions (principal + deposits)</div>
+            <div id="ciTotalContributions" style="font-size:1.3rem;font-weight:700;"></div>
+          </div>
+        </div>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
+    document.getElementById('processBtn').style.display = 'none';
     } else if(tool.type === 'case-converter') {
     document.getElementById('dropZone').style.display = 'none';
     opts.innerHTML = `
