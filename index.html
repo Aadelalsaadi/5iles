@@ -1405,7 +1405,8 @@ function openTool(id) {
           <button type="button" id="bfSexMale" onclick="setBfSex('male')" style="flex:1;padding:10px;background:var(--accent);border:1px solid var(--border);border-radius:10px;color:#fff;font-size:0.85rem;font-weight:600;cursor:pointer;">Male</button>
           <button type="button" id="bfSexFemale" onclick="setBfSex('female')" style="flex:1;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text2);font-size:0.85rem;font-weight:600;cursor:pointer;">Female</button>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
+          <div><div class="option-label">Age (optional)</div><input type="number" id="bfAge" placeholder="30" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
           <div><div class="option-label">Weight (kg, optional)</div><input type="number" id="bfWeight" placeholder="70" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
           <div><div class="option-label">Height (cm)</div><input type="number" id="bfHeight" placeholder="175" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
         </div>
