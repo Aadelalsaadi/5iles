@@ -1589,6 +1589,38 @@ function openTool(id) {
       </div>`;
     document.getElementById('processBtn').disabled = false;
     document.getElementById('processBtn').style.display = 'none';
+    } else if(tool.type === 'standard-deviation-calculator') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div style="margin-bottom:16px;">
+          <div class="option-label" style="margin-bottom:6px;">Enter numbers (separated by commas, spaces or new lines)</div>
+          <textarea id="sdInput" placeholder="10, 12, 18, 14, 21, 27" rows="4" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;resize:vertical;font-family:inherit;"></textarea>
+        </div>
+        <button type="button" onclick="calculateStdDev()" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;margin-bottom:16px;">Calculate</button>
+        <div id="sdResultBox" style="display:none;background:var(--surface2);border-radius:14px;padding:20px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;text-align:center;margin-bottom:14px;font-size:0.9rem;">
+            <div><div style="color:var(--text2);margin-bottom:2px;">Count (n)</div><div id="sdCount" style="font-weight:700;"></div></div>
+            <div><div style="color:var(--text2);margin-bottom:2px;">Sum</div><div id="sdSum" style="font-weight:700;"></div></div>
+            <div><div style="color:var(--text2);margin-bottom:2px;">Mean</div><div id="sdMean" style="font-weight:700;"></div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;text-align:center;padding-top:14px;border-top:1px solid var(--border);">
+            <div>
+              <div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Population std deviation (σ)</div>
+              <div id="sdPopSD" style="font-size:1.4rem;font-weight:800;"></div>
+              <div style="font-size:0.75rem;color:var(--text2);margin-top:4px;">Variance: <span id="sdPopVar"></span></div>
+            </div>
+            <div>
+              <div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Sample std deviation (s)</div>
+              <div id="sdSampleSD" style="font-size:1.4rem;font-weight:800;"></div>
+              <div style="font-size:0.75rem;color:var(--text2);margin-top:4px;">Variance: <span id="sdSampleVar"></span></div>
+            </div>
+          </div>
+          <div style="font-size:0.75rem;color:var(--text2);margin-top:14px;">💡 Use population if your data includes every member of the group. Use sample if it's a subset used to estimate a larger population.</div>
+        </div>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
+    document.getElementById('processBtn').style.display = 'none';
     } else if(tool.type === 'case-converter') {
     } else if(tool.type === 'case-converter') {
     document.getElementById('dropZone').style.display = 'none';
