@@ -1553,6 +1553,41 @@ function openTool(id) {
     document.getElementById('processBtn').disabled = false;
     document.getElementById('processBtn').style.display = 'none';
     setTimeout(() => { gpaInit(); }, 50);
+    } else if(tool.type === 'tip-calculator') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+          <div><div class="option-label">Bill amount</div><input type="number" id="tipBill" placeholder="100" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+          <div><div class="option-label">Tip (%)</div><input type="number" step="0.01" id="tipPercent" placeholder="18" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+        </div>
+        <div style="margin-bottom:16px;"><div class="option-label">Number of people</div><input type="number" id="tipPeople" placeholder="1" value="1" min="1" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+        <button type="button" onclick="calculateTip()" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;margin-bottom:16px;">Calculate</button>
+        <div id="tipResultBox" style="display:none;background:var(--surface2);border-radius:14px;padding:20px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;text-align:center;margin-bottom:14px;">
+            <div>
+              <div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Tip amount</div>
+              <div id="tipAmount" style="font-size:1.6rem;font-weight:800;"></div>
+            </div>
+            <div>
+              <div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Total bill</div>
+              <div id="tipTotal" style="font-size:1.6rem;font-weight:800;"></div>
+            </div>
+          </div>
+          <div id="tipPerPersonRow" style="display:none;grid-template-columns:1fr 1fr;gap:16px;text-align:center;padding-top:14px;border-top:1px solid var(--border);">
+            <div>
+              <div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Tip per person</div>
+              <div id="tipPerPersonAmount" style="font-size:1.2rem;font-weight:700;"></div>
+            </div>
+            <div>
+              <div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Total per person</div>
+              <div id="tipPerPersonTotal" style="font-size:1.2rem;font-weight:700;"></div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
+    document.getElementById('processBtn').style.display = 'none';
     } else if(tool.type === 'case-converter') {
     } else if(tool.type === 'case-converter') {
     document.getElementById('dropZone').style.display = 'none';
