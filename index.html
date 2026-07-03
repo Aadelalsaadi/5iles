@@ -4741,6 +4741,32 @@ function calculateFinance() {
   document.getElementById('fcTotalRepay').textContent = totalRepay.toLocaleString(undefined, {maximumFractionDigits:2});
   document.getElementById('fcResultBox').style.display = 'block';
 }
+function calculateCompoundInterest() {
+  const principal = parseFloat(document.getElementById('ciPrincipal').value);
+  const monthly = parseFloat(document.getElementById('ciMonthly').value) || 0;
+  const rate = parseFloat(document.getElementById('ciRate').value);
+  const years = parseFloat(document.getElementById('ciYears').value);
+  const freq = parseInt(document.getElementById('ciFrequency').value) || 12;
+  if (!principal || principal <= 0 || !years || years <= 0 || isNaN(rate) || rate < 0) {
+    showToast('⚠️ Please enter a valid principal, rate and time period.', 'error');
+    return;
+  }
+  const effectiveAnnualRate = Math.pow(1 + (rate / 100) / freq, freq) - 1;
+  const monthlyRate = Math.pow(1 + effectiveAnnualRate, 1 / 12) - 1;
+  const totalMonths = Math.round(years * 12);
+  let balance = principal;
+  let totalContributions = principal;
+  for (let m = 0; m < totalMonths; m++) {
+    balance += monthly;
+    totalContributions += monthly;
+    balance *= (1 + monthlyRate);
+  }
+  const totalInterest = balance - totalContributions;
+  document.getElementById('ciFinalBalance').textContent = balance.toLocaleString(undefined, {maximumFractionDigits:2});
+  document.getElementById('ciTotalInterest').textContent = totalInterest.toLocaleString(undefined, {maximumFractionDigits:2});
+  document.getElementById('ciTotalContributions').textContent = totalContributions.toLocaleString(undefined, {maximumFractionDigits:2});
+  document.getElementById('ciResultBox').style.display = 'block';
+}
 async function countWords() {
   const text = document.getElementById('wcText')?.value || '';
   if(!text.trim()) throw new Error('Please enter some text first.');
