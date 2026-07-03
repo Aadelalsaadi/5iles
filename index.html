@@ -1397,6 +1397,32 @@ function openTool(id) {
       </div>`;
     document.getElementById('processBtn').disabled = false;
     document.getElementById('processBtn').style.display = 'none';
+    } else if(tool.type === 'body-fat-calculator') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div style="display:flex;gap:8px;margin-bottom:12px;">
+          <button type="button" id="bfSexMale" onclick="setBfSex('male')" style="flex:1;padding:10px;background:var(--accent);border:1px solid var(--border);border-radius:10px;color:#fff;font-size:0.85rem;font-weight:600;cursor:pointer;">Male</button>
+          <button type="button" id="bfSexFemale" onclick="setBfSex('female')" style="flex:1;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text2);font-size:0.85rem;font-weight:600;cursor:pointer;">Female</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+          <div><div class="option-label">Height (cm)</div><input type="number" id="bfHeight" placeholder="175" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+          <div><div class="option-label">Neck (cm)</div><input type="number" id="bfNeck" placeholder="38" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+          <div><div class="option-label">Waist (cm)</div><input type="number" id="bfWaist" placeholder="85" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+          <div id="bfHipWrap" style="display:none;"><div class="option-label">Hip (cm)</div><input type="number" id="bfHip" placeholder="95" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+        </div>
+        <input type="hidden" id="bfSex" value="male">
+        <button type="button" onclick="calculateBodyFat()" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;margin-bottom:16px;">Calculate</button>
+        <div id="bfResultBox" style="display:none;background:var(--surface2);border-radius:14px;padding:20px;text-align:center;">
+          <div id="bfValue" style="font-size:2.4rem;font-weight:800;"></div>
+          <div id="bfCategory" style="font-size:1.05rem;font-weight:600;margin-bottom:10px;"></div>
+          <div style="font-size:0.75rem;color:var(--text2);margin-top:10px;">💡 Estimated using the U.S. Navy circumference method. For a precise measurement, consult a professional (DEXA scan or calipers).</div>
+        </div>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
+    document.getElementById('processBtn').style.display = 'none';
     } else if(tool.type === 'case-converter') {
     } else if(tool.type === 'case-converter') {
     document.getElementById('dropZone').style.display = 'none';
