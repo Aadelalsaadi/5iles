@@ -4991,6 +4991,61 @@ function calculateCalories() {
   document.getElementById('calGain').textContent = Math.round(gain).toLocaleString() + ' cal/day';
   document.getElementById('calResultBox').style.display = 'block';
 }
+function setBfSex(sex) {
+  document.getElementById('bfSexMale').style.background = sex === 'male' ? 'var(--accent)' : 'var(--surface2)';
+  document.getElementById('bfSexMale').style.color = sex === 'male' ? '#fff' : 'var(--text2)';
+  document.getElementById('bfSexFemale').style.background = sex === 'female' ? 'var(--accent)' : 'var(--surface2)';
+  document.getElementById('bfSexFemale').style.color = sex === 'female' ? '#fff' : 'var(--text2)';
+  document.getElementById('bfSex').value = sex;
+  document.getElementById('bfHipWrap').style.display = sex === 'female' ? 'block' : 'none';
+}
+function calculateBodyFat() {
+  const sex = document.getElementById('bfSex').value || 'male';
+  const height = parseFloat(document.getElementById('bfHeight').value);
+  const neck = parseFloat(document.getElementById('bfNeck').value);
+  const waist = parseFloat(document.getElementById('bfWaist').value);
+  const hip = parseFloat(document.getElementById('bfHip').value) || 0;
+  if (!height || height <= 0 || !neck || neck <= 0 || !waist || waist <= 0) {
+    showToast('⚠️ Please enter valid height, neck and waist measurements.', 'error');
+    return;
+  }
+  if (sex === 'female' && (!hip || hip <= 0)) {
+    showToast('⚠️ Please enter a valid hip measurement.', 'error');
+    return;
+  }
+  let bodyFat;
+  if (sex === 'male') {
+    if (waist <= neck) {
+      showToast('⚠️ Waist measurement must be greater than neck measurement.', 'error');
+      return;
+    }
+    bodyFat = 495 / (1.0324 - 0.19077 * Math.log10(waist - neck) + 0.15456 * Math.log10(height)) - 450;
+  } else {
+    if (waist + hip <= neck) {
+      showToast('⚠️ Waist + hip must be greater than neck measurement.', 'error');
+      return;
+    }
+    bodyFat = 495 / (1.29579 - 0.35004 * Math.log10(waist + hip - neck) + 0.22100 * Math.log10(height)) - 450;
+  }
+  bodyFat = Math.max(2, Math.min(60, bodyFat));
+  let category;
+  if (sex === 'male') {
+    if (bodyFat < 6) category = 'Essential Fat';
+    else if (bodyFat < 14) category = 'Athletes';
+    else if (bodyFat < 18) category = 'Fitness';
+    else if (bodyFat < 25) category = 'Average';
+    else category = 'Obese';
+  } else {
+    if (bodyFat < 14) category = 'Essential Fat';
+    else if (bodyFat < 21) category = 'Athletes';
+    else if (bodyFat < 25) category = 'Fitness';
+    else if (bodyFat < 32) category = 'Average';
+    else category = 'Obese';
+  }
+  document.getElementById('bfValue').textContent = bodyFat.toFixed(1) + '%';
+  document.getElementById('bfCategory').textContent = category;
+  document.getElementById('bfResultBox').style.display = 'block';
+}
 async function countWords() {
   const text = document.getElementById('wcText')?.value || '';
   if(!text.trim()) throw new Error('Please enter some text first.');
