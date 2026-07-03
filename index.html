@@ -5055,6 +5055,17 @@ function calculateBodyFat() {
   }
   document.getElementById('bfValue').textContent = bodyFat.toFixed(1) + '%';
   document.getElementById('bfCategory').textContent = category;
+  const weight = parseFloat(document.getElementById('bfWeight').value) || 0;
+  const massRow = document.getElementById('bfMassRow');
+  if (weight > 0) {
+    const fatMass = weight * (bodyFat / 100);
+    const leanMass = weight - fatMass;
+    document.getElementById('bfFatMass').textContent = fatMass.toFixed(1) + ' kg';
+    document.getElementById('bfLeanMass').textContent = leanMass.toFixed(1) + ' kg';
+    massRow.style.display = 'grid';
+  } else {
+    massRow.style.display = 'none';
+  }
   document.getElementById('bfResultBox').style.display = 'block';
 }
 async function countWords() {
