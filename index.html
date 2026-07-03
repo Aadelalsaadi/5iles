@@ -1419,7 +1419,17 @@ function openTool(id) {
         <div id="bfResultBox" style="display:none;background:var(--surface2);border-radius:14px;padding:20px;text-align:center;">
           <div id="bfValue" style="font-size:2.4rem;font-weight:800;"></div>
           <div id="bfCategory" style="font-size:1.05rem;font-weight:600;margin-bottom:10px;"></div>
-          <div style="font-size:0.75rem;color:var(--text2);margin-top:10px;">💡 Estimated using the U.S. Navy circumference method. For a precise measurement, consult a professional (DEXA scan or calipers).</div>
+          <div id="bfMassRow" style="display:none;grid-template-columns:1fr 1fr;gap:16px;text-align:center;padding-top:14px;margin-top:10px;border-top:1px solid var(--border);">
+            <div>
+              <div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Body fat mass</div>
+              <div id="bfFatMass" style="font-size:1.2rem;font-weight:700;"></div>
+            </div>
+            <div>
+              <div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Lean body mass</div>
+              <div id="bfLeanMass" style="font-size:1.2rem;font-weight:700;"></div>
+            </div>
+          </div>
+          <div style="font-size:0.75rem;color:var(--text2);margin-top:14px;">💡 Estimated using the U.S. Navy circumference method. For a precise measurement, consult a professional (DEXA scan or calipers).</div>
         </div>
       </div>`;
     document.getElementById('processBtn').disabled = false;
