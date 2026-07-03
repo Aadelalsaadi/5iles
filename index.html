@@ -1351,6 +1351,51 @@ function openTool(id) {
       </div>`;
     document.getElementById('processBtn').disabled = false;
     document.getElementById('processBtn').style.display = 'none';
+    } else if(tool.type === 'calorie-calculator') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div style="display:flex;gap:8px;margin-bottom:12px;">
+          <button type="button" id="calSexMale" onclick="setCalSex('male')" style="flex:1;padding:10px;background:var(--accent);border:1px solid var(--border);border-radius:10px;color:#fff;font-size:0.85rem;font-weight:600;cursor:pointer;">Male</button>
+          <button type="button" id="calSexFemale" onclick="setCalSex('female')" style="flex:1;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text2);font-size:0.85rem;font-weight:600;cursor:pointer;">Female</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px;">
+          <div><div class="option-label">Age</div><input type="number" id="calAge" placeholder="30" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+          <div><div class="option-label">Weight (kg)</div><input type="number" id="calWeight" placeholder="70" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+          <div><div class="option-label">Height (cm)</div><input type="number" id="calHeight" placeholder="175" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+        </div>
+        <div style="margin-bottom:16px;">
+          <div class="option-label" style="margin-bottom:6px;">Activity level</div>
+          <select id="calActivity" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;">
+            <option value="1.2">Sedentary (little or no exercise)</option>
+            <option value="1.375" selected>Light exercise (1-3 days/week)</option>
+            <option value="1.55">Moderate exercise (3-5 days/week)</option>
+            <option value="1.725">Active (6-7 days/week)</option>
+            <option value="1.9">Very active (hard exercise daily)</option>
+          </select>
+        </div>
+        <input type="hidden" id="calSex" value="male">
+        <button type="button" onclick="calculateCalories()" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;margin-bottom:16px;">Calculate</button>
+        <div id="calResultBox" style="display:none;background:var(--surface2);border-radius:14px;padding:20px;">
+          <div style="text-align:center;margin-bottom:14px;">
+            <div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Calories to maintain weight</div>
+            <div id="calMaintain" style="font-size:1.9rem;font-weight:800;"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;text-align:center;padding-top:14px;border-top:1px solid var(--border);">
+            <div>
+              <div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Lose weight (~0.5kg/week)</div>
+              <div id="calLose" style="font-size:1.3rem;font-weight:700;"></div>
+            </div>
+            <div>
+              <div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Gain weight (~0.5kg/week)</div>
+              <div id="calGain" style="font-size:1.3rem;font-weight:700;"></div>
+            </div>
+          </div>
+          <div style="font-size:0.75rem;color:var(--text2);margin-top:14px;">💡 Based on the Mifflin-St Jeor formula. Individual needs vary — consult a professional for personalized guidance.</div>
+        </div>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
+    document.getElementById('processBtn').style.display = 'none';
     } else if(tool.type === 'case-converter') {
     } else if(tool.type === 'case-converter') {
     document.getElementById('dropZone').style.display = 'none';
