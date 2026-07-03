@@ -5439,6 +5439,36 @@ function calculateGpa() {
   }
   document.getElementById('gpaResultBox').style.display = 'block';
 }
+function calculateTip() {
+  const bill = parseFloat(document.getElementById('tipBill').value);
+  const tipPct = parseFloat(document.getElementById('tipPercent').value);
+  const people = parseInt(document.getElementById('tipPeople').value) || 1;
+  if (!bill || bill <= 0) {
+    showToast('⚠️ Please enter a valid bill amount.', 'error');
+    return;
+  }
+  if (isNaN(tipPct) || tipPct < 0) {
+    showToast('⚠️ Please enter a valid tip percentage.', 'error');
+    return;
+  }
+  if (people < 1) {
+    showToast('⚠️ Number of people must be at least 1.', 'error');
+    return;
+  }
+  const tipAmount = bill * (tipPct / 100);
+  const total = bill + tipAmount;
+  document.getElementById('tipAmount').textContent = tipAmount.toLocaleString(undefined, {maximumFractionDigits:2});
+  document.getElementById('tipTotal').textContent = total.toLocaleString(undefined, {maximumFractionDigits:2});
+  const perPersonRow = document.getElementById('tipPerPersonRow');
+  if (people > 1) {
+    document.getElementById('tipPerPersonAmount').textContent = (tipAmount / people).toLocaleString(undefined, {maximumFractionDigits:2});
+    document.getElementById('tipPerPersonTotal').textContent = (total / people).toLocaleString(undefined, {maximumFractionDigits:2});
+    perPersonRow.style.display = 'grid';
+  } else {
+    perPersonRow.style.display = 'none';
+  }
+  document.getElementById('tipResultBox').style.display = 'block';
+}
 async function countWords() {
   const text = document.getElementById('wcText')?.value || '';
   if(!text.trim()) throw new Error('Please enter some text first.');
