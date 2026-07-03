@@ -4861,6 +4861,32 @@ function calculateSavings() {
   document.getElementById('svInterestEarned').textContent = Math.max(0, interestEarned).toLocaleString(undefined, {maximumFractionDigits:2});
   document.getElementById('svResultBox').style.display = 'block';
 }
+function calculateDiscountVat() {
+  const price = parseFloat(document.getElementById('dvPrice').value);
+  const discountPct = parseFloat(document.getElementById('dvDiscount').value) || 0;
+  const vatPct = parseFloat(document.getElementById('dvVat').value) || 0;
+  if (!price || price <= 0) {
+    showToast('⚠️ Please enter a valid price.', 'error');
+    return;
+  }
+  if (discountPct < 0 || discountPct > 100) {
+    showToast('⚠️ Discount must be between 0 and 100%.', 'error');
+    return;
+  }
+  if (vatPct < 0) {
+    showToast('⚠️ VAT cannot be negative.', 'error');
+    return;
+  }
+  const saved = price * (discountPct / 100);
+  const afterDiscount = price - saved;
+  const vatAmount = afterDiscount * (vatPct / 100);
+  const finalPrice = afterDiscount + vatAmount;
+  document.getElementById('dvFinalPrice').textContent = finalPrice.toLocaleString(undefined, {maximumFractionDigits:2});
+  document.getElementById('dvAfterDiscount').textContent = afterDiscount.toLocaleString(undefined, {maximumFractionDigits:2});
+  document.getElementById('dvSaved').textContent = saved.toLocaleString(undefined, {maximumFractionDigits:2});
+  document.getElementById('dvVatAmount').textContent = vatAmount.toLocaleString(undefined, {maximumFractionDigits:2});
+  document.getElementById('dvResultBox').style.display = 'block';
+}
 async function countWords() {
   const text = document.getElementById('wcText')?.value || '';
   if(!text.trim()) throw new Error('Please enter some text first.');
