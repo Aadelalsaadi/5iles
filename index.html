@@ -4933,6 +4933,37 @@ function calculateDiscountVat() {
   document.getElementById('dvVatAmount').textContent = vatAmount.toLocaleString(undefined, {maximumFractionDigits:2});
   document.getElementById('dvResultBox').style.display = 'block';
 }
+function setCalSex(sex) {
+  document.getElementById('calSexMale').style.background = sex === 'male' ? 'var(--accent)' : 'var(--surface2)';
+  document.getElementById('calSexMale').style.color = sex === 'male' ? '#fff' : 'var(--text2)';
+  document.getElementById('calSexFemale').style.background = sex === 'female' ? 'var(--accent)' : 'var(--surface2)';
+  document.getElementById('calSexFemale').style.color = sex === 'female' ? '#fff' : 'var(--text2)';
+  document.getElementById('calSex').value = sex;
+}
+function calculateCalories() {
+  const sex = document.getElementById('calSex').value || 'male';
+  const age = parseFloat(document.getElementById('calAge').value);
+  const weight = parseFloat(document.getElementById('calWeight').value);
+  const height = parseFloat(document.getElementById('calHeight').value);
+  const activity = parseFloat(document.getElementById('calActivity').value);
+  if (!age || age <= 0 || !weight || weight <= 0 || !height || height <= 0) {
+    showToast('⚠️ Please enter a valid age, weight and height.', 'error');
+    return;
+  }
+  let bmr;
+  if (sex === 'male') {
+    bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5;
+  } else {
+    bmr = (10 * weight) + (6.25 * height) - (5 * age) - 161;
+  }
+  const maintain = bmr * activity;
+  const lose = maintain - 500;
+  const gain = maintain + 500;
+  document.getElementById('calMaintain').textContent = Math.round(maintain).toLocaleString() + ' cal/day';
+  document.getElementById('calLose').textContent = Math.round(lose).toLocaleString() + ' cal/day';
+  document.getElementById('calGain').textContent = Math.round(gain).toLocaleString() + ' cal/day';
+  document.getElementById('calResultBox').style.display = 'block';
+}
 async function countWords() {
   const text = document.getElementById('wcText')?.value || '';
   if(!text.trim()) throw new Error('Please enter some text first.');
