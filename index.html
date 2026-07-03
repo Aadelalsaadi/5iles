@@ -1214,9 +1214,12 @@ function openTool(id) {
       <div style="width:100%;">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
           <div><div class="option-label">Finance amount</div><input type="number" id="fcAmount" placeholder="100000" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
-          <div><div class="option-label">Profit rate (% per year)</div><input type="number" step="0.01" id="fcRate" placeholder="5.5" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+          <div><div class="option-label">Advance payment (optional)</div><input type="number" id="fcAdvance" placeholder="0" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
         </div>
-        <div style="margin-bottom:16px;"><div class="option-label">Tenure (years)</div><input type="number" id="fcYears" placeholder="5" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+          <div><div class="option-label">Profit rate (% per year)</div><input type="number" step="0.01" id="fcRate" placeholder="5.5" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+          <div><div class="option-label">Tenure (years)</div><input type="number" id="fcYears" placeholder="5" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+        </div>
         <button type="button" onclick="calculateFinance()" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;margin-bottom:16px;">Calculate</button>
         <div id="fcResultBox" style="display:none;background:var(--surface2);border-radius:14px;padding:20px;">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;text-align:center;margin-bottom:14px;">
