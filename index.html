@@ -4666,6 +4666,29 @@ function calculateBMI() {
   bmiMarker.style.left = (((clampedBmi - 15) / (40 - 15)) * 100) + '%';
   resultBox.style.display = 'block';
 }
+function calculateFinance() {
+  const amount = parseFloat(document.getElementById('fcAmount').value);
+  const rate = parseFloat(document.getElementById('fcRate').value);
+  const years = parseFloat(document.getElementById('fcYears').value);
+  if (!amount || amount <= 0 || !years || years <= 0 || isNaN(rate) || rate < 0) {
+    showToast('⚠️ Please enter a valid amount, rate and tenure.', 'error');
+    return;
+  }
+  const n = Math.round(years * 12);
+  const r = (rate / 100) / 12;
+  let installment;
+  if (r === 0) {
+    installment = amount / n;
+  } else {
+    installment = amount * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+  }
+  const totalRepay = installment * n;
+  const totalProfit = totalRepay - amount;
+  document.getElementById('fcInstallment').textContent = installment.toLocaleString(undefined, {maximumFractionDigits:2});
+  document.getElementById('fcTotalProfit').textContent = totalProfit.toLocaleString(undefined, {maximumFractionDigits:2});
+  document.getElementById('fcTotalRepay').textContent = totalRepay.toLocaleString(undefined, {maximumFractionDigits:2});
+  document.getElementById('fcResultBox').style.display = 'block';
+}
 async function countWords() {
   const text = document.getElementById('wcText')?.value || '';
   if(!text.trim()) throw new Error('Please enter some text first.');
