@@ -5135,6 +5135,45 @@ function calculateBodyFat() {
   }
   document.getElementById('bfResultBox').style.display = 'block';
 }
+function setIwSex(sex) {
+  document.getElementById('iwSexMale').style.background = sex === 'male' ? 'var(--accent)' : 'var(--surface2)';
+  document.getElementById('iwSexMale').style.color = sex === 'male' ? '#fff' : 'var(--text2)';
+  document.getElementById('iwSexFemale').style.background = sex === 'female' ? 'var(--accent)' : 'var(--surface2)';
+  document.getElementById('iwSexFemale').style.color = sex === 'female' ? '#fff' : 'var(--text2)';
+  document.getElementById('iwSex').value = sex;
+}
+function calculateIdealWeight() {
+  const sex = document.getElementById('iwSex').value || 'male';
+  const heightCm = parseFloat(document.getElementById('iwHeight').value);
+  if (!heightCm || heightCm <= 0) {
+    showToast('⚠️ Please enter a valid height.', 'error');
+    return;
+  }
+  const inchesOver5ft = Math.max(0, (heightCm / 2.54) - 60);
+  let hamwi, devine, robinson, miller;
+  if (sex === 'male') {
+    hamwi = 48.0 + 2.7 * inchesOver5ft;
+    devine = 50.0 + 2.3 * inchesOver5ft;
+    robinson = 52 + 1.9 * inchesOver5ft;
+    miller = 56.2 + 1.41 * inchesOver5ft;
+  } else {
+    hamwi = 45.5 + 2.2 * inchesOver5ft;
+    devine = 45.5 + 2.3 * inchesOver5ft;
+    robinson = 49 + 1.7 * inchesOver5ft;
+    miller = 53.1 + 1.36 * inchesOver5ft;
+  }
+  const average = (hamwi + devine + robinson + miller) / 4;
+  const heightM = heightCm / 100;
+  const bmiMin = 18.5 * heightM * heightM;
+  const bmiMax = 24.9 * heightM * heightM;
+  document.getElementById('iwAverage').textContent = average.toFixed(1) + ' kg';
+  document.getElementById('iwBmiRange').textContent = bmiMin.toFixed(1) + ' – ' + bmiMax.toFixed(1) + ' kg';
+  document.getElementById('iwRobinson').textContent = robinson.toFixed(1) + ' kg';
+  document.getElementById('iwMiller').textContent = miller.toFixed(1) + ' kg';
+  document.getElementById('iwDevine').textContent = devine.toFixed(1) + ' kg';
+  document.getElementById('iwHamwi').textContent = hamwi.toFixed(1) + ' kg';
+  document.getElementById('iwResultBox').style.display = 'block';
+}
 async function countWords() {
   const text = document.getElementById('wcText')?.value || '';
   if(!text.trim()) throw new Error('Please enter some text first.');
