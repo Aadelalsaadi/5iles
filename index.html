@@ -1622,6 +1622,31 @@ function openTool(id) {
       </div>`;
     document.getElementById('processBtn').disabled = false;
     document.getElementById('processBtn').style.display = 'none';
+    } else if(tool.type === 'random-number-generator') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+          <div><div class="option-label">Minimum</div><input type="number" id="rngMin" placeholder="1" value="1" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+          <div><div class="option-label">Maximum</div><input type="number" id="rngMax" placeholder="100" value="100" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+        </div>
+        <div style="margin-bottom:12px;"><div class="option-label">How many numbers?</div><input type="number" id="rngCount" placeholder="1" value="1" min="1" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+        <label style="display:flex;align-items:center;gap:8px;margin-bottom:16px;cursor:pointer;font-size:0.9rem;color:var(--text2);">
+          <input type="checkbox" id="rngUnique" style="width:16px;height:16px;cursor:pointer;">
+          Unique numbers (no duplicates)
+        </label>
+        <button type="button" onclick="generateRandomNumbers()" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;margin-bottom:16px;">Generate</button>
+        <div id="rngResultBox" style="display:none;background:var(--surface2);border-radius:14px;padding:20px;">
+          <div style="font-size:0.8rem;color:var(--text2);margin-bottom:10px;text-align:center;">Result</div>
+          <div id="rngNumbers" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:14px;"></div>
+          <div id="rngSortedRow" style="display:none;text-align:center;padding-top:14px;border-top:1px solid var(--border);">
+            <div style="font-size:0.8rem;color:var(--text2);margin-bottom:6px;">Sorted (smallest to largest)</div>
+            <div id="rngSorted" style="font-size:0.95rem;font-weight:600;word-break:break-word;"></div>
+          </div>
+        </div>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
+    document.getElementById('processBtn').style.display = 'none';
     } else if(tool.type === 'case-converter') {
     } else if(tool.type === 'case-converter') {
     document.getElementById('dropZone').style.display = 'none';
