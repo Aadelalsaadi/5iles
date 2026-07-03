@@ -1208,6 +1208,36 @@ function openTool(id) {
     document.getElementById('processBtn').disabled = false;
     document.getElementById('processBtn').style.display = 'none';
     setPctMode('basic', document.querySelector('.pct-tab'));
+    } else if(tool.type === 'finance-calculator') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+          <div><div class="option-label">Finance amount</div><input type="number" id="fcAmount" placeholder="100000" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+          <div><div class="option-label">Profit rate (% per year)</div><input type="number" step="0.01" id="fcRate" placeholder="5.5" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+        </div>
+        <div style="margin-bottom:16px;"><div class="option-label">Tenure (years)</div><input type="number" id="fcYears" placeholder="5" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></div>
+        <button type="button" onclick="calculateFinance()" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;margin-bottom:16px;">Calculate</button>
+        <div id="fcResultBox" style="display:none;background:var(--surface2);border-radius:14px;padding:20px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;text-align:center;margin-bottom:14px;">
+            <div>
+              <div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Monthly installment</div>
+              <div id="fcInstallment" style="font-size:1.6rem;font-weight:800;"></div>
+            </div>
+            <div>
+              <div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Total profit</div>
+              <div id="fcTotalProfit" style="font-size:1.6rem;font-weight:800;"></div>
+            </div>
+          </div>
+          <div style="text-align:center;padding-top:14px;border-top:1px solid var(--border);">
+            <div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Total repayment</div>
+            <div id="fcTotalRepay" style="font-size:1.3rem;font-weight:700;"></div>
+          </div>
+          <div style="font-size:0.75rem;color:var(--text2);margin-top:14px;">💡 This is a general estimate using standard amortization math. Actual bank offers may differ based on their specific terms.</div>
+        </div>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
+    document.getElementById('processBtn').style.display = 'none';
     } else if(tool.type === 'case-converter') {
     document.getElementById('dropZone').style.display = 'none';
     opts.innerHTML = `
