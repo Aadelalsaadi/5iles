@@ -3332,6 +3332,51 @@ async function wordToJPG() {
   return results;
 }
 
+// ===================== EXCEL TO IMAGE =====================
+async function excelToImage() {
+  const CONVERTER_URL = 'https://fiveiles-converter.onrender.com';
+  const results = [];
+  const quality = parseInt(document.getElementById('excelImgQualitySlider')?.value || 90) / 100;
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  for (const file of uploadedFiles) {
+    const formData = new FormData();
+    formData.append('file', file);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 180000);
+    let res;
+    try {
+      res = await fetch(`${CONVERTER_URL}/convert`, { method: 'POST', body: formData, signal: controller.signal });
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        throw new Error('Conversion is taking longer than expected (3+ min). Try a smaller or simpler spreadsheet.');
+      }
+      throw err;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || 'Conversion failed');
+    }
+    const pdfBlob = await res.blob();
+    const ab = await pdfBlob.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
+    const baseName = file.name.replace(/\.(xlsx|xls)$/i, '');
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const viewport = page.getViewport({ scale: 2.0 });
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', quality));
+      const url = URL.createObjectURL(blob);
+      results.push({ name: `${baseName}_page${i}.jpg`, url, info: `Page ${i} of ${pdf.numPages} converted to JPG (${formatSize(blob.size)})` });
+    }
+  }
+  return results;
+}
+
 // ===================== PDF TO EXCEL (CSV) =====================
 async function pdfToExcel() {
   const CONVERTER_URL = 'https://fiveiles-converter.onrender.com';
