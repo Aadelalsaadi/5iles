@@ -3729,12 +3729,35 @@ async function wordToPDF() {
     const maxWidth = pageW - margin * 2;
 
     const lines = [];
+    // Breaks a single unbroken token (e.g. a long URL) into page-width-safe chunks
+    function breakLongWord(word) {
+      const chunks = [];
+      let chunk = '';
+      for (const ch of word) {
+        const test = chunk + ch;
+        if (font.widthOfTextAtSize(test, fontSize) > maxWidth && chunk) {
+          chunks.push(chunk);
+          chunk = ch;
+        } else { chunk = test; }
+      }
+      if (chunk) chunks.push(chunk);
+      return chunks;
+    }
     text.split('\n').forEach(paragraph => {
       if(!paragraph.trim()) { lines.push(''); return; }
       // Word wrap
       const words = paragraph.split(' ');
       let line = '';
       words.forEach(word => {
+        // If a single word is already wider than the page, it has no spaces to
+        // break on (e.g. a long URL) — force-break it at the character level.
+        if (font.widthOfTextAtSize(word, fontSize) > maxWidth) {
+          if (line) { lines.push(line); line = ''; }
+          const chunks = breakLongWord(word);
+          chunks.slice(0, -1).forEach(c => lines.push(c));
+          line = chunks[chunks.length - 1] || '';
+          return;
+        }
         const test = line ? line + ' ' + word : word;
         if(font.widthOfTextAtSize(test, fontSize) > maxWidth) {
           lines.push(line);
