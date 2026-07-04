@@ -952,6 +952,16 @@ function openTool(id) {
         </div>
         <p style="color:var(--text2);font-size:0.85rem;margin-top:12px;">🎞️ Each slide will be exported as a separate high-resolution JPG image.</p>
       </div>`;
+  } else if(tool.type === 'word-to-jpg') {
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div class="slider-row">
+          <span class="slider-label">Image quality:</span>
+          <input type="range" id="wordJpgQualitySlider" min="50" max="100" value="90" oninput="document.getElementById('wordJpgQualityVal').textContent=this.value+'%'">
+          <span class="slider-val" id="wordJpgQualityVal">90%</span>
+        </div>
+        <p style="color:var(--text2);font-size:0.85rem;margin-top:12px;">📰 Each page will be exported as a separate high-resolution JPG image, with fonts, tables, and layout preserved exactly as printed.</p>
+      </div>`;
   } else if(tool.type === 'pdf-to-excel') {
     opts.innerHTML = `<p style="color:var(--text2);font-size:0.85rem;margin-top:8px;">📊 Tables and data will be extracted from the PDF and saved as a .csv file.</p>`;
   } else if(tool.type === 'jpg-to-pdf') {
