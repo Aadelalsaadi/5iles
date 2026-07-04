@@ -1671,7 +1671,11 @@ function openTool(id) {
     } else if(tool.type === 'excel-to-json') {
     opts.innerHTML = `
       <div style="width:100%;">
-        <div style="font-size:0.85rem;color:var(--text2);background:rgba(108,99,255,0.1);border:1px solid var(--accent);border-radius:8px;padding:12px 14px;">🧾 Each row becomes a JSON object using the header row as keys. If your workbook has multiple sheets, the output is one JSON object keyed by sheet name (e.g. <code>{"Sheet1": [...], "Sheet2": [...]}</code>).</div>
+        <div class="option-group" style="margin-bottom:10px;">
+          <div class="option-label">Header row</div>
+          <input type="number" id="jsonHeaderRow" min="1" value="1" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 12px;border-radius:8px;width:100px;">
+        </div>
+        <div style="font-size:0.85rem;color:var(--text2);background:rgba(108,99,255,0.1);border:1px solid var(--accent);border-radius:8px;padding:12px 14px;">🧾 Each row becomes a JSON object using the header row as keys. If your sheet has title or summary rows before the real column headers, set "Header row" to that row number. If your workbook has multiple sheets, the output is one JSON object keyed by sheet name (e.g. <code>{"Sheet1": [...], "Sheet2": [...]}</code>).</div>
       </div>`;
     } else if(tool.type === 'case-converter') {
     } else if(tool.type === 'case-converter') {
