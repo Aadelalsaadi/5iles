@@ -842,7 +842,7 @@ function openTool(id) {
   document.getElementById('workspaceTitle').textContent = tool.icon + ' ' + tool.name;
   document.getElementById('fileInput').accept = tool.accept;
   document.getElementById('fileInput').multiple = tool.multiple || (tool.type === 'merge-pdf');
-  const DOC_BACKEND_TYPES = ['pdf-to-word', 'pdf-to-excel', 'pptx-to-pdf', 'xlsx-to-pdf', 'word-to-jpg'];
+  const DOC_BACKEND_TYPES = ['pdf-to-word', 'pdf-to-excel', 'pptx-to-pdf', 'xlsx-to-pdf', 'word-to-jpg', 'excel-to-image'];
   const MEDIA_BACKEND_TYPES = ['mp4-to-mp3', 'audio-converter', 'extract-audio', 'compress-video'];
   let dropSubText = tool.accept ? 'Accepts: ' + tool.accept.replace(/\./g,'').toUpperCase() : '';
   if (DOC_BACKEND_TYPES.includes(tool.type)) {
