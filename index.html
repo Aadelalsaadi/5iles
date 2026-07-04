@@ -1668,6 +1668,11 @@ function openTool(id) {
       <div style="width:100%;">
         <div style="font-size:0.85rem;color:var(--text2);background:rgba(108,99,255,0.1);border:1px solid var(--accent);border-radius:8px;padding:12px 14px;">💡 Upload a <b>.csv</b> file to convert it to Excel, or an <b>.xlsx/.xls</b> file to convert it to CSV — direction is detected automatically. For multi-sheet Excel files, only the first sheet is exported to CSV.</div>
       </div>`;
+    } else if(tool.type === 'excel-to-json') {
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div style="font-size:0.85rem;color:var(--text2);background:rgba(108,99,255,0.1);border:1px solid var(--accent);border-radius:8px;padding:12px 14px;">🧾 Each row becomes a JSON object using the header row as keys. If your workbook has multiple sheets, the output is one JSON object keyed by sheet name (e.g. <code>{"Sheet1": [...], "Sheet2": [...]}</code>).</div>
+      </div>`;
     } else if(tool.type === 'case-converter') {
     } else if(tool.type === 'case-converter') {
     document.getElementById('dropZone').style.display = 'none';
