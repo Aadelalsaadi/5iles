@@ -2913,6 +2913,8 @@ async function excelCsvConvert() {
 // ===================== EXCEL TO JSON =====================
 async function excelToJson() {
   await ensureXlsxLib();
+  const headerRow = Math.max(1, parseInt(document.getElementById('jsonHeaderRow')?.value || 1));
+  const rangeStart = headerRow - 1; // SheetJS range is 0-indexed
   const results = [];
   for (const file of uploadedFiles) {
     const buf = await file.arrayBuffer();
@@ -2920,12 +2922,12 @@ async function excelToJson() {
     let output, note;
     if (wb.SheetNames.length === 1) {
       const ws = wb.Sheets[wb.SheetNames[0]];
-      output = XLSX.utils.sheet_to_json(ws, { defval: null });
+      output = XLSX.utils.sheet_to_json(ws, { defval: null, range: rangeStart });
       note = `${output.length} rows converted to JSON (${wb.SheetNames[0]})`;
     } else {
       output = {};
       wb.SheetNames.forEach(name => {
-        output[name] = XLSX.utils.sheet_to_json(wb.Sheets[name], { defval: null });
+        output[name] = XLSX.utils.sheet_to_json(wb.Sheets[name], { defval: null, range: rangeStart });
       });
       note = `${wb.SheetNames.length} sheets converted — one JSON key per sheet`;
     }
