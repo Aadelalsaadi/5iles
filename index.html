@@ -2568,6 +2568,8 @@ if (USAGE_LIMIT_ENABLED && !currentUser) {
       results = await pptToJPG();
     } else if(currentTool.type === 'word-to-jpg') {
       results = await wordToJPG();
+    } else if(currentTool.type === 'excel-to-image') {
+      results = await excelToImage();
     } else if(currentTool.type === 'pdf-to-excel') {
       results = await pdfToExcel();
     } else if(currentTool.type === 'jpg-to-pdf') {
