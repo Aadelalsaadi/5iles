@@ -2906,6 +2906,33 @@ async function excelCsvConvert() {
   return results;
 }
 
+// ===================== EXCEL TO JSON =====================
+async function excelToJson() {
+  await ensureXlsxLib();
+  const results = [];
+  for (const file of uploadedFiles) {
+    const buf = await file.arrayBuffer();
+    const wb = XLSX.read(buf, { type: 'array', cellDates: true });
+    let output, note;
+    if (wb.SheetNames.length === 1) {
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      output = XLSX.utils.sheet_to_json(ws, { defval: null });
+      note = `${output.length} rows converted to JSON (${wb.SheetNames[0]})`;
+    } else {
+      output = {};
+      wb.SheetNames.forEach(name => {
+        output[name] = XLSX.utils.sheet_to_json(wb.Sheets[name], { defval: null });
+      });
+      note = `${wb.SheetNames.length} sheets converted — one JSON key per sheet`;
+    }
+    const json = JSON.stringify(output, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    results.push({ name: file.name.replace(/\.(xlsx|xls)$/i, '.json'), url, info: `${note} (${formatSize(blob.size)})` });
+  }
+  return results;
+}
+
 async function mp4ToMp3() {
   const CONVERTER_URL = 'https://fiveiles-converter.onrender.com';
   const results = [];
