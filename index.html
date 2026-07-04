@@ -2896,7 +2896,7 @@ async function excelCsvConvert() {
       const firstSheetName = wb.SheetNames[0];
       const ws = wb.Sheets[firstSheetName];
       const csv = XLSX.utils.sheet_to_csv(ws);
-      const blob = new Blob([csv], { type: 'text/csv' });
+      const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       let note = `Converted "${firstSheetName}" sheet to CSV (${formatSize(blob.size)})`;
       if (wb.SheetNames.length > 1) note += ` — ${wb.SheetNames.length} sheets found, only first sheet exported`;
