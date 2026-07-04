@@ -937,6 +937,16 @@ function openTool(id) {
           <span class="slider-val" id="jpgQualityVal">90%</span>
         </div>
       </div>`;
+  } else if(tool.type === 'ppt-to-jpg') {
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div class="slider-row">
+          <span class="slider-label">Image quality:</span>
+          <input type="range" id="pptJpgQualitySlider" min="50" max="100" value="90" oninput="document.getElementById('pptJpgQualityVal').textContent=this.value+'%'">
+          <span class="slider-val" id="pptJpgQualityVal">90%</span>
+        </div>
+        <p style="color:var(--text2);font-size:0.85rem;margin-top:12px;">🎞️ Each slide will be exported as a separate high-resolution JPG image.</p>
+      </div>`;
   } else if(tool.type === 'pdf-to-excel') {
     opts.innerHTML = `<p style="color:var(--text2);font-size:0.85rem;margin-top:8px;">📊 Tables and data will be extracted from the PDF and saved as a .csv file.</p>`;
   } else if(tool.type === 'jpg-to-pdf') {
