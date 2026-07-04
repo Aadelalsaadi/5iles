@@ -2527,6 +2527,8 @@ if (USAGE_LIMIT_ENABLED && !currentUser) {
       results = await rotatePDF();
     } else if(currentTool.type === 'pdf-to-jpg') {
       results = await pdfToJPG();
+    } else if(currentTool.type === 'ppt-to-jpg') {
+      results = await pptToJPG();
     } else if(currentTool.type === 'pdf-to-excel') {
       results = await pdfToExcel();
     } else if(currentTool.type === 'jpg-to-pdf') {
