@@ -2772,6 +2772,42 @@ async function xlsxToPDF() {
   }
   return results;
 }
+async function ensureXlsxLib() {
+  if (typeof XLSX !== 'undefined') return;
+  await new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload = resolve; s.onerror = () => reject(new Error('Failed to load spreadsheet library.'));
+    document.head.appendChild(s);
+  });
+}
+async function excelCsvConvert() {
+  await ensureXlsxLib();
+  const results = [];
+  for (const file of uploadedFiles) {
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (ext === 'csv') {
+      const text = await file.text();
+      const wb = XLSX.read(text, { type: 'string' });
+      const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = URL.createObjectURL(blob);
+      results.push({ name: file.name.replace(/\.csv$/i, '.xlsx'), url, info: `Converted to Excel (${formatSize(blob.size)})` });
+    } else {
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: 'array' });
+      const firstSheetName = wb.SheetNames[0];
+      const ws = wb.Sheets[firstSheetName];
+      const csv = XLSX.utils.sheet_to_csv(ws);
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      let note = `Converted "${firstSheetName}" sheet to CSV (${formatSize(blob.size)})`;
+      if (wb.SheetNames.length > 1) note += ` — ${wb.SheetNames.length} sheets found, only first sheet exported`;
+      results.push({ name: file.name.replace(/\.(xlsx|xls)$/i, '.csv'), url, info: note });
+    }
+  }
+  return results;
+}
 
 async function mp4ToMp3() {
   const CONVERTER_URL = 'https://fiveiles-converter.onrender.com';
