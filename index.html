@@ -888,6 +888,8 @@ function openTool(id) {
       </div>`;
   } else if(tool.type === 'merge-pdf') {
     document.getElementById('dropSub').textContent = 'Select multiple PDF files to merge';
+  } else if(tool.type === 'merge-word') {
+    document.getElementById('dropSub').textContent = 'Select multiple Word documents (.docx) to merge';
   } else if(tool.type === 'pdf-to-word') {
     opts.innerHTML = `<p style="color:var(--text2);font-size:0.85rem;margin-top:8px;">📋 Converted to a fully editable .docx file. First conversion may take up to a minute if the server is waking up.</p>`;
   } else if(tool.type === 'split-pdf') {
