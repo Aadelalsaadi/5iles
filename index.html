@@ -2700,6 +2700,49 @@ async function mergePDFs() {
   return [{ name: 'merged_document.pdf', url, info: `${uploadedFiles.length} files merged → ${totalPages} pages (${formatSize(blob.size)})` }];
 }
 
+// ===================== MERGE WORD DOCUMENTS =====================
+async function ensureDocxMergerLibs() {
+  if (typeof JSZip === 'undefined') {
+    await new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+      s.onload = resolve; s.onerror = () => reject(new Error('Failed to load compression library.'));
+      document.head.appendChild(s);
+    });
+  }
+  if (typeof DocxMerger === 'undefined') {
+    await new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/docx-merger@1.2.2/dist/docx-merger.min.js';
+      s.onload = resolve; s.onerror = () => reject(new Error('Failed to load document merge library.'));
+      document.head.appendChild(s);
+    });
+  }
+}
+async function mergeWordDocs() {
+  await ensureDocxMergerLibs();
+  if (uploadedFiles.length < 2) throw new Error('Please add at least 2 Word documents to merge.');
+  const buffers = [];
+  for (const file of uploadedFiles) {
+    buffers.push(new Uint8Array(await file.arrayBuffer()));
+  }
+  let bloatedBlob;
+  try {
+    bloatedBlob = await new Promise((resolve) => {
+      const docx = new DocxMerger({ pageBreak: true }, buffers);
+      docx.save('blob', (data) => resolve(data));
+    });
+  } catch (err) {
+    throw new Error('Unable to merge these documents. Make sure all files are valid .docx Word documents.');
+  }
+  // docx-merger writes the zip uncompressed (STORE), which can bloat files 10-30x.
+  // Re-zip with DEFLATE to bring the size back down before handing it to the user.
+  const zip = await JSZip.loadAsync(bloatedBlob);
+  const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+  const url = URL.createObjectURL(blob);
+  return [{ name: 'merged_document.docx', url, info: `${uploadedFiles.length} files merged (${formatSize(blob.size)})` }];
+}
+
 // ===================== PDF TO WORD =====================
 async function pdfToWord() {
   const CONVERTER_URL = 'https://fiveiles-converter.onrender.com';
