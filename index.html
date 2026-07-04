@@ -2520,6 +2520,8 @@ if (USAGE_LIMIT_ENABLED && !currentUser) {
       results = await compressPDF();
     } else if(currentTool.type === 'merge-pdf') {
       results = await mergePDFs();
+    } else if(currentTool.type === 'merge-word') {
+      results = await mergeWordDocs();
     } else if(currentTool.type === 'pdf-to-word') {
       results = await pdfToWord();
     } else if(currentTool.type === 'compress-image') {
