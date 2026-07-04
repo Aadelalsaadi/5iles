@@ -2544,6 +2544,8 @@ if (USAGE_LIMIT_ENABLED && !currentUser) {
       results = await pptxToPDF();
     } else if(currentTool.type === 'xlsx-to-pdf') {
       results = await xlsxToPDF();
+    } else if(currentTool.type === 'excel-csv-converter') {
+      results = await excelCsvConvert();
     } else if(currentTool.type === 'mp4-to-mp3') {
       results = await mp4ToMp3();
     } else if(currentTool.type === 'audio-converter') {
