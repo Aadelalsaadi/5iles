@@ -2465,7 +2465,7 @@ if(currentTool.type !== 'qr-code' && currentTool.type !== 'word-counter' && curr
 // genuine benefit, up to the safe technical maximum the backend supports.
 // Documents (LibreOffice) get a tighter cap than media (ffmpeg) since
 // LibreOffice loads the full file into memory while ffmpeg streams it.
-const DOC_BACKEND_TYPES = ['pdf-to-word', 'pdf-to-excel', 'pptx-to-pdf', 'xlsx-to-pdf'];
+const DOC_BACKEND_TYPES = ['pdf-to-word', 'pdf-to-excel', 'pptx-to-pdf', 'xlsx-to-pdf', 'word-to-jpg'];
 const MEDIA_BACKEND_TYPES = ['mp4-to-mp3', 'audio-converter', 'extract-audio', 'compress-video'];
 const isDocBackendTool = DOC_BACKEND_TYPES.includes(currentTool.type);
 const isMediaBackendTool = MEDIA_BACKEND_TYPES.includes(currentTool.type);
