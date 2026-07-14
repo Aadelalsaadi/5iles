@@ -354,6 +354,7 @@ async function initAuth() {
       updateNavForUser(currentUser);
       closeModalDirect();
       showToast('👋 Welcome back, ' + (currentUser.user_metadata?.name || currentUser.email) + '!', 'success');
+      setupReferralIfNeeded(currentUser);
       // Handle pending subscription redirect
       if(typeof pendingSubscriptionPlan !== 'undefined' && pendingSubscriptionPlan) {
         pendingSubscriptionPlan = null;
