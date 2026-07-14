@@ -372,10 +372,10 @@ async function updateNavForUser(user) {
   const navBtns = document.querySelector('.nav-btns');
   if(!navBtns) return;
 
-  let plan = 'free';
+ let plan = 'free';
   try {
-    const { data: profileData } = await _supabase.from('profiles').select('plan').eq('id', user.id).single();
-    if (profileData?.plan === 'pro') plan = 'pro';
+    const { data: profileData } = await _supabase.from('profiles').select('plan, referral_reward_until').eq('id', user.id).single();
+    if (isProActive(profileData)) plan = 'pro';
   } catch (e) {}
 
   const planBadge = plan === 'pro'
