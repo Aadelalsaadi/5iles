@@ -325,6 +325,17 @@ const SUPABASE_URL = 'https://rwmagyyiayscaqvljrft.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_7tFuLwSpdZ9FKqiyr5G72A_pLkFptOr';
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// Returns true if a profile has Pro access — either a real paid 'pro' plan,
+// or an active (not-yet-expired) referral reward. Centralizing this check
+// means every gate (nav badge, file size limits, daily usage limits) stays
+// in sync automatically when referral rewards are involved.
+function isProActive(profileData) {
+  if (!profileData) return false;
+  if (profileData.plan === 'pro') return true;
+  if (profileData.referral_reward_until && new Date(profileData.referral_reward_until) > new Date()) return true;
+  return false;
+}
+
 // Auth state
 let currentUser = null;
 
