@@ -6786,6 +6786,7 @@ showCookieBanner();
 function dismissReferralBanner() {
   const el = document.getElementById('referral-announce');
   if (el) el.style.display = 'none';
+  document.body.classList.remove('has-referral-banner');
 }
 function handleReferralBannerClick() {
   dismissReferralBanner();
