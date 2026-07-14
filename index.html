@@ -6542,6 +6542,16 @@ renderTools();
 
 let pendingSubscriptionPlan = null;
 
+// Capture a referral link (?ref=CODE) the moment the page loads, and hold
+// onto it in sessionStorage so it survives clicking through to the signup
+// modal. Only ever set once per browser session — if someone already has a
+// pending code stored, a fresh visit without ?ref= shouldn't wipe it out.
+(function captureReferralCode() {
+  const params = new URLSearchParams(window.location.search);
+  const ref = params.get('ref');
+  if (ref) sessionStorage.setItem('pendingReferralCode', ref);
+})();
+
 function openUpgradeFlow() {
   if (currentUser) {
     openModal('upgrade');
