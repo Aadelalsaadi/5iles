@@ -2724,7 +2724,16 @@ if(currentUser) {
     .update({ completed_conversion: true, completed_at: new Date().toISOString() })
     .eq('referred_id', currentUser.id)
     .eq('completed_conversion', false)
-    .then(() => {});
+    .select('referrer_id')
+    .then(({ data }) => {
+      if (data && data[0]?.referrer_id) {
+        fetch('https://5iles.com/.netlify/functions/referral-check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ referrerId: data[0].referrer_id })
+        }).catch(() => {});
+      }
+    });
 }
 resultFiles.innerHTML = results.map(r => `
       <div class="result-file">
