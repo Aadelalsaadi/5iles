@@ -2495,8 +2495,8 @@ if ((isDocBackendTool || isMediaBackendTool) && uploadedFiles.length) {
   let isPro = false;
   if (currentUser) {
     try {
-      const { data: profileData } = await _supabase.from('profiles').select('plan').eq('id', currentUser.id).single();
-      isPro = profileData?.plan === 'pro';
+      const { data: profileData } = await _supabase.from('profiles').select('plan, referral_reward_until').eq('id', currentUser.id).single();
+      isPro = isProActive(profileData);
     } catch (e) {}
   }
   const limitMB = isDocBackendTool ? (isPro ? 50 : 10) : (isPro ? 100 : 25);
