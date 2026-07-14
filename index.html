@@ -6776,6 +6776,22 @@ function hideCookieBanner() {
 }
 
 showCookieBanner();
+
+// Referral program banner — shown on every visit (no permanent dismissal),
+// but closeable for the current visit so it doesn't follow someone around
+// while they're actively using a tool.
+function dismissReferralBanner() {
+  const el = document.getElementById('referral-announce');
+  if (el) el.style.display = 'none';
+}
+function handleReferralBannerClick() {
+  dismissReferralBanner();
+  if (currentUser) {
+    openDashboard();
+  } else {
+    openModal('signup');
+  }
+}
 </script>
 
 <script>
