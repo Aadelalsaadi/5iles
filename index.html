@@ -6626,20 +6626,75 @@ function closeMenu() {
   document.getElementById('navLinks').classList.remove('open');
   document.getElementById('navBtns').classList.remove('open');
 }
-function openDashboard() {
-  if(!document.getElementById('dashboardModal')){const m=document.createElement('div');m.id='dashboardModal';m.style.cssText='display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;';m.innerHTML='<div style="background:var(--surface);border-radius:16px;padding:32px;max-width:420px;width:90%;position:relative;"><button onclick="closeDashboard()" style="position:absolute;top:12px;right:16px;background:none;border:none;color:var(--text2);font-size:1.5rem;cursor:pointer;">×</button><h2>My Account</h2><div id="dashboardContent"></div></div>';document.body.appendChild(m);}
+async function openDashboard() {
+  if(!document.getElementById('dashboardModal')){const m=document.createElement('div');m.id='dashboardModal';m.style.cssText='display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;';m.innerHTML='<div style="background:var(--surface);border-radius:16px;padding:32px;max-width:420px;width:90%;max-height:85vh;overflow-y:auto;position:relative;"><button onclick="closeDashboard()" style="position:absolute;top:12px;right:16px;background:none;border:none;color:var(--text2);font-size:1.5rem;cursor:pointer;">×</button><h2>My Account</h2><div id="dashboardContent"></div></div>';document.body.appendChild(m);}
   const modal = document.getElementById('dashboardModal');
   if(modal){modal.style.display='flex';}
 
   const today = new Date().toDateString();
   const usageCount = parseInt(localStorage.getItem('usage_' + today) || 0);
-  const plan = currentUser?.user_metadata?.plan || 'Free';
   const email = currentUser?.email || '';
   const name = currentUser?.user_metadata?.name || email.split('@')[0];
-  const dc=document.getElementById('dashboardContent'); if(dc) dc.innerHTML = `<div style="display:flex;flex-direction:column;gap:16px;"><div style="background:var(--surface2);border-radius:10px;padding:16px;"><div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Account</div><div style="font-weight:600;">${name}</div><div style="font-size:0.85rem;color:var(--text2);">${email}</div></div><div style="background:var(--surface2);border-radius:10px;padding:16px;"><div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Plan</div><div style="font-weight:600;color:var(--accent);">${plan==='Free'?'🆓 Free':'⭐ Pro'}</div></div><div style="background:var(--surface2);border-radius:10px;padding:16px;"><div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Usage today</div><div style="font-weight:600;">${plan==='Free'?usageCount+' / 15 conversions':'Unlimited ✓'}</div></div>${plan==='Free'?'<button class="btn btn-primary" onclick="closeDashboard()" style="width:100%;">⚡ Upgrade to Pro</button>':''}</div>`;
+  const dc = document.getElementById('dashboardContent');
+  if (!dc) return;
+  dc.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text2);">Loading...</div>`;
+
+  // Real source of truth for plan status + referral data — same check used
+  // for the nav badge and usage limits, not the possibly-stale user_metadata.
+  let profileData = null;
+  let referrals = [];
+  try {
+    const { data: pd } = await _supabase.from('profiles').select('plan, referral_reward_until, referral_code').eq('id', currentUser.id).single();
+    profileData = pd;
+    const { data: rd } = await _supabase.from('referrals').select('completed_conversion, created_at').eq('referrer_id', currentUser.id).order('created_at', { ascending: true });
+    referrals = rd || [];
+  } catch (e) {}
+
+  const isPro = isProActive(profileData);
+  const completedCount = referrals.filter(r => r.completed_conversion).length;
+  const referralLink = profileData?.referral_code ? `https://5iles.com/?ref=${profileData.referral_code}` : '';
+  const rewardActive = profileData?.referral_reward_until && new Date(profileData.referral_reward_until) > new Date();
+
+  const referralRows = referrals.length
+    ? referrals.map((r, i) => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.85rem;"><span>Referral #${i+1}</span><span style="color:${r.completed_conversion ? '#43e97b' : 'var(--text2)'};">${r.completed_conversion ? '✓ Completed' : '⏳ Pending first use'}</span></div>`).join('')
+    : `<div style="color:var(--text2);font-size:0.85rem;padding:8px 0;">No referrals yet — share your link below!</div>`;
+
+  dc.innerHTML = `<div style="display:flex;flex-direction:column;gap:16px;">
+    <div style="background:var(--surface2);border-radius:10px;padding:16px;">
+      <div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Account</div>
+      <div style="font-weight:600;">${name}</div>
+      <div style="font-size:0.85rem;color:var(--text2);">${email}</div>
+    </div>
+    <div style="background:var(--surface2);border-radius:10px;padding:16px;">
+      <div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Plan</div>
+      <div style="font-weight:600;color:var(--accent);">${isPro ? '⭐ Pro' : '🆓 Free'}</div>
+      ${rewardActive ? `<div style="font-size:0.78rem;color:#43e97b;margin-top:4px;">🎁 Referral reward active until ${new Date(profileData.referral_reward_until).toLocaleDateString()}</div>` : ''}
+    </div>
+    <div style="background:var(--surface2);border-radius:10px;padding:16px;">
+      <div style="font-size:0.8rem;color:var(--text2);margin-bottom:4px;">Usage today</div>
+      <div style="font-weight:600;">${isPro ? 'Unlimited ✓' : usageCount + ' / 15 conversions'}</div>
+    </div>
+    <div style="background:var(--surface2);border-radius:10px;padding:16px;">
+      <div style="font-size:0.8rem;color:var(--text2);margin-bottom:8px;">🎁 Refer & Earn — ${completedCount}/10 for a free month of Pro</div>
+      <div style="background:var(--border);border-radius:100px;height:6px;overflow:hidden;margin-bottom:12px;">
+        <div style="background:linear-gradient(90deg,var(--accent),var(--accent2));height:100%;width:${Math.min(completedCount*10,100)}%;transition:width 0.3s;"></div>
+      </div>
+      ${referralLink ? `<div style="display:flex;gap:8px;margin-bottom:12px;">
+        <input readonly value="${referralLink}" id="referralLinkInput" style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:0.8rem;">
+        <button onclick="copyReferralLink()" class="btn btn-ghost" style="padding:8px 14px;font-size:0.8rem;white-space:nowrap;">Copy</button>
+      </div>` : ''}
+      <div style="max-height:160px;overflow-y:auto;">${referralRows}</div>
+    </div>
+    ${isPro ? '' : '<button class="btn btn-primary" onclick="closeDashboard()" style="width:100%;">⚡ Upgrade to Pro</button>'}
+  </div>`;
 }
 function closeDashboard() {
   document.getElementById('dashboardModal').style.display = 'none';
+}
+function copyReferralLink() {
+  const input = document.getElementById('referralLinkInput');
+  if (!input) return;
+  navigator.clipboard.writeText(input.value).then(() => showToast('🔗 Referral link copied!', 'success'));
 }
 </script>
 
