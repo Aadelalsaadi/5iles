@@ -2717,6 +2717,14 @@ if(currentUser) {
       status: 'success'
     }).then(() => {});
   });
+  // If this account was referred by someone and hasn't completed a
+  // conversion yet, this is that moment — mark it complete. This is what
+  // actually makes a referral "count" (not just signing up).
+  _supabase.from('referrals')
+    .update({ completed_conversion: true, completed_at: new Date().toISOString() })
+    .eq('referred_id', currentUser.id)
+    .eq('completed_conversion', false)
+    .then(() => {});
 }
 resultFiles.innerHTML = results.map(r => `
       <div class="result-file">
