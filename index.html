@@ -554,6 +554,15 @@ window.addEventListener('load', initAuth);
 </head>
 <body>
 
+<!-- Referral program banner -->
+<div id="referral-announce" style="background:linear-gradient(135deg,var(--accent),var(--accent2));padding:10px 5%;text-align:center;position:relative;z-index:100;">
+  <span style="color:#fff;font-size:0.85rem;font-weight:600;">
+    🎁 Refer 10 friends to 5iles, earn a free month of Pro —
+    <a href="#" onclick="handleReferralBannerClick();return false;" style="color:#fff;text-decoration:underline;font-weight:700;">Get your link →</a>
+  </span>
+  <button onclick="dismissReferralBanner()" aria-label="Dismiss" style="position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:#fff;font-size:1.1rem;cursor:pointer;opacity:0.85;line-height:1;">×</button>
+</div>
+
 <!-- NAV -->
 <nav>
           <a href="#" class="logo">
