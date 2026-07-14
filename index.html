@@ -396,6 +396,50 @@ async function updateNavForUser(user) {
   `;
 }
 
+// Generates a short random referral code, e.g. "K7QX2M9P"
+function generateReferralCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no O/0/I/1 — avoids visual confusion
+  let code = '';
+  for (let i = 0; i < 8; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
+// Runs once, the very first time a given account ever gets a real session.
+// 1) Gives them their own referral code, if they don't already have one.
+// 2) If they arrived via someone else's referral link (?ref=CODE, captured
+//    earlier into sessionStorage), permanently records that relationship —
+//    but only the first time; a profile that already has a referral_code
+//    has already been through this, so we skip re-running it on every
+//    future sign-in.
+async function setupReferralIfNeeded(user) {
+  try {
+    const { data: profileData } = await _supabase.from('profiles').select('referral_code').eq('id', user.id).single();
+    if (profileData?.referral_code) return; // already set up — nothing to do
+
+    // Generate this user's own code, retrying on the rare chance of a collision
+    let myCode = null;
+    for (let attempt = 0; attempt < 5 && !myCode; attempt++) {
+      const candidate = generateReferralCode();
+      const { error } = await _supabase.from('profiles').update({ referral_code: candidate }).eq('id', user.id);
+      if (!error) myCode = candidate;
+    }
+
+    // If they came in via a referral link, resolve it and record it — once, permanently
+    const pendingCode = sessionStorage.getItem('pendingReferralCode');
+    if (pendingCode) {
+      sessionStorage.removeItem('pendingReferralCode'); // consume it either way, success or not
+      const { data: referrerId } = await _supabase.rpc('get_referrer_id', { code: pendingCode });
+      if (referrerId && referrerId !== user.id) { // can't refer yourself
+        await _supabase.from('profiles').update({ referred_by: referrerId }).eq('id', user.id);
+        await _supabase.from('referrals').insert({ referrer_id: referrerId, referred_id: user.id });
+      }
+    }
+  } catch (e) {
+    // Non-critical — referral setup failing shouldn't block anyone from using the site
+    console.error('Referral setup error:', e);
+  }
+}
+
 function updateNavForSignedOut() {
   const navBtns = document.querySelector('.nav-btns');
   if(navBtns) {
