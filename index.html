@@ -2530,8 +2530,8 @@ if (USAGE_LIMIT_ENABLED && !currentUser && usageCount >= 15) {
 if (USAGE_LIMIT_ENABLED && currentUser && !currentUser.user_metadata?.plan) {
   const userUsageKey = 'usage_user_' + currentUser.id + '_' + today;
   const userUsageCount = parseInt(localStorage.getItem(userUsageKey) || 0);
-  const { data: profileData } = await _supabase.from('profiles').select('plan').eq('id', currentUser.id).single();
-const limit = profileData?.plan === 'pro' ? Infinity : 15;
+  const { data: profileData } = await _supabase.from('profiles').select('plan, referral_reward_until').eq('id', currentUser.id).single();
+const limit = isProActive(profileData) ? Infinity : 15;
   if (userUsageCount >= limit) {
     showToast(`⚠ You've used ${userUsageCount}/${limit} conversions today. Resets at midnight — upgrade to Pro for unlimited!`, 'error');
     btn.disabled = false;
