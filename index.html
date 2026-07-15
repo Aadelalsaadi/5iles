@@ -2337,6 +2337,8 @@ function openTool(id) {
           </select>
         </div>
       </div>`;
+    } else if(tool.type === 'qr-scanner') {
+    opts.innerHTML = `<p style="color:var(--text2);font-size:0.85rem;margin-top:8px;">📷 Upload a photo or screenshot containing a QR code — the decoded text or link will be extracted automatically.</p>`;
     } else if(tool.type === 'adjust-image') {
     opts.innerHTML = `
       <div style="width:100%;">
