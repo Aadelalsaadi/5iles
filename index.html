@@ -2748,7 +2748,17 @@ if(currentUser) {
       }
     });
 }
-resultFiles.innerHTML = results.map(r => `
+lastResults = results;
+resultFiles.innerHTML = (results.length > 1 ? `
+      <div class="result-file" style="background:rgba(108,99,255,0.08);border:1px dashed var(--accent);">
+        <div class="file-item-icon">📦</div>
+        <div class="result-file-info">
+          <div class="result-file-name">All ${results.length} files</div>
+          <div class="result-file-savings">Download everything in one .zip</div>
+        </div>
+        <button class="btn-download" onclick="downloadAllAsZip()">⬇ Download ZIP</button>
+      </div>
+    ` : '') + results.map(r => `
       <div class="result-file">
         <div class="file-item-icon">${getFileIcon(r.name)}</div>
         <div class="result-file-info">
