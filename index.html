@@ -6420,6 +6420,35 @@ function fileToDataUrl(file) {
   });
 }
 
+async function downloadAllAsZip() {
+  if (!lastResults.length) return;
+  try {
+    // Reuses the same JSZip lazy-load pattern as Merge Word Documents —
+    // only loads the library if it isn't already on the page.
+    if (typeof JSZip === 'undefined') {
+      await new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+        s.onload = resolve; s.onerror = () => reject(new Error('Failed to load ZIP library.'));
+        document.head.appendChild(s);
+      });
+    }
+    const zip = new JSZip();
+    for (const r of lastResults) {
+      const res = await fetch(r.url);
+      const blob = await res.blob();
+      zip.file(r.name, blob);
+    }
+    const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+    const url = URL.createObjectURL(zipBlob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'files.zip'; a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch (e) {
+    showToast('❌ Could not create ZIP: ' + e.message, 'error');
+  }
+}
+
 async function downloadResult(url, name) {
   try {
     let blobUrl;
