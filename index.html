@@ -3080,6 +3080,56 @@ async function excelToJson() {
   return results;
 }
 
+// ===================== MERGE EXCEL SHEETS =====================
+async function mergeExcelSheets() {
+  await ensureXlsxLib();
+  if (uploadedFiles.length < 2) throw new Error('Please add at least 2 Excel files to merge.');
+  const mode = document.querySelector('input[name="mergeExcelMode"]:checked')?.value || 'separate';
+  const newWb = XLSX.utils.book_new();
+
+  if (mode === 'separate') {
+    // Every sheet from every file goes into one workbook, renamed to avoid clashes.
+    const usedNames = new Set();
+    for (const file of uploadedFiles) {
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: 'array', cellDates: true });
+      const baseName = file.name.replace(/\.(xlsx|xls)$/i, '');
+      wb.SheetNames.forEach(sheetName => {
+        let uniqueName = `${baseName}_${sheetName}`.slice(0, 31); // Excel's 31-char sheet name limit
+        let counter = 1;
+        while (usedNames.has(uniqueName)) {
+          const suffix = `_${counter}`;
+          uniqueName = (`${baseName}_${sheetName}`.slice(0, 31 - suffix.length)) + suffix;
+          counter++;
+        }
+        usedNames.add(uniqueName);
+        XLSX.utils.book_append_sheet(newWb, wb.Sheets[sheetName], uniqueName);
+      });
+    }
+  } else {
+    // Stack mode: first sheet of each file, one below another, with a
+    // filename label before each block so nothing gets silently mixed up.
+    let combinedRows = [];
+    for (const file of uploadedFiles) {
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: 'array', cellDates: true });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+      if (combinedRows.length) combinedRows.push([]); // blank spacer row between files
+      combinedRows.push([`── ${file.name} ──`]);
+      combinedRows.push(...rows);
+    }
+    const combinedSheet = XLSX.utils.aoa_to_sheet(combinedRows);
+    XLSX.utils.book_append_sheet(newWb, combinedSheet, 'Combined');
+  }
+
+  const wbArrayBuffer = XLSX.write(newWb, { bookType: 'xlsx', type: 'array' });
+  const blob = new Blob([wbArrayBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  const url = URL.createObjectURL(blob);
+  const modeLabel = mode === 'separate' ? `${uploadedFiles.length} files merged, sheets kept separate` : `${uploadedFiles.length} files stacked into one sheet`;
+  return [{ name: 'merged_excel.xlsx', url, info: `${modeLabel} (${formatSize(blob.size)})` }];
+}
+
 async function mp4ToMp3() {
   const CONVERTER_URL = 'https://fiveiles-converter.onrender.com';
   const results = [];
