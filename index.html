@@ -341,6 +341,7 @@ function isProActive(profileData) {
 
 // Auth state
 let currentUser = null;
+let lastResults = []; // powers the "Download all as ZIP" button for multi-file results
 
 // Check session on load
 async function initAuth() {
