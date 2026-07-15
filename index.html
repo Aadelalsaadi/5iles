@@ -1769,6 +1769,22 @@ function openTool(id) {
         </div>
         <div style="font-size:0.85rem;color:var(--text2);background:rgba(108,99,255,0.1);border:1px solid var(--accent);border-radius:8px;padding:12px 14px;">🧾 Each row becomes a JSON object using the header row as keys. If your sheet has title or summary rows before the real column headers, set "Header row" to that row number. If your workbook has multiple sheets, the output is one JSON object keyed by sheet name (e.g. <code>{"Sheet1": [...], "Sheet2": [...]}</code>).</div>
       </div>`;
+    } else if(tool.type === 'merge-excel') {
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div class="option-group" style="margin-bottom:12px;">
+          <div class="option-label" style="margin-bottom:8px;">How should the sheets be combined?</div>
+          <label style="display:flex;align-items:flex-start;gap:8px;margin-bottom:10px;cursor:pointer;">
+            <input type="radio" name="mergeExcelMode" value="separate" checked style="margin-top:3px;">
+            <span><b>Keep sheets separate</b> — one workbook with all original sheets kept intact, renamed to avoid clashes (e.g. "Report_Sheet1")</span>
+          </label>
+          <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer;">
+            <input type="radio" name="mergeExcelMode" value="stack" style="margin-top:3px;">
+            <span><b>Stack into one sheet</b> — the first sheet of each file, one below another, with a filename label before each block</span>
+          </label>
+        </div>
+        <div style="font-size:0.85rem;color:var(--text2);background:rgba(108,99,255,0.1);border:1px solid var(--accent);border-radius:8px;padding:12px 14px;">📚 Upload the Excel files you want to combine, choose a mode above, then process.</div>
+      </div>`;
     } else if(tool.type === 'case-converter') {
     } else if(tool.type === 'case-converter') {
     document.getElementById('dropZone').style.display = 'none';
