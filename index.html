@@ -2688,6 +2688,8 @@ if (USAGE_LIMIT_ENABLED && !currentUser) {
       results = await excelCsvConvert();
     } else if(currentTool.type === 'excel-to-json') {
       results = await excelToJson();
+    } else if(currentTool.type === 'merge-excel') {
+      results = await mergeExcelSheets();
     } else if(currentTool.type === 'mp4-to-mp3') {
       results = await mp4ToMp3();
     } else if(currentTool.type === 'audio-converter') {
