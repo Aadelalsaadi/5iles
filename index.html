@@ -6165,6 +6165,48 @@ async function generateQRCode() {
     } catch(e) { document.body.removeChild(container); reject(e); }
   });
 }
+
+async function ensureJsQR() {
+  if (typeof jsQR !== 'undefined') return;
+  await new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
+    s.onload = resolve; s.onerror = () => reject(new Error('Failed to load QR scanning library.'));
+    document.head.appendChild(s);
+  });
+}
+
+async function qrCodeScanner() {
+  await ensureJsQR();
+  const results = [];
+  for (const file of uploadedFiles) {
+    const imgUrl = URL.createObjectURL(file);
+    const img = await new Promise((resolve, reject) => {
+      const im = new Image();
+      im.onload = () => resolve(im);
+      im.onerror = () => reject(new Error(`"${file.name}" could not be read as an image.`));
+      im.src = imgUrl;
+    });
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    URL.revokeObjectURL(imgUrl);
+    const code = jsQR(imageData.data, imageData.width, imageData.height);
+    if (!code || !code.data) {
+      throw new Error(`No QR code found in "${file.name}". Try a clearer or closer photo of the code.`);
+    }
+    const decoded = code.data;
+    const blob = new Blob([decoded], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const baseName = file.name.replace(/\.[^.]+$/, '');
+    const preview = decoded.length > 60 ? decoded.slice(0, 60) + '…' : decoded;
+    results.push({ name: `${baseName}_decoded.txt`, url, info: `Decoded: "${preview}"` });
+  }
+  return results;
+}
 // ===================== ADJUST IMAGE =====================
 async function adjustImage() {
   const results = [];
