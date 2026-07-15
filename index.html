@@ -2506,10 +2506,19 @@ function handleFiles(files) {
   }
 }
 
+let dragSrcIndex = null;
+
 function renderFileList() {
   const list = document.getElementById('fileList');
+  const showHandle = uploadedFiles.length > 1; // no point reordering a single file
   list.innerHTML = uploadedFiles.map((f,i) => `
-    <div class="file-item">
+    <div class="file-item" draggable="${showHandle}" data-index="${i}"
+      ondragstart="fileDragStart(event, ${i})"
+      ondragover="fileDragOver(event)"
+      ondragleave="fileDragLeave(event)"
+      ondrop="fileDrop(event, ${i})"
+      ondragend="fileDragEnd(event)">
+      ${showHandle ? '<div class="file-item-handle" title="Drag to reorder" style="cursor:grab;color:var(--text2);padding:0 4px;user-select:none;">⠿</div>' : ''}
       <div class="file-item-icon">${getFileIcon(f.name)}</div>
       <div class="file-item-info">
         <div class="file-item-name">${f.name}</div>
@@ -2518,6 +2527,32 @@ function renderFileList() {
       <button class="file-item-remove" onclick="removeFile(${i})">✕</button>
     </div>
   `).join('');
+}
+
+function fileDragStart(e, i) {
+  dragSrcIndex = i;
+  e.currentTarget.style.opacity = '0.4';
+  e.dataTransfer.effectAllowed = 'move';
+}
+function fileDragOver(e) {
+  e.preventDefault();
+  e.currentTarget.style.borderTop = '2px solid var(--accent)';
+}
+function fileDragLeave(e) {
+  e.currentTarget.style.borderTop = '';
+}
+function fileDrop(e, targetIndex) {
+  e.preventDefault();
+  e.currentTarget.style.borderTop = '';
+  if (dragSrcIndex === null || dragSrcIndex === targetIndex) return;
+  const moved = uploadedFiles.splice(dragSrcIndex, 1)[0];
+  uploadedFiles.splice(targetIndex, 0, moved);
+  dragSrcIndex = null;
+  renderFileList();
+}
+function fileDragEnd(e) {
+  e.currentTarget.style.opacity = '';
+  dragSrcIndex = null;
 }
 
 function removeFile(i) {
