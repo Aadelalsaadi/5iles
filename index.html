@@ -2713,6 +2713,8 @@ if (USAGE_LIMIT_ENABLED && !currentUser) {
   results = await countWords();
       } else if(currentTool.type === 'qr-code') {
   results = await generateQRCode();
+      } else if(currentTool.type === 'qr-scanner') {
+  results = await qrCodeScanner();
     } else if(currentTool.type === 'adjust-image') {
   results = await adjustImage();
 } else if(currentTool.type === 'blur-image') {
