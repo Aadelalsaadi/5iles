@@ -1310,6 +1310,48 @@ function openTool(id) {
       </div>`;
     document.getElementById('processBtn').disabled = false;
     document.getElementById('processBtn').style.display = 'none';
+    } else if(tool.type === 'calorie-burn-calculator') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+          <button type="button" id="calUnitMetric" onclick="setCalorieUnit('metric')" style="flex:1;padding:10px;background:var(--accent);border:1px solid var(--border);border-radius:10px;color:#fff;font-size:0.85rem;font-weight:600;cursor:pointer;">Metric</button>
+          <button type="button" id="calUnitImperial" onclick="setCalorieUnit('imperial')" style="flex:1;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text2);font-size:0.85rem;font-weight:600;cursor:pointer;">Imperial</button>
+        </div>
+        <div style="margin-bottom:12px;">
+          <div class="option-label">Activity</div>
+          <select id="calorieActivity" onchange="onCalorieActivityChange()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;"></select>
+        </div>
+        <div id="calWeightMetric" style="margin-bottom:12px;">
+          <div class="option-label">Weight (kg)</div>
+          <input type="number" id="calWeightKg" placeholder="70" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;">
+        </div>
+        <div id="calWeightImperial" style="display:none;margin-bottom:12px;">
+          <div class="option-label">Weight (lb)</div>
+          <input type="number" id="calWeightLb" placeholder="154" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;">
+        </div>
+        <div id="calInputModeRow" style="display:none;gap:8px;margin-bottom:12px;">
+          <button type="button" id="calModeDuration" onclick="setCalorieInputMode('duration')" style="flex:1;padding:8px;background:var(--accent);border:1px solid var(--border);border-radius:8px;color:#fff;font-size:0.8rem;font-weight:600;cursor:pointer;">I know my duration</button>
+          <button type="button" id="calModeDistance" onclick="setCalorieInputMode('distance')" style="flex:1;padding:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:0.8rem;font-weight:600;cursor:pointer;">I know my distance</button>
+        </div>
+        <div id="calDurationInput" style="margin-bottom:12px;">
+          <div class="option-label">Duration (minutes)</div>
+          <input type="number" id="calDurationMin" placeholder="30" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;">
+        </div>
+        <div id="calDistanceInput" style="display:none;margin-bottom:12px;">
+          <div class="option-label" id="calDistanceLabel">Distance (km)</div>
+          <input type="number" id="calDistanceVal" placeholder="5" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;">
+        </div>
+        <button type="button" onclick="calculateCaloriesBurned()" style="width:100%;padding:14px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:10px;font-size:1rem;font-weight:600;cursor:pointer;margin-bottom:16px;">Calculate</button>
+        <div id="calResultBox" style="display:none;background:var(--surface2);border-radius:14px;padding:20px;text-align:center;">
+          <div id="calCaloriesValue" style="font-size:2.4rem;font-weight:800;color:#ff6584;"></div>
+          <div style="font-size:0.9rem;color:var(--text2);margin-bottom:8px;">calories burned</div>
+          <div id="calDerivedDuration" style="font-size:0.85rem;color:var(--text2);"></div>
+        </div>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
+    document.getElementById('processBtn').style.display = 'none';
+    populateCalorieActivities();
     } else if(tool.type === 'percentage-calculator') {
     document.getElementById('dropZone').style.display = 'none';
     opts.innerHTML = `
