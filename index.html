@@ -875,10 +875,15 @@ const TOOLS = [
 let currentTool = null;
 let uploadedFiles = [];
 
-function renderTools(cat='all') {
+let currentCategory = 'all';
+
+function renderToolCards(list) {
   const grid = document.getElementById('toolsGrid');
-  const filtered = cat === 'all' ? TOOLS : TOOLS.filter(t => t.cat.includes(cat));
-  grid.innerHTML = filtered.map(t => `
+  if (!list.length) {
+    grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2);">No tools found. Try a different search term.</div>`;
+    return;
+  }
+  grid.innerHTML = list.map(t => `
     <div class="tool-card" onclick="openTool('${t.id}')">
       ${t.badge ? `<span class="tool-badge badge-${t.badge.toLowerCase()}">${t.badge}</span>` : ''}
       <div class="tool-icon">${t.icon}</div>
@@ -888,10 +893,25 @@ function renderTools(cat='all') {
   `).join('');
 }
 
+function renderTools(cat='all') {
+  const filtered = cat === 'all' ? TOOLS : TOOLS.filter(t => t.cat.includes(cat));
+  renderToolCards(filtered);
+}
+
 function filterTools(cat, btn) {
+  currentCategory = cat;
+  document.getElementById('toolSearchInput').value = '';
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   btn.classList.add('active');
   renderTools(cat);
+}
+
+function searchTools(query) {
+  const q = query.trim().toLowerCase();
+  if (!q) { renderTools(currentCategory); return; }
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  const matches = TOOLS.filter(t => t.name.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q));
+  renderToolCards(matches);
 }
 
 function openTool(id) {
