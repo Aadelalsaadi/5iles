@@ -5679,6 +5679,139 @@ function calculateBMI() {
   bmiMarker.style.left = (((clampedBmi - 15) / (40 - 15)) * 100) + '%';
   resultBox.style.display = 'block';
 }
+
+// ===================== CALORIES BURNED CALCULATOR =====================
+// MET values sourced from the Compendium of Physical Activities (the
+// standard reference every reputable calorie calculator uses). Activities
+// with a speedMph carry an implied pace, letting duration be derived from
+// distance for that specific tier — non-pace activities are duration-only.
+const CALORIE_ACTIVITIES = [
+  { name: 'Walking — 2.0 mph (very slow)', met: 2.8, speedMph: 2.0 },
+  { name: 'Walking — 2.5 mph (slow)', met: 3.0, speedMph: 2.5 },
+  { name: 'Walking — 3.0 mph (moderate)', met: 3.3, speedMph: 3.0 },
+  { name: 'Walking — 3.5 mph (brisk)', met: 3.8, speedMph: 3.5 },
+  { name: 'Walking — 4.0 mph (very brisk)', met: 5.0, speedMph: 4.0 },
+  { name: 'Running — 5 mph (12 min/mile)', met: 8.3, speedMph: 5.0 },
+  { name: 'Running — 6 mph (10 min/mile)', met: 9.8, speedMph: 6.0 },
+  { name: 'Running — 6.7 mph (9 min/mile)', met: 10.5, speedMph: 6.7 },
+  { name: 'Running — 7.5 mph (8 min/mile)', met: 11.0, speedMph: 7.5 },
+  { name: 'Running — 8.6 mph (7 min/mile)', met: 11.8, speedMph: 8.6 },
+  { name: 'Running — 10 mph (6 min/mile)', met: 14.5, speedMph: 10.0 },
+  { name: 'Cycling — under 10 mph (leisure)', met: 4.0, speedMph: 8 },
+  { name: 'Cycling — 10-12 mph (light effort)', met: 6.8, speedMph: 11 },
+  { name: 'Cycling — 12-14 mph (moderate effort)', met: 8.0, speedMph: 13 },
+  { name: 'Cycling — 14-16 mph (vigorous effort)', met: 10.0, speedMph: 15 },
+  { name: 'Cycling — 16-19 mph (racing)', met: 12.0, speedMph: 17.5 },
+  { name: 'Cycling — 20+ mph (very fast)', met: 15.8, speedMph: 20 },
+  { name: 'Swimming — leisurely', met: 6.0 },
+  { name: 'Swimming — moderate effort', met: 8.3 },
+  { name: 'Swimming — vigorous laps', met: 9.8 },
+  { name: 'Elliptical trainer — moderate', met: 5.0 },
+  { name: 'Rowing machine — moderate', met: 7.0 },
+  { name: 'Rowing machine — vigorous', met: 8.5 },
+  { name: 'Stair climbing', met: 9.0 },
+  { name: 'Jump rope — moderate', met: 11.8 },
+  { name: 'Hiking — cross-country', met: 6.0 },
+  { name: 'HIIT (high-intensity interval training)', met: 8.0 },
+  { name: 'Weightlifting — moderate effort', met: 3.5 },
+  { name: 'Weightlifting — vigorous effort', met: 6.0 },
+  { name: 'Yoga — Hatha', met: 2.5 },
+  { name: 'Yoga — power / vinyasa', met: 4.0 },
+  { name: 'Pilates', met: 3.0 },
+  { name: 'Stretching', met: 2.3 },
+  { name: 'Basketball — game play', met: 8.0 },
+  { name: 'Soccer — casual', met: 7.0 },
+  { name: 'Tennis — general', met: 7.3 },
+  { name: 'Boxing — sparring', met: 7.8 },
+  { name: 'Dancing — general', met: 5.5 },
+  { name: 'Housework / cleaning', met: 3.3 },
+  { name: 'Gardening', met: 3.8 },
+];
+
+function populateCalorieActivities() {
+  const sel = document.getElementById('calorieActivity');
+  if (!sel) return;
+  sel.innerHTML = CALORIE_ACTIVITIES.map((a, i) => `<option value="${i}">${a.name}</option>`).join('');
+  window.calorieUnit = window.calorieUnit || 'metric';
+  window.calorieInputMode = 'duration';
+  onCalorieActivityChange();
+}
+
+function onCalorieActivityChange() {
+  const sel = document.getElementById('calorieActivity');
+  const activity = CALORIE_ACTIVITIES[parseInt(sel.value)];
+  const isPaceBased = typeof activity.speedMph === 'number';
+  document.getElementById('calInputModeRow').style.display = isPaceBased ? 'flex' : 'none';
+  if (!isPaceBased) {
+    setCalorieInputMode('duration');
+  }
+}
+
+function setCalorieUnit(unit) {
+  window.calorieUnit = unit;
+  document.getElementById('calWeightMetric').style.display = unit === 'metric' ? 'block' : 'none';
+  document.getElementById('calWeightImperial').style.display = unit === 'imperial' ? 'block' : 'none';
+  document.getElementById('calUnitMetric').style.background = unit === 'metric' ? 'var(--accent)' : 'var(--surface2)';
+  document.getElementById('calUnitMetric').style.color = unit === 'metric' ? '#fff' : 'var(--text2)';
+  document.getElementById('calUnitImperial').style.background = unit === 'imperial' ? 'var(--accent)' : 'var(--surface2)';
+  document.getElementById('calUnitImperial').style.color = unit === 'imperial' ? '#fff' : 'var(--text2)';
+  const distLabel = document.getElementById('calDistanceLabel');
+  if (distLabel) distLabel.textContent = unit === 'metric' ? 'Distance (km)' : 'Distance (miles)';
+}
+
+function setCalorieInputMode(mode) {
+  window.calorieInputMode = mode;
+  document.getElementById('calDurationInput').style.display = mode === 'duration' ? 'block' : 'none';
+  document.getElementById('calDistanceInput').style.display = mode === 'distance' ? 'block' : 'none';
+  document.getElementById('calModeDuration').style.background = mode === 'duration' ? 'var(--accent)' : 'var(--surface2)';
+  document.getElementById('calModeDuration').style.color = mode === 'duration' ? '#fff' : 'var(--text2)';
+  document.getElementById('calModeDistance').style.background = mode === 'distance' ? 'var(--accent)' : 'var(--surface2)';
+  document.getElementById('calModeDistance').style.color = mode === 'distance' ? '#fff' : 'var(--text2)';
+}
+
+function calculateCaloriesBurned() {
+  const unit = window.calorieUnit || 'metric';
+  const mode = window.calorieInputMode || 'duration';
+  const activity = CALORIE_ACTIVITIES[parseInt(document.getElementById('calorieActivity').value)];
+
+  let weightKg;
+  if (unit === 'metric') {
+    weightKg = parseFloat(document.getElementById('calWeightKg').value);
+  } else {
+    const weightLb = parseFloat(document.getElementById('calWeightLb').value);
+    weightKg = weightLb ? weightLb * 0.453592 : NaN;
+  }
+  if (!weightKg || weightKg <= 0) {
+    showToast('⚠️ Please enter a valid weight.', 'error');
+    return;
+  }
+
+  let durationHours, derivedNote = '';
+  if (mode === 'distance' && typeof activity.speedMph === 'number') {
+    const distanceRaw = parseFloat(document.getElementById('calDistanceVal').value);
+    if (!distanceRaw || distanceRaw <= 0) {
+      showToast('⚠️ Please enter a valid distance.', 'error');
+      return;
+    }
+    const distanceMiles = unit === 'metric' ? distanceRaw * 0.621371 : distanceRaw;
+    durationHours = distanceMiles / activity.speedMph;
+    const derivedMinutes = Math.round(durationHours * 60);
+    derivedNote = `Estimated duration at this pace: ${derivedMinutes} minutes`;
+  } else {
+    const durationMin = parseFloat(document.getElementById('calDurationMin').value);
+    if (!durationMin || durationMin <= 0) {
+      showToast('⚠️ Please enter a valid duration.', 'error');
+      return;
+    }
+    durationHours = durationMin / 60;
+  }
+
+  const calories = activity.met * weightKg * durationHours;
+  document.getElementById('calCaloriesValue').textContent = Math.round(calories);
+  document.getElementById('calDerivedDuration').textContent = derivedNote;
+  document.getElementById('calResultBox').style.display = 'block';
+}
+
 function calculateFinance() {
   const amount = parseFloat(document.getElementById('fcAmount').value);
   const advance = parseFloat(document.getElementById('fcAdvance').value) || 0;
