@@ -612,6 +612,9 @@ window.addEventListener('load', initAuth);
     <h2>Everything in one place</h2>
     <p>Professional-grade file tools for individuals and teams. No software to install.</p>
   </div>
+  <div style="max-width:480px;margin:0 auto 20px;position:relative;">
+    <input type="text" id="toolSearchInput" oninput="searchTools(this.value)" placeholder="🔍 Search tools — try 'merge', 'excel', 'calorie'..." style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:14px 18px;border-radius:12px;font-size:0.95rem;">
+  </div>
   <div class="tools-tabs">
     <button class="tab active" onclick="filterTools('all',this)">All tools</button>
     <button class="tab" onclick="filterTools('pdf',this)">📄 PDF</button>
