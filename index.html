@@ -2907,6 +2907,12 @@ resultFiles.innerHTML = (results.length > 1 ? `
     `).join('');
     resultBox.classList.add('active');
     showToast('✅ Processing complete! Files ready to download.', 'success');
+    if (typeof gtag === 'function') {
+      gtag('event', 'file_converted', {
+        tool_type: currentTool.type,
+        file_count: results.length
+      });
+    }
   } catch(err) {
     showToast('❌ Error: ' + err.message, 'error');
     fill.style.width = '0%';
@@ -6811,7 +6817,10 @@ async function downloadAllAsZip() {
   }
 }
 
-async function downloadResult(url, name) {
+ async function downloadResult(url, name) {
+  if (typeof gtag === 'function') {
+    gtag('event', 'file_downloaded', { file_name: name });
+  }
   try {
     let blobUrl;
     if(url.startsWith('data:')) {
