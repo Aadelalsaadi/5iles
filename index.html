@@ -4248,7 +4248,7 @@ async function removeWatermarkPDF() {
       });
     });
 
-    const bytes = await pdfDoc.save();
+    const bytes = await pdfDoc.save({ useObjectStreams: false });
     const blob = new Blob([bytes], { type: 'application/pdf' });
     results.push({
       name: file.name.replace('.pdf', '_watermark_removed.pdf'),
