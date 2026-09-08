@@ -4119,7 +4119,8 @@ async function watermarkPDF() {
 
                        const mb = page.getMediaBox();
       const dbgFont = font;
-      page.drawText(`DBG w=${width.toFixed(0)} h=${height.toFixed(0)} rot=${rotation} mbx=${mb.x.toFixed(0)} mby=${mb.y.toFixed(0)} sizeRatio=${sizeRatio} pos=${position}`, { x: mb.x + 5, y: mb.y + 5, size: 7, font: dbgFont, color: rgb(1,0,0), opacity: 1 });
+            page.drawText(`W${width.toFixed(0)}H${height.toFixed(0)}`, { x: mb.x + 10, y: mb.y + 10, size: 22, font: dbgFont, color: rgb(1,0,0), opacity: 1 });
+      page.drawText(`R${rotation}`, { x: mb.x + 10, y: mb.y + height - 30, size: 22, font: dbgFont, color: rgb(1,0,0), opacity: 1 });
       const place = (vx, vy, size) => {
         let px = vx, py = vy;
         if (rotation === 90) { px = vy; py = raw.height - vx; }
