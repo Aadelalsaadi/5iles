@@ -837,6 +837,7 @@ const TOOLS = [
   {id:'ocr-pdf',icon:'🔍',name:'OCR PDF',desc:'Make scanned PDFs searchable',cat:'pdf',accept:'.pdf,.jpg,.jpeg,.png',badge:'AI',type:'ocr-pdf'},
     {id:'watermark',icon:'💧',name:'Add Watermark',desc:'Stamp text or image watermarks on PDF',cat:'sign',accept:'.pdf',type:'watermark-pdf'},
   {id:'remove-watermark-pdf',icon:'🧹',name:'Remove Watermark',desc:'Detect and remove low-opacity watermarks from PDF',cat:'sign',accept:'.pdf',type:'remove-watermark-pdf'},
+  {id:'remove-watermark-word', icon:'🧹', name:'Remove Watermark (Word)', desc:'Remove watermarks from Word documents', cat:'sign', accept:'.docx', type:'remove-watermark-word'},
   {id:'watermark-image',icon:'🖼️',name:'Watermark Image',desc:'Stamp text watermarks on photos and images',cat:'image',accept:'.jpg,.jpeg,.png,.webp',type:'watermark-image'},
 {id:'pptx-to-pdf',icon:'📊',name:'PPT → PDF',desc:'Convert PowerPoint presentations to PDF',cat:'convert',accept:'.pptx,.ppt',type:'pptx-to-pdf'},
 {id:'xlsx-to-pdf',icon:'📈',name:'Excel → PDF',desc:'Convert Excel spreadsheets to PDF',cat:'convert',accept:'.xlsx,.xls',type:'xlsx-to-pdf'},
@@ -2849,6 +2850,8 @@ if (USAGE_LIMIT_ENABLED && !currentUser) {
         results = await watermarkImage();
       } else if(currentTool.type === 'remove-watermark-pdf') {
         results = await removeWatermarkPDF();
+      } else if(currentTool.type === 'remove-watermark-word') {
+  results = await removeWatermarkWord();
       } else if(currentTool.type === 'ocr-pdf') {
       results = await ocrPDF();
     } else if(currentTool.type === 'word-to-pdf') {
