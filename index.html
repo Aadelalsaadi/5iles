@@ -836,6 +836,7 @@ const TOOLS = [
 {id:'translate-document',icon:'🌐',name:'Translate Document',desc:'Translate Word documents into another language',cat:'sign',accept:'.docx',type:'translate-document'},
   {id:'ocr-pdf',icon:'🔍',name:'OCR PDF',desc:'Make scanned PDFs searchable',cat:'pdf',accept:'.pdf,.jpg,.jpeg,.png',badge:'AI',type:'ocr-pdf'},
     {id:'watermark',icon:'💧',name:'Add Watermark',desc:'Stamp text or image watermarks on PDF',cat:'sign',accept:'.pdf',type:'watermark-pdf'},
+  {id:'remove-watermark-pdf',icon:'🧹',name:'Remove Watermark',desc:'Detect and remove low-opacity watermarks from PDF',cat:'sign',accept:'.pdf',type:'remove-watermark-pdf'},
   {id:'watermark-image',icon:'🖼️',name:'Watermark Image',desc:'Stamp text watermarks on photos and images',cat:'image',accept:'.jpg,.jpeg,.png,.webp',type:'watermark-image'},
 {id:'pptx-to-pdf',icon:'📊',name:'PPT → PDF',desc:'Convert PowerPoint presentations to PDF',cat:'convert',accept:'.pptx,.ppt',type:'pptx-to-pdf'},
 {id:'xlsx-to-pdf',icon:'📈',name:'Excel → PDF',desc:'Convert Excel spreadsheets to PDF',cat:'convert',accept:'.xlsx,.xls',type:'xlsx-to-pdf'},
@@ -2842,11 +2843,13 @@ if (USAGE_LIMIT_ENABLED && !currentUser) {
           results = await fixGrammar();
         } else if(currentTool.type === 'translate-document') {
           results = await translateDocument();
-                } else if(currentTool.type === 'watermark-pdf') {
-          results = await watermarkPDF();
-        } else if(currentTool.type === 'watermark-image') {
-          results = await watermarkImage();
-    } else if(currentTool.type === 'ocr-pdf') {
+                     } else if(currentTool.type === 'watermark-pdf') {
+        results = await watermarkPDF();
+      } else if(currentTool.type === 'watermark-image') {
+        results = await watermarkImage();
+      } else if(currentTool.type === 'remove-watermark-pdf') {
+        results = await removeWatermarkPDF();
+      } else if(currentTool.type === 'ocr-pdf') {
       results = await ocrPDF();
     } else if(currentTool.type === 'word-to-pdf') {
       results = await wordToPDF();
@@ -4181,7 +4184,87 @@ async function watermarkPDF() {
   }
   return results;
 }
+async function removeWatermarkPDF() {
+  const { PDFName, PDFArray, PDFDict, PDFRawStream, decodePDFRawStream } = PDFLib;
+  const results = [];
 
+  const encodeLatin1 = (str) => {
+    const bytes = new Uint8Array(str.length);
+    for (let i = 0; i < str.length; i++) bytes[i] = str.charCodeAt(i) & 0xFF;
+    return bytes;
+  };
+
+  for (const file of uploadedFiles) {
+    const ab = await file.arrayBuffer();
+    const pdfDoc = await PDFDocument.load(ab, { ignoreEncryption: true });
+    const pages = pdfDoc.getPages();
+    let totalRemoved = 0;
+    const debugLines = [];
+
+    pages.forEach((page, pageIdx) => {
+      const resources = page.node.Resources();
+      const extGState = resources ? resources.lookup(PDFName.of('ExtGState'), PDFDict) : null;
+      const lowAlphaNames = [];
+
+      if (extGState) {
+        extGState.entries().forEach(([key, ref]) => {
+          const gsDict = pdfDoc.context.lookup(ref, PDFDict);
+          if (!gsDict) return;
+          const ca = gsDict.get(PDFName.of('ca'));
+          const CA = gsDict.get(PDFName.of('CA'));
+          const caVal = ca ? ca.asNumber() : 1;
+          const CAVal = CA ? CA.asNumber() : 1;
+          if (caVal < 0.9 || CAVal < 0.9) {
+            const name = key.encodedName ? key.encodedName.replace('/', '') : key.toString().replace('/', '');
+            lowAlphaNames.push(name);
+          }
+        });
+      }
+
+      debugLines.push(`page ${pageIdx + 1}: lowAlphaGS=[${lowAlphaNames.join(',')}]`);
+      if (lowAlphaNames.length === 0) return;
+
+      let contentsEntry = page.node.get(PDFName.of('Contents'));
+      const contentRefs = contentsEntry instanceof PDFArray ? contentsEntry.asArray() : [contentsEntry];
+
+      contentRefs.forEach(ref => {
+        const stream = pdfDoc.context.lookup(ref, PDFRawStream);
+        if (!stream) return;
+        const decoded = decodePDFRawStream(stream).decode();
+        let text = new TextDecoder('latin1').decode(decoded);
+
+        lowAlphaNames.forEach(name => {
+          const gsRegex = new RegExp(`q[^Qq]*?/${name}\\s+gs[^Qq]*?Q`, 'g');
+          const matches = text.match(gsRegex);
+          if (matches) {
+            totalRemoved += matches.length;
+            text = text.replace(gsRegex, '');
+          }
+        });
+
+        const newBytes = encodeLatin1(text);
+        const newStream = PDFRawStream.of(stream.dict, newBytes);
+        pdfDoc.context.assign(ref, newStream);
+      });
+    });
+
+    const bytes = await pdfDoc.save();
+    const blob = new Blob([bytes], { type: 'application/pdf' });
+    results.push({
+      name: file.name.replace('.pdf', '_watermark_removed.pdf'),
+      url: URL.createObjectURL(blob),
+      info: `Removed ${totalRemoved} watermark block(s) across ${pages.length} page(s) (${formatSize(blob.size)})`
+    });
+    results.push({
+      name: 'DEBUG-INFO.txt',
+      url: 'data:text/plain,' + encodeURIComponent(debugLines.join('\n') + `\ntotalRemoved=${totalRemoved}`),
+      info: 'Debug info'
+    });
+  }
+
+  return results;
+}
+  
 // ===================== OCR PDF =====================
 async function ocrPDF() {
   const lang = document.getElementById('ocrLang')?.value || 'eng';
