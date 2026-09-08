@@ -4310,7 +4310,83 @@ pdfDoc.context.assign(ref, newStream);
 
   return results;
 }
-  
+
+  async function removeWatermarkWord() {
+  const results = [];
+  const debugLines = [];
+
+  for (const file of uploadedFiles) {
+    const arrayBuffer = await file.arrayBuffer();
+    const zip = await JSZip.loadAsync(arrayBuffer);
+
+    const headerPaths = Object.keys(zip.files).filter(p => /^word\/header\d+\.xml$/.test(p));
+    let totalRemoved = 0;
+
+    for (const path of headerPaths) {
+      const xmlText = await zip.file(path).async('text');
+      const doc = new DOMParser().parseFromString(xmlText, 'application/xml');
+
+      const shapes = Array.from(doc.getElementsByTagName('v:shape'));
+      let removedInFile = 0;
+
+      shapes.forEach(shape => {
+        const id = shape.getAttribute('id') || '';
+        if (!id.startsWith('PowerPlusWaterMarkObject')) return;
+
+        let node = shape.parentNode;
+        while (node && node.nodeName !== 'w:pict') node = node.parentNode;
+        const pict = node;
+        if (!pict) return;
+
+        const run = pict.parentNode;
+        if (!run || run.nodeName !== 'w:r') return;
+
+        const para = run.parentNode;
+        if (para && para.nodeName === 'w:p') {
+          const otherRuns = Array.from(para.childNodes).filter(n =>
+            n.nodeName === 'w:r' && n !== run
+          );
+          if (otherRuns.length === 0) {
+            para.parentNode.removeChild(para);
+          } else {
+            run.parentNode.removeChild(run);
+          }
+        } else {
+          run.parentNode.removeChild(run);
+        }
+        removedInFile++;
+      });
+
+      if (removedInFile > 0) {
+        const newXml = new XMLSerializer().serializeToString(doc);
+        zip.file(path, newXml);
+        totalRemoved += removedInFile;
+        debugLines.push(`${path}: removed ${removedInFile} watermark shape(s)`);
+      }
+    }
+
+    const blob = await zip.generateAsync({
+      type: 'blob',
+      mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    });
+
+    results.push({
+      name: file.name.replace('.docx', '_watermark_removed.docx'),
+      url: URL.createObjectURL(blob),
+      info: totalRemoved > 0
+        ? `Removed ${totalRemoved} watermark shape(s) across ${headerPaths.length} header(s)`
+        : 'No watermark found (checked headers for PowerPlusWaterMarkObject shapes)'
+    });
+  }
+
+  results.push({
+    name: 'DEBUG-INFO.txt',
+    url: 'data:text/plain,' + encodeURIComponent(debugLines.join('\n')),
+    info: 'Debug info'
+  });
+
+  return results;
+}
 // ===================== OCR PDF =====================
 async function ocrPDF() {
   const lang = document.getElementById('ocrLang')?.value || 'eng';
