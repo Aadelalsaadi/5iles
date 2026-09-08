@@ -4185,7 +4185,7 @@ async function watermarkPDF() {
   return results;
 }
 async function removeWatermarkPDF() {
-  const { PDFName, PDFArray, PDFDict, PDFRawStream, decodePDFRawStream } = PDFLib;
+  const { PDFDocument, PDFName, PDFArray, PDFDict, PDFRawStream, decodePDFRawStream } = PDFLib;
   const results = [];
 
   const encodeLatin1 = (str) => {
