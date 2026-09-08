@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>5iles</title>
+  <script>
+    // Capture the path (e.g. /tools/compress-pdf) and redirect to homepage.
+    // index.html will read this on load and open the matching tool.
+    var path = window.location.pathname;
+    var segment = path.replace(/^\//, '').replace(/\/$/, '');
+    // Strip leading "tools/" if present: /tools/compress-pdf → compress-pdf
+    var slug = segment.replace(/^tools\//, '');
+    if (slug) {
+      sessionStorage.setItem('5iles_tool_slug', slug);
+    }
+    window.location.replace('/');
+  </script>
+</head>
+<body></body>
+</html>
