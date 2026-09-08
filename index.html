@@ -2496,7 +2496,7 @@ function openTool(id) {
           <option value="strong">Strong</option>
         </select>
       </div>`;
-  } else if(tool.type === 'remove-bg') {
+    } else if(tool.type === 'remove-bg') {
     opts.innerHTML = `
       <div class="option-group">
         <div class="option-label">Background replacement</div>
@@ -2516,6 +2516,7 @@ function openTool(id) {
         </select>
       </div>
       <p style="color:var(--text3);font-size:0.78rem;margin-top:8px;">ℹ️ Browser-based removal. For professional results, use the Pro plan with AI-powered server processing.</p>`;
+  } else if(tool.type === 'watermark-pdf') {
     opts.innerHTML = `
       <div style="width:100%;">
         <div class="option-label" style="margin-bottom:8px;">Watermark text</div>
@@ -2534,6 +2535,33 @@ function openTool(id) {
             <select class="option-select" id="watermarkPages">
               <option value="all">All pages</option>
               <option value="first">First page only</option>
+            </select>
+          </div>
+        </div>
+      </div>`;
+  } else if(tool.type === 'watermark-image') {
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div class="option-label" style="margin-bottom:8px;">Watermark text</div>
+        <input type="text" id="imgWatermarkText" placeholder="e.g. \u00a9 Your Name, DRAFT, your company..." value="\u00a9 5iles" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;">
+        <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;">
+          <div class="option-group">
+            <div class="option-label">Position</div>
+            <select class="option-select" id="imgWatermarkPosition">
+              <option value="center" selected>Center</option>
+              <option value="top-left">Top left</option>
+              <option value="top-right">Top right</option>
+              <option value="bottom-left">Bottom left</option>
+              <option value="bottom-right">Bottom right</option>
+              <option value="tile">Tiled (repeat)</option>
+            </select>
+          </div>
+          <div class="option-group">
+            <div class="option-label">Opacity</div>
+            <select class="option-select" id="imgWatermarkOpacity">
+              <option value="0.15">Light (15%)</option>
+              <option value="0.3" selected>Medium (30%)</option>
+              <option value="0.5">Strong (50%)</option>
             </select>
           </div>
         </div>
