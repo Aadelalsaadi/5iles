@@ -4174,9 +4174,10 @@ async function watermarkPDF() {
         const dbg = targetPages[0];
     const dbgRaw = dbg.getSize();
     const dbgRot = dbg.getRotation().angle;
+    const dbgCb = dbg.getCropBox();
     const bytes = await pdfDoc.save({ useObjectStreams: true });
     const blob = new Blob([bytes], {type:'application/pdf'});
-    results.push({ name: file.name.replace('.pdf', '_watermarked.pdf'), url: URL.createObjectURL(blob), info: `Watermarked "${text}" (${position}) on ${targetPages.length} page(s) (${formatSize(blob.size)}) [DEBUG: mb=${dbgRaw.width.toFixed(0)}x${dbgRaw.height.toFixed(0)}, cb=${cb.width.toFixed(0)}x${cb.height.toFixed(0)} @(${cb.x.toFixed(0)},${cb.y.toFixed(0)}), rotation=${dbgRot}]` });
+          results.push({ name: file.name.replace('.pdf', '_watermarked.pdf'), url: URL.createObjectURL(blob), info: `Watermarked "${text}" (${position}) on ${targetPages.length} page(s) (${formatSize(blob.size)}) [DEBUG: mb=${dbgRaw.width.toFixed(0)}x${dbgRaw.height.toFixed(0)}, cb=${dbgCb.width.toFixed(0)}x${dbgCb.height.toFixed(0)} @(${dbgCb.x.toFixed(0)},${dbgCb.y.toFixed(0)}), rotation=${dbgRot}]` });
   }
   return results;
 }
