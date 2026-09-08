@@ -4165,9 +4165,12 @@ async function watermarkPDF() {
       }
     });
 
+        const dbg = targetPages[0];
+    const dbgRaw = dbg.getSize();
+    const dbgRot = dbg.getRotation().angle;
     const bytes = await pdfDoc.save({ useObjectStreams: true });
     const blob = new Blob([bytes], {type:'application/pdf'});
-    results.push({ name: file.name.replace('.pdf', '_watermarked.pdf'), url: URL.createObjectURL(blob), info: `Watermarked "${text}" (${position}) on ${targetPages.length} page(s) (${formatSize(blob.size)})` });
+    results.push({ name: file.name.replace('.pdf', '_watermarked.pdf'), url: URL.createObjectURL(blob), info: `Watermarked "${text}" (${position}) on ${targetPages.length} page(s) (${formatSize(blob.size)}) [DEBUG: raw=${dbgRaw.width.toFixed(0)}x${dbgRaw.height.toFixed(0)}, rotation=${dbgRot}]` });
   }
   return results;
 }
