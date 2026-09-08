@@ -4125,9 +4125,20 @@ async function watermarkPDF() {
         page.drawText(text, { x: px, y: py, size, font, color: rgb(0.5,0.5,0.5), opacity, rotate: degrees(rotation) });
       };
 
+            const fitFont = (startSize, maxW) => {
+        let fs = startSize;
+        let tw = font.widthOfTextAtSize(text, fs);
+        let guard = 0;
+        while (tw > maxW && fs > 4 && guard < 50) {
+          fs *= 0.9;
+          tw = font.widthOfTextAtSize(text, fs);
+          guard++;
+        }
+        return { fs, tw };
+      };
+
       if (position === 'tile') {
-        const fontSize = Math.min(width, height) * sizeRatio * 0.5;
-        const textWidth = font.widthOfTextAtSize(text, fontSize);
+        const { fs: fontSize, tw: textWidth } = fitFont(Math.min(width, height) * sizeRatio * 0.5, width * 0.6);
         const stepX = textWidth + pad * 3;
         const stepY = fontSize + pad * 4;
         for (let y = fontSize + pad; y < height; y += stepY) {
@@ -4138,29 +4149,20 @@ async function watermarkPDF() {
         return;
       }
 
-      let fontSize = Math.min(width, height) * sizeRatio;
-      let textWidth = font.widthOfTextAtSize(text, fontSize);
-
       if (position === 'center') {
-        const maxWidthCenter = width * 0.85;
-        if (textWidth > maxWidthCenter) {
-          fontSize *= maxWidthCenter / textWidth;
-          textWidth = font.widthOfTextAtSize(text, fontSize);
-        }
-        const x = (width - textWidth) / 2;
-        const y = (height - fontSize * 0.36) / 2;
+        const { fs: fontSize, tw: textWidth } = fitFont(Math.min(width, height) * sizeRatio, width - pad * 2);
+        const x = Math.max(pad, Math.min((width - textWidth) / 2, width - textWidth - pad));
+        const y = Math.max(pad, Math.min((height - fontSize * 0.36) / 2, height - fontSize - pad));
         place(x, y, fontSize);
       } else {
-        const maxWidth = width - pad * 2;
-        if (textWidth > maxWidth) {
-          fontSize *= maxWidth / textWidth;
-          textWidth = font.widthOfTextAtSize(text, fontSize);
-        }
+        const { fs: fontSize, tw: textWidth } = fitFont(Math.min(width, height) * sizeRatio, width - pad * 2);
         let x, y;
         if (position === 'top-left') { x = pad; y = height - fontSize - pad; }
         else if (position === 'top-right') { x = width - textWidth - pad; y = height - fontSize - pad; }
         else if (position === 'bottom-left') { x = pad; y = pad; }
         else { x = width - textWidth - pad; y = pad; }
+        x = Math.max(pad, Math.min(x, width - textWidth - pad));
+        y = Math.max(pad, Math.min(y, height - fontSize - pad));
         place(x, y, fontSize);
       }
     });
