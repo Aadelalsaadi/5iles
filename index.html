@@ -2819,8 +2819,10 @@ if (USAGE_LIMIT_ENABLED && !currentUser) {
           results = await fixGrammar();
         } else if(currentTool.type === 'translate-document') {
           results = await translateDocument();
-        } else if(currentTool.type === 'watermark-pdf') {
+                } else if(currentTool.type === 'watermark-pdf') {
           results = await watermarkPDF();
+        } else if(currentTool.type === 'watermark-image') {
+          results = await watermarkImage();
     } else if(currentTool.type === 'ocr-pdf') {
       results = await ocrPDF();
     } else if(currentTool.type === 'word-to-pdf') {
@@ -4004,6 +4006,62 @@ async function unlockPDF() {
       }
   
 // ===================== WATERMARK PDF =====================
+async function watermarkImage() {
+  const text = document.getElementById('imgWatermarkText')?.value?.trim() || '© 5iles';
+  const position = document.getElementById('imgWatermarkPosition')?.value || 'center';
+  const opacity = parseFloat(document.getElementById('imgWatermarkOpacity')?.value || 0.3);
+  const results = [];
+
+  for (const file of uploadedFiles) {
+    const img = await createImageBitmap(file);
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+
+    const fontSize = Math.max(18, Math.min(img.width, img.height) * 0.05);
+    ctx.font = `bold ${fontSize}px sans-serif`;
+    ctx.fillStyle = `rgba(255,255,255,${opacity})`;
+    ctx.strokeStyle = `rgba(0,0,0,${opacity * 0.6})`;
+    ctx.lineWidth = Math.max(1, fontSize * 0.05);
+    const textWidth = ctx.measureText(text).width;
+    const pad = fontSize * 0.8;
+
+    const drawAt = (x, y) => {
+      ctx.strokeText(text, x, y);
+      ctx.fillText(text, x, y);
+    };
+
+    if (position === 'tile') {
+      ctx.save();
+      ctx.globalAlpha = 1;
+      const stepX = textWidth + pad * 3;
+      const stepY = fontSize + pad * 3;
+      for (let y = fontSize + pad; y < canvas.height; y += stepY) {
+        for (let x = pad; x < canvas.width + textWidth; x += stepX) {
+          drawAt(x, y);
+        }
+      }
+      ctx.restore();
+    } else {
+      let x, y;
+      if (position === 'center') { x = (canvas.width - textWidth) / 2; y = canvas.height / 2; }
+      else if (position === 'top-left') { x = pad; y = fontSize + pad; }
+      else if (position === 'top-right') { x = canvas.width - textWidth - pad; y = fontSize + pad; }
+      else if (position === 'bottom-left') { x = pad; y = canvas.height - pad; }
+      else { x = canvas.width - textWidth - pad; y = canvas.height - pad; }
+      drawAt(x, y);
+    }
+
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, file.type.includes('png') ? 'image/png' : 'image/jpeg', 0.92));
+    const ext = file.name.match(/\.[^.]+$/)?.[0] || '.jpg';
+    const baseName = file.name.replace(/\.[^.]+$/, '');
+    results.push({ name: `${baseName}_watermarked${ext}`, url: URL.createObjectURL(blob), info: `Watermarked (${position}, ${formatSize(blob.size)})` });
+  }
+  return results;
+}
+
 async function watermarkPDF() {
   const { PDFDocument, rgb, StandardFonts, degrees } = PDFLib;
   const text = document.getElementById('watermarkText')?.value?.trim() || 'CONFIDENTIAL';
