@@ -2517,13 +2517,32 @@ function openTool(id) {
         </select>
       </div>
       <p style="color:var(--text3);font-size:0.78rem;margin-top:8px;">ℹ️ Browser-based removal. For professional results, use the Pro plan with AI-powered server processing.</p>`;
-  } else if(tool.type === 'watermark-pdf') {
+    } else if(tool.type === 'watermark-pdf') {
     opts.innerHTML = `
       <div style="width:100%;">
         <div class="option-label" style="margin-bottom:8px;">Watermark text</div>
         <input type="text" id="watermarkText" placeholder="e.g. CONFIDENTIAL, DRAFT, your company name..." value="CONFIDENTIAL" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;">
         <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;">
-                    <div class="option-group">
+          <div class="option-group">
+            <div class="option-label">Position</div>
+            <select class="option-select" id="watermarkPosition">
+              <option value="center" selected>Center (diagonal)</option>
+              <option value="top-left">Top left</option>
+              <option value="top-right">Top right</option>
+              <option value="bottom-left">Bottom left</option>
+              <option value="bottom-right">Bottom right</option>
+              <option value="tile">Tiled (repeat)</option>
+            </select>
+          </div>
+          <div class="option-group">
+            <div class="option-label">Size</div>
+            <select class="option-select" id="watermarkSize">
+              <option value="0.05">Small</option>
+              <option value="0.09" selected>Medium</option>
+              <option value="0.14">Large</option>
+            </select>
+          </div>
+          <div class="option-group">
             <div class="option-label">Opacity</div>
             <select class="option-select" id="watermarkOpacity">
               <option value="0.15">Light (15%)</option>
@@ -4075,6 +4094,8 @@ async function watermarkImage() {
 async function watermarkPDF() {
   const { PDFDocument, rgb, StandardFonts, degrees } = PDFLib;
   const text = document.getElementById('watermarkText')?.value?.trim() || 'CONFIDENTIAL';
+  const position = document.getElementById('watermarkPosition')?.value || 'center';
+  const sizeRatio = parseFloat(document.getElementById('watermarkSize')?.value || 0.09);
   const opacity = parseFloat(document.getElementById('watermarkOpacity')?.value || 0.3);
   const pageMode = document.getElementById('watermarkPages')?.value || 'all';
   const results = [];
@@ -4090,29 +4111,53 @@ async function watermarkPDF() {
 
     targetPages.forEach(page => {
       const { width, height } = page.getSize();
-      let fontSize = Math.min(width, height) * 0.09;
-      let textWidth = font.widthOfTextAtSize(text, fontSize);
-      const maxDiagonal = Math.min(width, height) * 0.92;
-      const rotatedSpan = textWidth * Math.cos(rad) + fontSize * Math.sin(rad);
-      if (rotatedSpan > maxDiagonal) {
-        fontSize *= maxDiagonal / rotatedSpan;
-        textWidth = font.widthOfTextAtSize(text, fontSize);
+      const pad = Math.min(width, height) * 0.04;
+
+      if (position === 'tile') {
+        const fontSize = Math.min(width, height) * sizeRatio * 0.5;
+        const textWidth = font.widthOfTextAtSize(text, fontSize);
+        const stepX = textWidth + pad * 3;
+        const stepY = fontSize + pad * 4;
+        for (let y = fontSize + pad; y < height; y += stepY) {
+          for (let x = pad; x < width + textWidth; x += stepX) {
+            page.drawText(text, { x, y, size: fontSize, font, color: rgb(0.5,0.5,0.5), opacity, rotate: degrees(angle) });
+          }
+        }
+        return;
       }
-      const cx = width / 2, cy = height / 2;
-      const x = cx - (textWidth / 2) * Math.cos(rad) + (fontSize / 2) * Math.sin(rad);
-      const y = cy - (textWidth / 2) * Math.sin(rad) - (fontSize / 2) * Math.cos(rad);
-      page.drawText(text, {
-        x, y,
-        size: fontSize, font,
-        color: rgb(0.5, 0.5, 0.5),
-        opacity,
-        rotate: degrees(angle),
-      });
+
+      let fontSize = Math.min(width, height) * sizeRatio;
+      let textWidth = font.widthOfTextAtSize(text, fontSize);
+
+      if (position === 'center') {
+        const maxDiagonal = Math.min(width, height) * 0.92;
+        const rotatedSpan = textWidth * Math.cos(rad) + fontSize * Math.sin(rad);
+        if (rotatedSpan > maxDiagonal) {
+          fontSize *= maxDiagonal / rotatedSpan;
+          textWidth = font.widthOfTextAtSize(text, fontSize);
+        }
+        const cx = width / 2, cy = height / 2;
+        const x = cx - (textWidth / 2) * Math.cos(rad) + (fontSize / 2) * Math.sin(rad);
+        const y = cy - (textWidth / 2) * Math.sin(rad) - (fontSize / 2) * Math.cos(rad);
+        page.drawText(text, { x, y, size: fontSize, font, color: rgb(0.5,0.5,0.5), opacity, rotate: degrees(angle) });
+      } else {
+        const maxWidth = width - pad * 2;
+        if (textWidth > maxWidth) {
+          fontSize *= maxWidth / textWidth;
+          textWidth = font.widthOfTextAtSize(text, fontSize);
+        }
+        let x, y;
+        if (position === 'top-left') { x = pad; y = height - fontSize - pad; }
+        else if (position === 'top-right') { x = width - textWidth - pad; y = height - fontSize - pad; }
+        else if (position === 'bottom-left') { x = pad; y = pad; }
+        else { x = width - textWidth - pad; y = pad; }
+        page.drawText(text, { x, y, size: fontSize, font, color: rgb(0.5,0.5,0.5), opacity });
+      }
     });
 
     const bytes = await pdfDoc.save({ useObjectStreams: true });
     const blob = new Blob([bytes], {type:'application/pdf'});
-    results.push({ name: file.name.replace('.pdf', '_watermarked.pdf'), url: URL.createObjectURL(blob), info: `Watermarked "${text}" on ${targetPages.length} page(s) (${formatSize(blob.size)})` });
+    results.push({ name: file.name.replace('.pdf', '_watermarked.pdf'), url: URL.createObjectURL(blob), info: `Watermarked "${text}" (${position}) on ${targetPages.length} page(s) (${formatSize(blob.size)})` });
   }
   return results;
 }
