@@ -4117,12 +4117,13 @@ async function watermarkPDF() {
       const height = swapped ? raw.width : raw.height;
       const pad = Math.min(width, height) * 0.04;
 
-            const place = (vx, vy, size) => {
+                 const mb = page.getMediaBox();
+      const place = (vx, vy, size) => {
         let px = vx, py = vy;
         if (rotation === 90) { px = vy; py = raw.height - vx; }
         else if (rotation === 180) { px = raw.width - vx; py = vy; }
         else if (rotation === 270) { px = raw.width - vy; py = vx; }
-        page.drawText(text, { x: px, y: py, size, font, color: rgb(0.5,0.5,0.5), opacity, rotate: degrees(rotation) });
+        page.drawText(text, { x: px + mb.x, y: py + mb.y, size, font, color: rgb(0.5,0.5,0.5), opacity, rotate: degrees(rotation) });
       };
 
             const fitFont = (startSize, maxW) => {
