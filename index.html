@@ -4118,8 +4118,9 @@ async function watermarkPDF() {
       const pad = Math.min(width, height) * 0.04;
 
                        const mb = page.getMediaBox();
+          const cb = page.getCropBox();
       const dbgFont = font;
-                  results.push({ name: 'DEBUG-INFO.txt', url: 'data:text/plain,' + encodeURIComponent(`width=${width}\nheight=${height}\nrotation=${rotation}\nmbx=${mb.x}\nmby=${mb.y}`), info: 'Debug info' });
+                  results.push({ name: 'DEBUG-INFO.txt', url: 'data:text/plain,' + encodeURIComponent(`width=${width}\nheight=${height}\nrotation=${rotation}\nmbx=${mb.x}\nmby=${mb.y}\ncbwidth=${cb.width}\ncbheight=${cb.height}\ncbx=${cb.x}\ncby=${cb.y}`), info: 'Debug info' });
       const place = (vx, vy, size) => {
         let px = vx, py = vy;
         if (rotation === 90) { px = vy; py = raw.height - vx; }
@@ -4175,7 +4176,7 @@ async function watermarkPDF() {
     const dbgRot = dbg.getRotation().angle;
     const bytes = await pdfDoc.save({ useObjectStreams: true });
     const blob = new Blob([bytes], {type:'application/pdf'});
-    results.push({ name: file.name.replace('.pdf', '_watermarked.pdf'), url: URL.createObjectURL(blob), info: `Watermarked "${text}" (${position}) on ${targetPages.length} page(s) (${formatSize(blob.size)}) [DEBUG: raw=${dbgRaw.width.toFixed(0)}x${dbgRaw.height.toFixed(0)}, rotation=${dbgRot}]` });
+    results.push({ name: file.name.replace('.pdf', '_watermarked.pdf'), url: URL.createObjectURL(blob), info: `Watermarked "${text}" (${position}) on ${targetPages.length} page(s) (${formatSize(blob.size)}) [DEBUG: mb=${dbgRaw.width.toFixed(0)}x${dbgRaw.height.toFixed(0)}, cb=${cb.width.toFixed(0)}x${cb.height.toFixed(0)} @(${cb.x.toFixed(0)},${cb.y.toFixed(0)}), rotation=${dbgRot}]` });
   }
   return results;
 }
