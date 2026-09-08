@@ -4109,24 +4109,24 @@ async function watermarkPDF() {
     const pages = pdfDoc.getPages();
     const targetPages = pageMode === 'all' ? pages : [pages[0]];
 
-        targetPages.forEach(page => {
+            targetPages.forEach(page => {
       const raw = page.getSize();
       const rotation = ((page.getRotation().angle % 360) + 360) % 360;
       const swapped = rotation === 90 || rotation === 270;
-      const width = swapped ? raw.height : raw.width;
-      const height = swapped ? raw.width : raw.height;
+      const cb = page.getCropBox();
+      const width = swapped ? cb.height : cb.width;
+      const height = swapped ? cb.width : cb.height;
       const pad = Math.min(width, height) * 0.04;
 
-                       const mb = page.getMediaBox();
-          const cb = page.getCropBox();
+      const mb = page.getMediaBox();
       const dbgFont = font;
-                  results.push({ name: 'DEBUG-INFO.txt', url: 'data:text/plain,' + encodeURIComponent(`width=${width}\nheight=${height}\nrotation=${rotation}\nmbx=${mb.x}\nmby=${mb.y}\ncbwidth=${cb.width}\ncbheight=${cb.height}\ncbx=${cb.x}\ncby=${cb.y}`), info: 'Debug info' });
+      results.push({ name: 'DEBUG-INFO.txt', url: 'data:text/plain,' + encodeURIComponent(`width=${width}\nheight=${height}\nrotation=${rotation}\nmbx=${mb.x}\nmby=${mb.y}\ncbwidth=${cb.width}\ncbheight=${cb.height}\ncbx=${cb.x}\ncby=${cb.y}`), info: 'Debug info' });
       const place = (vx, vy, size) => {
         let px = vx, py = vy;
-        if (rotation === 90) { px = vy; py = raw.height - vx; }
-        else if (rotation === 180) { px = raw.width - vx; py = vy; }
-        else if (rotation === 270) { px = raw.width - vy; py = vx; }
-        page.drawText(text, { x: px + mb.x, y: py + mb.y, size, font, color: rgb(0.5,0.5,0.5), opacity, rotate: degrees(rotation) });
+        if (rotation === 90) { px = vy; py = cb.height - vx; }
+        else if (rotation === 180) { px = cb.width - vx; py = vy; }
+        else if (rotation === 270) { px = cb.width - vy; py = vx; }
+        page.drawText(text, { x: px + cb.x, y: py + cb.y, size, font, color: rgb(0.5,0.5,0.5), opacity, rotate: degrees(rotation) });
       };
 
             const fitFont = (startSize, maxW) => {
