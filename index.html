@@ -4109,9 +4109,21 @@ async function watermarkPDF() {
     const pages = pdfDoc.getPages();
     const targetPages = pageMode === 'all' ? pages : [pages[0]];
 
-    targetPages.forEach(page => {
-      const { width, height } = page.getSize();
+        targetPages.forEach(page => {
+      const raw = page.getSize();
+      const rotation = ((page.getRotation().angle % 360) + 360) % 360;
+      const swapped = rotation === 90 || rotation === 270;
+      const width = swapped ? raw.height : raw.width;
+      const height = swapped ? raw.width : raw.height;
       const pad = Math.min(width, height) * 0.04;
+
+            const place = (vx, vy, size) => {
+        let px = vx, py = vy;
+        if (rotation === 90) { px = vy; py = raw.height - vx; }
+        else if (rotation === 180) { px = raw.width - vx; py = vy; }
+        else if (rotation === 270) { px = raw.width - vy; py = vx; }
+        page.drawText(text, { x: px, y: py, size, font, color: rgb(0.5,0.5,0.5), opacity, rotate: degrees(rotation) });
+      };
 
       if (position === 'tile') {
         const fontSize = Math.min(width, height) * sizeRatio * 0.5;
@@ -4120,13 +4132,13 @@ async function watermarkPDF() {
         const stepY = fontSize + pad * 4;
         for (let y = fontSize + pad; y < height; y += stepY) {
           for (let x = pad; x < width + textWidth; x += stepX) {
-            page.drawText(text, { x, y, size: fontSize, font, color: rgb(0.5,0.5,0.5), opacity, rotate: degrees(angle) });
+            place(x, y, fontSize);
           }
         }
         return;
       }
 
-            let fontSize = Math.min(width, height) * sizeRatio;
+      let fontSize = Math.min(width, height) * sizeRatio;
       let textWidth = font.widthOfTextAtSize(text, fontSize);
 
       if (position === 'center') {
@@ -4137,7 +4149,7 @@ async function watermarkPDF() {
         }
         const x = (width - textWidth) / 2;
         const y = (height - fontSize * 0.36) / 2;
-        page.drawText(text, { x, y, size: fontSize, font, color: rgb(0.5,0.5,0.5), opacity });
+        place(x, y, fontSize);
       } else {
         const maxWidth = width - pad * 2;
         if (textWidth > maxWidth) {
@@ -4149,7 +4161,7 @@ async function watermarkPDF() {
         else if (position === 'top-right') { x = width - textWidth - pad; y = height - fontSize - pad; }
         else if (position === 'bottom-left') { x = pad; y = pad; }
         else { x = width - textWidth - pad; y = pad; }
-        page.drawText(text, { x, y, size: fontSize, font, color: rgb(0.5,0.5,0.5), opacity });
+        place(x, y, fontSize);
       }
     });
 
