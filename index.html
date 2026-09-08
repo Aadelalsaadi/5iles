@@ -4279,8 +4279,15 @@ async function removeWatermarkPDF() {
       });
 
         const newBytes = encodeLatin1(text);
-        const newStream = PDFRawStream.of(stream.dict, newBytes);
-        pdfDoc.context.assign(ref, newStream);
+const newDict = pdfDoc.context.obj({});
+for (const [key, val] of stream.dict.entries()) {
+  const keyName = key.encodedName ? key.encodedName.replace('/', '') : key.toString().replace('/', '');
+  if (keyName === 'Filter' || keyName === 'DecodeParms' || keyName === 'Length') continue;
+  newDict.set(key, val);
+}
+newDict.set(PDFName.of('Length'), pdfDoc.context.obj(newBytes.length));
+const newStream = PDFRawStream.of(newDict, newBytes);
+pdfDoc.context.assign(ref, newStream);
       });
     });
 
