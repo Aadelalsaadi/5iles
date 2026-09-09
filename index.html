@@ -935,6 +935,10 @@ function openTool(id) {
   const tool = TOOLS.find(t=>t.id===id);
   if(!tool) return;
   currentTool = tool;
+  history.pushState({toolId: id}, tool.name + ' — Free Online Tool | 5iles', '/tools/' + tool.type);
+document.title = tool.name + ' — Free Online Tool | 5iles';
+const metaDesc = document.querySelector('meta[name="description"]');
+if (metaDesc) metaDesc.setAttribute('content', tool.desc + ' Free, no signup required. | 5iles');
   uploadedFiles = [];
   // NOTE: 6 tools (pptx-to-pdf, xlsx-to-pdf, mp4-to-mp3, audio-converter,
   // extract-audio, compress-video) have been migrated to run fully inside the
@@ -2608,6 +2612,8 @@ function closeWorkspace() {
   document.getElementById('workspace').classList.remove('active');
   currentTool = null;
   uploadedFiles = [];
+  history.pushState(null, '5iles — Free PDF, Word, Excel & Image Tools Online', '/');
+document.title = '5iles — Free PDF, Word, Excel & Image Tools Online';
 }
 
 // ===================== FILE HANDLING =====================
@@ -7713,6 +7719,15 @@ window.addEventListener('appinstalled', () => {
     pwaBanner.style.display = 'none';
     showToast('🎉 5iles app installed!', 'success');
   });
+    window.addEventListener('popstate', (e) => {
+  try {
+    if (e.state && e.state.toolId) {
+      openTool(e.state.toolId);
+    } else {
+      closeWorkspace();
+    }
+  } catch(e) {}
+});
     // === SLUG ROUTING ===
 try {
   const slug = sessionStorage.getItem('5iles_tool_slug');
