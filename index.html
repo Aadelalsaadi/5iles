@@ -7713,6 +7713,24 @@ window.addEventListener('appinstalled', () => {
     pwaBanner.style.display = 'none';
     showToast('🎉 5iles app installed!', 'success');
   });
+    // === SLUG ROUTING ===
+try {
+  const slug = sessionStorage.getItem('5iles_tool_slug');
+  if (slug) {
+    sessionStorage.removeItem('5iles_tool_slug');
+    const tool = TOOLS.find(t => t.type === slug || t.id === slug);
+    if (tool) {
+      openTool(tool.id);
+      // Update page title and meta description for SEO
+      document.title = tool.name + ' — Free Online Tool | 5iles';
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) metaDesc.setAttribute('content', tool.desc + ' Free, no signup required. | 5iles');
+      // Push clean URL so the browser shows /tools/compress-pdf etc.
+      history.replaceState(null, '', '/tools/' + tool.type);
+    }
+  }
+} catch(e) {}
+// === END SLUG ROUTING ===
 </script>
 </body>
   <!-- Dashboard Modal -->
