@@ -7726,7 +7726,7 @@ try {
       const metaDesc = document.querySelector('meta[name="description"]');
       if (metaDesc) metaDesc.setAttribute('content', tool.desc + ' Free, no signup required. | 5iles');
       // Push clean URL so the browser shows /tools/compress-pdf etc.
-      history.replaceState(null, '', '/tools/' + tool.type);
+      setTimeout(() => history.replaceState(null, '', '/tools/' + tool.type), 200);
     }
   }
 } catch(e) {}
