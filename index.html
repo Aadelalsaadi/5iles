@@ -7746,6 +7746,22 @@ try {
   }
 } catch(e) {}
 // === END SLUG ROUTING ===
+    // === QUERY PARAM ROUTING (for ad sitelinks / deep links) ===
+try {
+  const params = new URLSearchParams(window.location.search);
+  const toolParam = params.get('tool');
+  if (toolParam) {
+    const tool = TOOLS.find(t => t.type === toolParam || t.id === toolParam);
+    if (tool) {
+      openTool(tool.id);
+      document.title = tool.name + ' — Free Online Tool | 5iles';
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) metaDesc.setAttribute('content', tool.desc + ' Free, no signup required. | 5iles');
+      setTimeout(() => history.replaceState(null, '', '/tools/' + tool.type), 200);
+    }
+  }
+} catch(e) {}
+// === END QUERY PARAM ROUTING ===
 </script>
 </body>
   <!-- Dashboard Modal -->
