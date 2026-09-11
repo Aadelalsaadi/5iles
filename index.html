@@ -5149,6 +5149,174 @@ function tcReset() {
   tcValue = 0;
   document.getElementById('tcCount').textContent = tcValue;
 }
+// ===================== TEXT TO BINARY =====================
+function t2bConvert() {
+  const text = document.getElementById('t2bInput').value;
+  const result = text.split('').map(c => c.charCodeAt(0).toString(2).padStart(8,'0')).join(' ');
+  document.getElementById('t2bResult').textContent = text ? result : 'Result will appear here...';
+}
+function t2bCopy() {
+  const text = document.getElementById('t2bResult').textContent;
+  if (!text || text === 'Result will appear here...') return;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('t2bCopyBtn');
+    const original = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+  });
+}
+// ===================== BINARY TO TEXT =====================
+function b2tConvert() {
+  const input = document.getElementById('b2tInput').value.trim();
+  const resultEl = document.getElementById('b2tResult');
+  if (!input) { resultEl.textContent = 'Result will appear here...'; return; }
+  const groups = input.split(/\s+/);
+  const valid = groups.every(g => /^[01]{1,8}$/.test(g));
+  if (!valid) { resultEl.textContent = 'Invalid binary — use groups of 0s and 1s separated by spaces.'; return; }
+  const text = groups.map(g => String.fromCharCode(parseInt(g, 2))).join('');
+  resultEl.textContent = text;
+}
+function b2tCopy() {
+  const text = document.getElementById('b2tResult').textContent;
+  if (!text || text === 'Result will appear here...' || text.startsWith('Invalid')) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('b2tCopyBtn');
+    const original = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+  });
+}
+// ===================== FAKE NAME GENERATOR =====================
+const fngMaleFirst = ['James','John','Robert','Michael','William','David','Richard','Joseph','Thomas','Charles','Daniel','Matthew','Anthony','Mark','Paul'];
+const fngFemaleFirst = ['Mary','Patricia','Jennifer','Linda','Elizabeth','Barbara','Susan','Jessica','Sarah','Karen','Nancy','Lisa','Betty','Margaret','Sandra'];
+const fngLast = ['Smith','Johnson','Williams','Brown','Jones','Garcia','Miller','Davis','Rodriguez','Martinez','Hernandez','Lopez','Gonzalez','Wilson','Anderson'];
+const fngStreets = ['Maple St','Oak Ave','Cedar Rd','Elm St','Pine Ave','Park Blvd','Main St','Sunset Dr','Lake Rd','Hill St'];
+const fngCities = ['Springfield','Riverside','Franklin','Clinton','Georgetown','Madison','Arlington','Salem','Fairview','Greenville'];
+const fngStates = ['CA','NY','TX','FL','IL','OH','GA','NC','MI','WA'];
+function fngRand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function fngGenerate() {
+  const genderSel = document.getElementById('fngGender')?.value || 'any';
+  const gender = genderSel === 'any' ? (Math.random() < 0.5 ? 'male' : 'female') : genderSel;
+  const first = gender === 'male' ? fngRand(fngMaleFirst) : fngRand(fngFemaleFirst);
+  const last = fngRand(fngLast);
+  const streetNum = Math.floor(Math.random() * 9000) + 100;
+  const zip = Math.floor(Math.random() * 90000) + 10000;
+  const dobYear = 1960 + Math.floor(Math.random() * 45);
+  const dobMonth = String(Math.floor(Math.random() * 12) + 1).padStart(2,'0');
+  const dobDay = String(Math.floor(Math.random() * 28) + 1).padStart(2,'0');
+  const email = `${first.toLowerCase()}.${last.toLowerCase()}${Math.floor(Math.random()*99)}@example.com`;
+  const phone = `(${Math.floor(Math.random()*900)+100}) ${Math.floor(Math.random()*900)+100}-${Math.floor(Math.random()*9000)+1000}`;
+  const address = `${streetNum} ${fngRand(fngStreets)}, ${fngRand(fngCities)}, ${fngRand(fngStates)} ${zip}`;
+  document.getElementById('fngResult').innerHTML = `
+    <div><strong>Name:</strong> ${first} ${last}</div>
+    <div><strong>Email:</strong> ${email}</div>
+    <div><strong>Phone:</strong> ${phone}</div>
+    <div><strong>Address:</strong> ${address}</div>
+    <div><strong>Date of birth:</strong> ${dobMonth}/${dobDay}/${dobYear}</div>
+  `;
+}
+function fngCopy() {
+  const el = document.getElementById('fngResult');
+  const text = el.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('fngCopyBtn');
+    const original = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+  });
+}
+// ===================== HOURS CALCULATOR =====================
+function hcCalculate() {
+  const start = document.getElementById('hcStart').value;
+  const end = document.getElementById('hcEnd').value;
+  const breakMin = parseInt(document.getElementById('hcBreak').value || 0);
+  if (!start || !end) return;
+  const [sh, sm] = start.split(':').map(Number);
+  const [eh, em] = end.split(':').map(Number);
+  let startMinutes = sh * 60 + sm;
+  let endMinutes = eh * 60 + em;
+  if (endMinutes < startMinutes) endMinutes += 24 * 60;
+  let totalMinutes = endMinutes - startMinutes - breakMin;
+  if (totalMinutes < 0) totalMinutes = 0;
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  document.getElementById('hcResult').textContent = `${hours}h ${minutes}m`;
+}
+// ===================== WHAT IS MY BROWSER =====================
+function wmbDetect() {
+  const ua = navigator.userAgent;
+  let browser = 'Unknown';
+  if (ua.includes('Edg/')) browser = 'Microsoft Edge';
+  else if (ua.includes('Chrome/') && !ua.includes('Edg/')) browser = 'Google Chrome';
+  else if (ua.includes('Firefox/')) browser = 'Mozilla Firefox';
+  else if (ua.includes('Safari/') && !ua.includes('Chrome/')) browser = 'Safari';
+  let os = 'Unknown';
+  if (ua.includes('Windows')) os = 'Windows';
+  else if (ua.includes('Mac OS')) os = 'macOS';
+  else if (ua.includes('Android')) os = 'Android';
+  else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
+  else if (ua.includes('Linux')) os = 'Linux';
+  const rows = [
+    ['Browser', browser],
+    ['Operating system', os],
+    ['Screen resolution', `${screen.width} × ${screen.height}`],
+    ['Viewport size', `${window.innerWidth} × ${window.innerHeight}`],
+    ['Language', navigator.language],
+    ['Cookies enabled', navigator.cookieEnabled ? 'Yes' : 'No'],
+    ['User agent', ua]
+  ];
+  document.getElementById('wmbResult').innerHTML = rows.map(r => `<div><strong>${r[0]}:</strong> <span style="color:var(--text2);word-break:break-all;">${r[1]}</span></div>`).join('');
+}
+// ===================== ROBOTS.TXT GENERATOR =====================
+function rtgGenerate() {
+  const mode = document.getElementById('rtgDefault')?.value || 'allow';
+  const sitemap = document.getElementById('rtgSitemap')?.value.trim();
+  const paths = document.getElementById('rtgPaths')?.value.split('\n').map(p => p.trim()).filter(Boolean);
+  let lines = ['User-agent: *'];
+  if (mode === 'disallow') {
+    lines.push('Disallow: /');
+  } else {
+    lines.push('Allow: /');
+    paths.forEach(p => lines.push(`Disallow: ${p}`));
+  }
+  if (sitemap) { lines.push(''); lines.push(`Sitemap: ${sitemap}`); }
+  document.getElementById('rtgResult').textContent = lines.join('\n');
+}
+function rtgCopy() {
+  const text = document.getElementById('rtgResult').textContent;
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('rtgCopyBtn');
+    const original = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+  });
+}
+// ===================== META TAG GENERATOR =====================
+function mtgEscape(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function mtgGenerate() {
+  const title = document.getElementById('mtgTitle')?.value || '';
+  const desc = document.getElementById('mtgDesc')?.value || '';
+  const keywords = document.getElementById('mtgKeywords')?.value || '';
+  const author = document.getElementById('mtgAuthor')?.value || '';
+  let lines = [];
+  if (title) lines.push(`<title>${mtgEscape(title)}</title>`);
+  if (desc) lines.push(`<meta name="description" content="${mtgEscape(desc)}">`);
+  if (keywords) lines.push(`<meta name="keywords" content="${mtgEscape(keywords)}">`);
+  if (author) lines.push(`<meta name="author" content="${mtgEscape(author)}">`);
+  lines.push('<meta name="viewport" content="width=device-width, initial-scale=1.0">');
+  document.getElementById('mtgResult').textContent = lines.join('\n');
+}
+function mtgCopy() {
+  const text = document.getElementById('mtgResult').textContent;
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('mtgCopyBtn');
+    const original = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+  });
+}
 function hgMd5(string) {
   function rotateLeft(n, s) { return (n << s) | (n >>> (32 - s)); }
   function addUnsigned(x, y) {
