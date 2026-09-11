@@ -4928,6 +4928,63 @@ function ccCopyResult() {
     setTimeout(() => { btn.textContent = original; }, 1500);
   });
 }
+// ===================== SMALL TEXT GENERATOR =====================
+const stgSmallCapsMap = {a:'ᴀ',b:'ʙ',c:'ᴄ',d:'ᴅ',e:'ᴇ',f:'ꜰ',g:'ɢ',h:'ʜ',i:'ɪ',j:'ᴊ',k:'ᴋ',l:'ʟ',m:'ᴍ',n:'ɴ',o:'ᴏ',p:'ᴘ',q:'ǫ',r:'ʀ',s:'s',t:'ᴛ',u:'ᴜ',v:'ᴠ',w:'ᴡ',x:'x',y:'ʏ',z:'ᴢ'};
+const stgSuperscriptMap = {a:'ᵃ',b:'ᵇ',c:'ᶜ',d:'ᵈ',e:'ᵉ',f:'ᶠ',g:'ᵍ',h:'ʰ',i:'ⁱ',j:'ʲ',k:'ᵏ',l:'ˡ',m:'ᵐ',n:'ⁿ',o:'ᵒ',p:'ᵖ',q:'q',r:'ʳ',s:'ˢ',t:'ᵗ',u:'ᵘ',v:'ᵛ',w:'ʷ',x:'ˣ',y:'ʸ',z:'ᶻ','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','+':'⁺','-':'⁻','=':'⁼','(':'⁽',')':'⁾'};
+const stgSubscriptMap = {a:'ₐ',e:'ₑ',h:'ₕ',i:'ᵢ',j:'ⱼ',k:'ₖ',l:'ₗ',m:'ₘ',n:'ₙ',o:'ₒ',p:'ₚ',r:'ᵣ',s:'ₛ',t:'ₜ',u:'ᵤ',v:'ᵥ',x:'ₓ','0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉','+':'₊','-':'₋','=':'₌','(':'₍',')':'₎'};
+function stgApplyMap(text, map) {
+  return text.toLowerCase().split('').map(c => map[c] !== undefined ? map[c] : c).join('');
+}
+function stgConvert() {
+  const text = document.getElementById('stgInputText').value;
+  document.getElementById('stgSmallCaps').textContent = text ? stgApplyMap(text, stgSmallCapsMap) : 'Result will appear here...';
+  document.getElementById('stgSuperscript').textContent = text ? stgApplyMap(text, stgSuperscriptMap) : 'Result will appear here...';
+  document.getElementById('stgSubscript').textContent = text ? stgApplyMap(text, stgSubscriptMap) : 'Result will appear here...';
+}
+function stgCopy(id) {
+  const el = document.getElementById(id);
+  const text = el.textContent;
+  if (!text || text === 'Result will appear here...') return;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = el.previousElementSibling.querySelector('button');
+    const original = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+  });
+}
+// ===================== INVISIBLE CHARACTER GENERATOR =====================
+const icgChars = { braille: '\u2800', zwsp: '\u200B', hangul: '\u3164' };
+function icgGenerate() {
+  const type = document.getElementById('icgType')?.value || 'braille';
+  const count = parseInt(document.getElementById('icgCount')?.value || 1);
+  const ch = icgChars[type];
+  const result = ch.repeat(count);
+  const box = document.getElementById('icgResultBox');
+  box.textContent = result;
+  box.dataset.value = result;
+}
+function icgCopy() {
+  const box = document.getElementById('icgResultBox');
+  const text = box?.dataset.value || '';
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('icgCopyBtn');
+    const original = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+  });
+}
+// ===================== TALLY COUNTER =====================
+let tcValue = 0;
+function tcChange(dir) {
+  const step = parseInt(document.getElementById('tcStep')?.value || 1);
+  tcValue += dir * step;
+  document.getElementById('tcCount').textContent = tcValue;
+}
+function tcReset() {
+  tcValue = 0;
+  document.getElementById('tcCount').textContent = tcValue;
+}
 function hgMd5(string) {
   function rotateLeft(n, s) { return (n << s) | (n >>> (32 - s)); }
   function addUnsigned(x, y) {
