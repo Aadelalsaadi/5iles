@@ -5408,6 +5408,151 @@ function mtgCopy() {
     setTimeout(() => { btn.textContent = original; }, 1500);
   });
 }
+// ===================== STOPWATCH & TIMER =====================
+let swInterval = null, swElapsed = 0, swStartTime = 0, swRunning = false, swLapCount = 0;
+function swSetMode(mode, el) {
+  document.querySelectorAll('.sw-tab').forEach(t => { t.classList.remove('active'); t.style.background='var(--surface2)'; t.style.color='var(--text2)'; });
+  el.classList.add('active'); el.style.background='var(--accent)'; el.style.color='#fff';
+  document.getElementById('swStopwatchPanel').style.display = mode === 'stopwatch' ? 'block' : 'none';
+  document.getElementById('swCountdownPanel').style.display = mode === 'countdown' ? 'block' : 'none';
+}
+function swFormat(ms) {
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  const s = Math.floor((ms % 60000) / 1000);
+  const t = Math.floor((ms % 1000) / 100);
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${t}`;
+}
+function swTick() {
+  const now = Date.now();
+  const display = document.getElementById('swDisplay');
+  if (display) display.textContent = swFormat(swElapsed + (now - swStartTime));
+}
+function swStart() {
+  const btn = document.getElementById('swStartBtn');
+  if (!swRunning) {
+    swRunning = true;
+    swStartTime = Date.now();
+    swInterval = setInterval(swTick, 100);
+    btn.textContent = 'Pause';
+  } else {
+    swRunning = false;
+    swElapsed += Date.now() - swStartTime;
+    clearInterval(swInterval);
+    btn.textContent = 'Resume';
+  }
+}
+function swLap() {
+  if (!swRunning) return;
+  swLapCount++;
+  const current = swElapsed + (Date.now() - swStartTime);
+  const laps = document.getElementById('swLaps');
+  const row = document.createElement('div');
+  row.style.cssText = 'display:flex;justify-content:space-between;padding:6px 10px;background:var(--surface2);border-radius:6px;margin-bottom:4px;font-size:0.85rem;';
+  row.innerHTML = `<span>Lap ${swLapCount}</span><span style="font-family:monospace;">${swFormat(current)}</span>`;
+  laps.prepend(row);
+}
+function swReset() {
+  swRunning = false;
+  clearInterval(swInterval);
+  swElapsed = 0;
+  swLapCount = 0;
+  document.getElementById('swDisplay').textContent = '00:00:00.0';
+  document.getElementById('swLaps').innerHTML = '';
+  document.getElementById('swStartBtn').textContent = 'Start';
+}
+let cdInterval = null, cdRemaining = 0, cdRunning = false;
+function cdFormat(sec) {
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  const s = sec % 60;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+function cdStart() {
+  const btn = document.getElementById('cdStartBtn');
+  if (!cdRunning) {
+    if (cdRemaining <= 0) {
+      const h = parseInt(document.getElementById('cdHours').value || 0);
+      const m = parseInt(document.getElementById('cdMinutes').value || 0);
+      const s = parseInt(document.getElementById('cdSeconds').value || 0);
+      cdRemaining = h * 3600 + m * 60 + s;
+    }
+    if (cdRemaining <= 0) return;
+    cdRunning = true;
+    btn.textContent = 'Pause';
+    cdInterval = setInterval(() => {
+      cdRemaining--;
+      document.getElementById('cdDisplay').textContent = cdFormat(cdRemaining);
+      if (cdRemaining <= 0) {
+        clearInterval(cdInterval);
+        cdRunning = false;
+        btn.textContent = 'Start';
+        document.getElementById('cdDisplay').style.color = 'var(--accent2)';
+        setTimeout(() => { document.getElementById('cdDisplay').style.color = 'var(--accent)'; }, 3000);
+      }
+    }, 1000);
+  } else {
+    cdRunning = false;
+    clearInterval(cdInterval);
+    btn.textContent = 'Resume';
+  }
+}
+function cdReset() {
+  cdRunning = false;
+  clearInterval(cdInterval);
+  cdRemaining = 0;
+  const h = parseInt(document.getElementById('cdHours').value || 0);
+  const m = parseInt(document.getElementById('cdMinutes').value || 0);
+  const s = parseInt(document.getElementById('cdSeconds').value || 0);
+  document.getElementById('cdDisplay').textContent = cdFormat(h*3600+m*60+s);
+  document.getElementById('cdStartBtn').textContent = 'Start';
+}
+// ===================== RANDOM NAME PICKER =====================
+let rnpSpinTimer = null;
+function rnpPick() {
+  const names = document.getElementById('rnpInput').value.split('\n').map(n => n.trim()).filter(Boolean);
+  if (!names.length) { document.getElementById('rnpResult').textContent = 'Add some names first'; return; }
+  if (rnpSpinTimer) clearInterval(rnpSpinTimer);
+  const resultEl = document.getElementById('rnpResult');
+  let ticks = 0;
+  const totalTicks = 20;
+  rnpSpinTimer = setInterval(() => {
+    resultEl.textContent = names[Math.floor(Math.random() * names.length)];
+    ticks++;
+    if (ticks >= totalTicks) {
+      clearInterval(rnpSpinTimer);
+      resultEl.textContent = names[Math.floor(Math.random() * names.length)];
+    }
+  }, 80);
+}
+// ===================== CITATION GENERATOR =====================
+function citGenerate() {
+  const style = document.getElementById('citStyle')?.value || 'apa';
+  const author = document.getElementById('citAuthor')?.value.trim() || '';
+  const title = document.getElementById('citTitle')?.value.trim() || 'Untitled';
+  const site = document.getElementById('citSite')?.value.trim() || '';
+  const year = document.getElementById('citYear')?.value.trim() || 'n.d.';
+  const url = document.getElementById('citUrl')?.value.trim() || '';
+  let result = '';
+  if (style === 'apa') {
+    result = `${author ? author + ' ' : ''}(${year}). ${title}.${site ? ' ' + site + '.' : ''}${url ? ' ' + url : ''}`;
+  } else if (style === 'mla') {
+    result = `${author ? author + '. ' : ''}"${title}." ${site ? site + ', ' : ''}${year}${url ? ', ' + url : ''}.`;
+  } else {
+    result = `${author ? author + '. ' : ''}"${title}." ${site ? site + '. ' : ''}${year}.${url ? ' ' + url + '.' : ''}`;
+  }
+  document.getElementById('citResult').textContent = result;
+}
+function citCopy() {
+  const text = document.getElementById('citResult').textContent;
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('citCopyBtn');
+    const original = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+  });
+}
 function hgMd5(string) {
   function rotateLeft(n, s) { return (n << s) | (n >>> (32 - s)); }
   function addUnsigned(x, y) {
