@@ -1906,6 +1906,87 @@ if (metaDesc) metaDesc.setAttribute('content', tool.desc + ' Free, no signup req
           <div id="ccResultText" style="font-size:0.95rem;color:var(--text);white-space:pre-wrap;word-break:break-word;"></div>
         </div>
       </div>`;
+        document.getElementById('processBtn').disabled = false;
+    document.getElementById('processBtn').style.display = 'none';
+    } else if(tool.type === 'small-text-generator') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div class="option-label" style="margin-bottom:8px;">Type your text</div>
+        <textarea id="stgInputText" placeholder="Type or paste your text here..." style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;min-height:100px;resize:vertical;font-family:inherit;" oninput="stgConvert()"></textarea>
+        <div style="display:flex;flex-direction:column;gap:12px;margin-top:16px;">
+          <div style="background:var(--surface2);border-radius:10px;padding:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span style="font-weight:600;color:var(--accent);">Small Caps</span><button type="button" onclick="stgCopy('stgSmallCaps')" style="padding:5px 10px;background:var(--accent);border:none;border-radius:6px;color:#fff;font-size:0.75rem;cursor:pointer;">Copy</button></div>
+            <div id="stgSmallCaps" style="font-size:0.95rem;color:var(--text);word-break:break-word;">Result will appear here...</div>
+          </div>
+          <div style="background:var(--surface2);border-radius:10px;padding:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span style="font-weight:600;color:var(--accent);">Superscript</span><button type="button" onclick="stgCopy('stgSuperscript')" style="padding:5px 10px;background:var(--accent);border:none;border-radius:6px;color:#fff;font-size:0.75rem;cursor:pointer;">Copy</button></div>
+            <div id="stgSuperscript" style="font-size:0.95rem;color:var(--text);word-break:break-word;">Result will appear here...</div>
+          </div>
+          <div style="background:var(--surface2);border-radius:10px;padding:14px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span style="font-weight:600;color:var(--accent);">Subscript</span><button type="button" onclick="stgCopy('stgSubscript')" style="padding:5px 10px;background:var(--accent);border:none;border-radius:6px;color:#fff;font-size:0.75rem;cursor:pointer;">Copy</button></div>
+            <div id="stgSubscript" style="font-size:0.95rem;color:var(--text);word-break:break-word;">Result will appear here...</div>
+          </div>
+        </div>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
+    document.getElementById('processBtn').style.display = 'none';
+    } else if(tool.type === 'invisible-char-generator') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+          <div class="option-group">
+            <div class="option-label">Character type</div>
+            <select class="option-select" id="icgType" onchange="icgGenerate()">
+              <option value="braille">Invisible (Braille blank) — works almost everywhere</option>
+              <option value="zwsp">Zero-width space</option>
+              <option value="hangul">Hangul filler — works on Instagram/Discord names</option>
+            </select>
+          </div>
+          <div class="option-group">
+            <div class="option-label">How many characters</div>
+            <select class="option-select" id="icgCount" onchange="icgGenerate()">
+              <option value="1" selected>1</option>
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+            </select>
+          </div>
+        </div>
+        <div style="background:var(--surface2);border-radius:14px;padding:18px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <span style="font-weight:600;color:var(--accent);">Result (looks blank — that's expected)</span>
+            <button type="button" id="icgCopyBtn" onclick="icgCopy()" style="padding:6px 12px;background:var(--accent);border:none;border-radius:6px;color:#fff;font-size:0.8rem;cursor:pointer;">Copy</button>
+          </div>
+          <div id="icgResultBox" style="min-height:40px;background:var(--bg);border:1px dashed var(--border);border-radius:8px;padding:10px;"></div>
+        </div>
+        <p style="color:var(--text2);font-size:0.8rem;margin-top:10px;">Tip: if one type gets stripped by an app (e.g. a bio field trims spaces), try another type.</p>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
+    document.getElementById('processBtn').style.display = 'none';
+    icgGenerate();
+    } else if(tool.type === 'tally-counter') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;text-align:center;">
+        <div id="tcCount" style="font-size:4rem;font-weight:700;color:var(--accent);margin:20px 0;">0</div>
+        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:16px;">
+          <button type="button" onclick="tcChange(-1)" style="width:64px;height:64px;font-size:1.8rem;background:var(--surface2);border:1px solid var(--border);border-radius:50%;color:var(--text);cursor:pointer;">−</button>
+          <button type="button" onclick="tcChange(1)" style="width:64px;height:64px;font-size:1.8rem;background:var(--accent);border:none;border-radius:50%;color:#fff;cursor:pointer;">+</button>
+        </div>
+        <div style="display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap;">
+          <div class="option-group">
+            <div class="option-label">Step</div>
+            <select class="option-select" id="tcStep">
+              <option value="1" selected>1</option>
+              <option value="5">5</option>
+              <option value="10">10</option>
+            </select>
+          </div>
+          <button type="button" onclick="tcReset()" style="padding:10px 18px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;font-weight:600;cursor:pointer;align-self:flex-end;">Reset</button>
+        </div>
+      </div>`;
     document.getElementById('processBtn').disabled = false;
     document.getElementById('processBtn').style.display = 'none';
     } else if(tool.type === 'hash-generator') {
