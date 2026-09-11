@@ -2153,9 +2153,97 @@ if (metaDesc) metaDesc.setAttribute('content', tool.desc + ' Free, no signup req
           <pre id="mtgResult" style="font-size:0.8rem;color:var(--text);white-space:pre-wrap;word-break:break-word;font-family:monospace;margin:0;"></pre>
         </div>
       </div>`;
-    document.getElementById('processBtn').disabled = false;
+        document.getElementById('processBtn').disabled = false;
     document.getElementById('processBtn').style.display = 'none';
     mtgGenerate();
+    } else if(tool.type === 'stopwatch-timer') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+          <button type="button" class="sw-tab active" onclick="swSetMode('stopwatch',this)" style="flex:1;padding:10px;background:var(--accent);border:1px solid var(--border);border-radius:10px;color:#fff;font-size:0.85rem;font-weight:600;cursor:pointer;">Stopwatch</button>
+          <button type="button" class="sw-tab" onclick="swSetMode('countdown',this)" style="flex:1;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text2);font-size:0.85rem;font-weight:600;cursor:pointer;">Countdown</button>
+        </div>
+        <div id="swStopwatchPanel">
+          <div style="text-align:center;">
+            <div id="swDisplay" style="font-size:3.5rem;font-weight:700;color:var(--accent);font-family:monospace;margin:20px 0;">00:00:00.0</div>
+            <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:16px;">
+              <button type="button" id="swStartBtn" onclick="swStart()" style="padding:12px 28px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-size:0.9rem;font-weight:600;cursor:pointer;">Start</button>
+              <button type="button" onclick="swLap()" style="padding:12px 28px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;font-weight:600;cursor:pointer;">Lap</button>
+              <button type="button" onclick="swReset()" style="padding:12px 28px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;font-weight:600;cursor:pointer;">Reset</button>
+            </div>
+            <div id="swLaps" style="text-align:left;max-width:300px;margin:0 auto;max-height:160px;overflow-y:auto;"></div>
+          </div>
+        </div>
+        <div id="swCountdownPanel" style="display:none;">
+          <div style="display:flex;gap:12px;justify-content:center;margin-bottom:16px;">
+            <div class="option-group">
+              <div class="option-label">Hours</div>
+              <input type="number" id="cdHours" value="0" min="0" style="width:80px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:0.95rem;text-align:center;">
+            </div>
+            <div class="option-group">
+              <div class="option-label">Minutes</div>
+              <input type="number" id="cdMinutes" value="5" min="0" max="59" style="width:80px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:0.95rem;text-align:center;">
+            </div>
+            <div class="option-group">
+              <div class="option-label">Seconds</div>
+              <input type="number" id="cdSeconds" value="0" min="0" max="59" style="width:80px;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px;border-radius:8px;font-size:0.95rem;text-align:center;">
+            </div>
+          </div>
+          <div style="text-align:center;">
+            <div id="cdDisplay" style="font-size:3.5rem;font-weight:700;color:var(--accent);font-family:monospace;margin:20px 0;">00:05:00</div>
+            <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+              <button type="button" id="cdStartBtn" onclick="cdStart()" style="padding:12px 28px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-size:0.9rem;font-weight:600;cursor:pointer;">Start</button>
+              <button type="button" onclick="cdReset()" style="padding:12px 28px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;font-weight:600;cursor:pointer;">Reset</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
+    document.getElementById('processBtn').style.display = 'none';
+    } else if(tool.type === 'random-name-picker') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div class="option-label" style="margin-bottom:8px;">Enter names (one per line)</div>
+        <textarea id="rnpInput" placeholder="Alice&#10;Bob&#10;Charlie" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.95rem;min-height:140px;resize:vertical;font-family:inherit;"></textarea>
+        <button type="button" onclick="rnpPick()" style="width:100%;margin-top:12px;padding:14px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:1rem;font-weight:700;cursor:pointer;">🎯 Pick a random name</button>
+        <div style="background:var(--surface2);border-radius:14px;padding:24px;margin-top:16px;text-align:center;">
+          <div id="rnpResult" style="font-size:2rem;font-weight:700;color:var(--accent);min-height:48px;">—</div>
+        </div>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
+    document.getElementById('processBtn').style.display = 'none';
+    } else if(tool.type === 'citation-generator') {
+    document.getElementById('dropZone').style.display = 'none';
+    opts.innerHTML = `
+      <div style="width:100%;">
+        <div class="option-group" style="margin-bottom:12px;">
+          <div class="option-label">Citation style</div>
+          <select class="option-select" id="citStyle" onchange="citGenerate()">
+            <option value="apa" selected>APA</option>
+            <option value="mla">MLA</option>
+            <option value="chicago">Chicago</option>
+          </select>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div><div class="option-label">Author (Last, First)</div><input type="text" id="citAuthor" placeholder="Smith, Jane" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.9rem;" oninput="citGenerate()"></div>
+          <div><div class="option-label">Title</div><input type="text" id="citTitle" placeholder="Article or page title" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.9rem;" oninput="citGenerate()"></div>
+          <div><div class="option-label">Website / publisher name</div><input type="text" id="citSite" placeholder="Example.com" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.9rem;" oninput="citGenerate()"></div>
+          <div><div class="option-label">Publish year</div><input type="text" id="citYear" placeholder="2025" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.9rem;" oninput="citGenerate()"></div>
+          <div><div class="option-label">URL</div><input type="text" id="citUrl" placeholder="https://example.com/page" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;width:100%;font-size:0.9rem;" oninput="citGenerate()"></div>
+        </div>
+        <div style="background:var(--surface2);border-radius:14px;padding:18px;margin-top:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <span style="font-weight:600;color:var(--accent);">Citation</span>
+            <button type="button" id="citCopyBtn" onclick="citCopy()" style="padding:6px 12px;background:var(--accent);border:none;border-radius:6px;color:#fff;font-size:0.8rem;cursor:pointer;">Copy</button>
+          </div>
+          <div id="citResult" style="font-size:0.9rem;color:var(--text);line-height:1.6;"></div>
+        </div>
+      </div>`;
+    document.getElementById('processBtn').disabled = false;
+    document.getElementById('processBtn').style.display = 'none';
+    citGenerate();
     } else if(tool.type === 'hash-generator') {
     document.getElementById('dropZone').style.display = 'none';
     opts.innerHTML = `
