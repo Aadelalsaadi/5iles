@@ -934,6 +934,7 @@ function filterTools(cat, btn) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   btn.classList.add('active');
   renderTools(cat);
+  document.getElementById('toolsGrid').scrollIntoView({behavior:'smooth', block:'start'});
 }
 
 function searchTools(query) {
@@ -942,6 +943,7 @@ function searchTools(query) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   const matches = TOOLS.filter(t => t.name.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q));
   renderToolCards(matches);
+  document.getElementById('toolsGrid').scrollIntoView({behavior:'smooth', block:'start'});
 }
 
 function openTool(id) {
